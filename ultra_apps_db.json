@@ -1,0 +1,69 @@
+{
+    "ultra apps" : {
+        "instagram" : {
+            "rank": 2,
+            "name": "Instagram",
+            "homeUrl": "https://www.instagram.com/?utm_source=samsung_max_sd",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "com.instagram.android"
+            ],
+            "iconUrl": "ultra_apps/instagram_ultra_48.png"
+        },
+        "vk" : {
+            "rank": 4,
+            "name": "VK",
+            "homeUrl": "https://vk.com",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps" : [
+                "com.vkontakte.android"
+            ],
+            "iconUrl": "ultra_apps/vkontakte_ultra_48.png"
+        },
+        "cricbuzz": {
+            "rank": 5,
+            "name": "Cricbuzz",
+            "homeUrl": "http://m.cricbuzz.com",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "com.cricbuzz.android",
+                "com.cricbuzz.android.vernacular"
+            ],
+            "iconUrl": "ultra_apps/cricbuzz_ultra_48.png"
+        },
+        "wikipedia": {
+            "rank": 7,
+            "name": "Wikipedia",
+            "homeUrl": "https://www.wikipedia.org",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "org.wikipedia"
+            ],
+            "iconUrl": "ultra_apps/wikipedia_ultra_48.png"
+        }
+    }
+}

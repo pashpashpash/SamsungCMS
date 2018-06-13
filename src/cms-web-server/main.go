@@ -8,6 +8,9 @@ import (
 	"time"
     "fmt"
 
+    "encoding/json"
+    "io/ioutil"
+
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 )
@@ -15,15 +18,66 @@ import (
 const NegroniLogFmt = "{{.StartTime}} | {{.Status}} | {{.Duration}} \n          {{.Method}} {{.Path}}\n"
 const NegroniDateFmt = time.Stamp
 
+
+
 func main() {
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
 		port = "8080"
 	}
 
+
+    cms_db := getDB()
+    fmt.Println("JSON->Object Results:", cms_db)
+
 	server := NewServer()
 	server.Run(":" + port)
 }
+
+
+func getDB() []CMS_DB {
+    raw, err := ioutil.ReadFile("./ultra_apps_db.json") //it does actually find this file
+    if err != nil {
+        fmt.Println(err.Error())
+        os.Exit(1)
+    }
+    log.Println("Successfully found JSON")
+
+    var c []CMS_DB
+    json.Unmarshal(raw, &c)
+
+    log.Println("Made CMS_DB object out of provided JSON")
+
+    return c
+}
+
+type CMS_DB struct {
+	CmsDatabase []struct {
+		ConfigName string   `json:"config_name"`
+		Order      int      `json:"order"`
+		Inherit    []string `json:"inherit,omitempty"`
+		Filter     []struct {
+			Product  []string `json:"product,omitempty"`
+			Operator []string `json:"operator,omitempty"`
+		} `json:"filter,omitempty"`
+		Webapps []struct {
+			ID                     string   `json:"id"`
+			Rank                   int      `json:"rank"`
+			Name                   string   `json:"name"`
+			HomeURL                string   `json:"homeUrl"`
+			DefaultEnabledFeatures []string `json:"defaultEnabledFeatures"`
+			HiddenUI               []string `json:"hiddenUI,omitempty"`
+			HiddenFeatures         []string `json:"hiddenFeatures"`
+			NativeApps             []string `json:"nativeApps,omitempty"`
+			IconURL                string   `json:"iconUrl"`
+		} `json:"webapps"`
+	} `json:"cms_database"`
+}
+
+func (cms_db CMS_DB) String() string {
+    return cms_db.CmsDatabase[0].ConfigName
+}
+
 
 func GetProjectRoot() string {
 	root, err := os.Getwd()
