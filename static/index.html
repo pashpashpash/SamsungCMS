@@ -5,6 +5,53 @@
     </head>
 
     <body>
+        <div id = "filters">
+            <div id = "filterContainer">
+                <div id="filterText">
+                    Platform
+                </div>
+                <select>
+                  <option value="volvo">Samsung J2</option>
+                  <option value="saab">Saab</option>
+                  <option value="mercedes">Mercedes</option>
+                  <option value="audi">Audi</option>
+                </select>
+            </div>
+            <div id = "filterContainer">
+                <div id="filterText">
+                    Operator
+                </div>
+                <select>
+                  <option value="volvo">T-Mobile</option>
+                  <option value="saab">Saab</option>
+                  <option value="mercedes">Mercedes</option>
+                  <option value="audi">Audi</option>
+                </select>
+            </div>
+            <div id = "filterContainer">
+                <div id="filterText">
+                    Country
+                </div>
+                <select>
+                  <option value="volvo">Afghanistan</option>
+                  <option value="saab">Saab</option>
+                  <option value="mercedes">Mercedes</option>
+                  <option value="audi">Audi</option>
+                </select>
+            </div>
+            <div id = "filterContainer">
+                <div id="filterText">
+                    Version
+                </div>
+                <select>
+                  <option value="volvo">2.4</option>
+                  <option value="saab">Saab</option>
+                  <option value="mercedes">Mercedes</option>
+                  <option value="audi">Audi</option>
+                </select>
+            </div>
+        </div>
+
         <main>
             <div id ="appTray">
                 <div id ="allicons">
@@ -75,6 +122,13 @@
                 webAppsHTML += ("</div>");
                 webAppsHTML += ("</div>");
             }
+
+            webAppsHTML += "<div id='iconContainer'>";
+            webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"' />");
+            webAppsHTML += ("<div id='iconText'>");
+            webAppsHTML += ("Create new Ultra App");
+            webAppsHTML += ("</div>");
+            webAppsHTML += ("</div>");
 
             allAppsContainer.innerHTML = (webAppsHTML);
         }

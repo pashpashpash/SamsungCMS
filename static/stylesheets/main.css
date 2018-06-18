@@ -5,21 +5,58 @@ body {
   font-size: 14px;
 }
 main{
+    background-image: url("/images/blur_bg.png");
+    padding-top:40px;
+    color:white;
+    overflow: hidden;
+}
 
+select{
+    padding: 10px 30px 8px 8px;
+    font-size: 16px;
+    border: 1px solid black;
+    height: 44px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: url(../images/arrow_drop_down.svg) 96% / 15% no-repeat #eee;
+    background-color: #ebebeb;
+}
+#filters{
+
+    width: 64%;
+    margin: auto;
+    margin-top: 100px;
+    margin-bottom:32px;
+}
+
+#filterContainer{
+    display: inline-flex;
+}
+#filterContainer select{
+    margin-left:18px;
+    margin-right:32px;
+}
+#filterContainer #filterText{
+    font-size:16px;
+    padding-top: 12px;
 }
 #appTray{
     margin: auto;
-    width: 520px;
-    background-image: url("/images/phoneBG.png");
+    width: 1074px;
+    background-image: url("/images/s8_landscape_white.png");
     background-repeat: no-repeat;
     background-size:100%;
-    height: 800px;
-    padding-top:60px;
-    margin-top: 88px;
+    height: 700px;
+    padding-top: 14px;
+    padding-left:32px;
 }
 #allicons{
-    width: 420px;
+    width: 900px;
     margin: auto;
+    height: 465px;
+    overflow: scroll;
+    padding-top: 2px;
 }
 #iconContainer
 {
@@ -36,8 +73,8 @@ img#icon {
 	border: 1px solid rgba(0, 0, 0, 0.125);
     height:72px;
     width:72px;
-    margin-left:16px;
-    margin-right:16px;
+    margin-left:18px;
+    margin-right:18px;
     margin-bottom:18px;
     margin-top:32px;
 }
@@ -51,4 +88,18 @@ img#icon {
 		mask-image: url(/images/samsung_mask.svg);
 		mask-size: cover;
 	}
+}
+
+/* CAUTION: IE hackery ahead */
+
+select::-ms-expand {
+    display: none; /* remove default arrow in IE 10 and 11 */
+}
+
+/* target Internet Explorer 9 to undo the custom arrow */
+@media screen and (min-width:0\0) {
+    select {
+        background:none\9;
+        padding: 5px\9;
+    }
 }
