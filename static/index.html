@@ -5,6 +5,9 @@
     </head>
 
     <body>
+        <div id = "header">
+            <div id="headerIcon" onClick="window.location.reload()"></div><div id="headerText" onClick="window.location.reload()"> Ultra Apps <span id="smallerText">CMS</span></div>
+        </div>
         <div id = "filters">
             <div id = "filterContainer">
                 <div id="filterText">
@@ -50,9 +53,31 @@
                   <option value="audi">Audi</option>
                 </select>
             </div>
+            <div id = "filterContainer">
+                <div id="checkboxFilterText">
+                    Featured Location
+                </div>
+                  <div class="checkboxContainer">
+                      <input onchange="check1()" id="checkbox1" type="checkbox" name="location" value="max">
+                      <label for="checkbox1">Max</label>
+                  </div>
+                  <div class="checkboxContainer">
+                      <input onchange="check2()"id="checkbox2" type="checkbox" name="location" value="folder">
+                       <label for="checkbox2">Folder</label>
+                  </div>
+                  <div onchange="check3()" class="checkboxContainer">
+                      <input id="checkbox3" type="checkbox" name="location" value="homescreen">
+                       <label for="checkbox3"> Homescreen</label>
+                  </div>
+            </div>
         </div>
 
         <main>
+            <div class="fullscreen-bg">
+                <video loop muted autoplay poster="images/mp4_bg_preview.jpg" class="fullscreen-bg__video">
+                    <source src="images/mp4_bg.mp4" type="video/mp4">
+                </video>
+            </div>
             <div id ="appTray">
                 <div id ="allicons">
                 </div>
@@ -73,24 +98,6 @@
                 console.log('Network request for products.json failed with response ' + response.status + ': ' + response.statusText);
             }
         });
-
-
-
-
-        // function main(cms_database)
-        // {
-        //     console.log(cms_database);
-        //     for (var i = 0; i < cms_database.length; i++) {
-        //         var webapps = cms_database[i].webapps
-        //         console.log(webapps);
-        //         for(var o= 0; o < webapps.length; o++){
-        //             document.getElementById("allicons").innerHTML += ("<img id='icon' src='" + webapps[o].iconUrl +"' />");
-        //         }
-        //     }
-        // }
-
-
-
 
         var xmlhttp = new XMLHttpRequest();
         var url = "/rest/allApps";
@@ -116,7 +123,11 @@
             for(var o= 0; o < webapps.length; o++){
                 console.log("Adding "+webapps[o].name+" iconContainer to the HTML");
                 webAppsHTML += "<div id='iconContainer'>";
-                webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl +"' />");
+                webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl + "'");
+                webAppsHTML += (" onclick=\"javascript:window.location.href='/ultra/"+ webapps[o].id +"'; return false;\"");
+                webAppsHTML += (" />");
+
+
                 webAppsHTML += ("<div id='iconText'>");
                 webAppsHTML += (webapps[o].name + " Ultra");
                 webAppsHTML += ("</div>");
@@ -132,6 +143,7 @@
 
             allAppsContainer.innerHTML = (webAppsHTML);
         }
+
         </script>
     </body>
 </html>
