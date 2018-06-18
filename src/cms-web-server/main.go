@@ -228,13 +228,13 @@ type CMS_DB struct {
 }
 
 type Webapp struct {
-    ID                     string
-    Rank                   int
-    Name                   string
-    HomeURL                string
-    DefaultEnabledFeatures []string
-    HiddenUI               []string
-    HiddenFeatures         []string
-    NativeApps             []string
-    IconURL                string
+    ID                     string   `json:"id"`
+    Rank                   int      `json:"rank"`
+    Name                   string   `json:"name"`
+    HomeURL                string   `json:"homeUrl"`
+    DefaultEnabledFeatures []string `json:"defaultEnabledFeatures"`
+    HiddenUI               []string `json:"hiddenUI,omitempty"`
+    HiddenFeatures         []string `json:"hiddenFeatures"`
+    NativeApps             []string `json:"nativeApps,omitempty"`
+    IconURL                string   `json:"iconUrl"`
 }

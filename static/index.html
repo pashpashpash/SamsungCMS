@@ -6,7 +6,9 @@
 
     <body>
         <main>
-            <div id ="allicons">
+            <div id ="appTray">
+                <div id ="allicons">
+                </div>
             </div>
         </main>
 
@@ -65,11 +67,11 @@
         function showWebapps(allAppsContainer, webapps) {
 
             for(var o= 0; o < webapps.length; o++){
-                console.log("Adding "+webapps[o].Name+" iconContainer to the HTML");
+                console.log("Adding "+webapps[o].name+" iconContainer to the HTML");
                 webAppsHTML += "<div id='iconContainer'>";
-                webAppsHTML += ("<img id='icon' src='" + webapps[o].IconURL +"' />");
+                webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl +"' />");
                 webAppsHTML += ("<div id='iconText'>");
-                webAppsHTML += (webapps[o].Name + " Ultra");
+                webAppsHTML += (webapps[o].name + " Ultra");
                 webAppsHTML += ("</div>");
                 webAppsHTML += ("</div>");
             }

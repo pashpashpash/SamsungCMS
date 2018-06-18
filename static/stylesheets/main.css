@@ -4,7 +4,23 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
 }
+main{
 
+}
+#appTray{
+    margin: auto;
+    width: 520px;
+    background-image: url("/images/phoneBG.png");
+    background-repeat: no-repeat;
+    background-size:100%;
+    height: 800px;
+    padding-top:60px;
+    margin-top: 88px;
+}
+#allicons{
+    width: 420px;
+    margin: auto;
+}
 #iconContainer
 {
     display: inline-grid;
@@ -13,14 +29,13 @@ body {
 }
 #iconContainer #iconText{
     width: 104px;
-    padding-left: 7px;
 }
 
 img#icon {
 	border-radius: 22.5%;
 	border: 1px solid rgba(0, 0, 0, 0.125);
-    height:88px;
-    width:88px;
+    height:72px;
+    width:72px;
     margin-left:16px;
     margin-right:16px;
     margin-bottom:18px;
