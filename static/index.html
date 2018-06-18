@@ -6,13 +6,76 @@
 
     <body>
         <main>
-            <figure class='full-width'>
-              <img src="images/CMS-Index-Page.png">
-              <figcaption>Samsung © 2018</figcaption>
-            </figure>
-            <a href="cricbuzz.html">
-                <div id="invisibleClickableBox"></div>
-            </a>
+            <div id ="allicons">
+            </div>
         </main>
+
+        <script>
+        var cms_database
+        fetch('cms-database.json').then(function(response) {
+            if(response.ok)
+            {
+                response.json().then(function(json) {
+                    cms_database = json;
+                });
+            }
+            else
+            {
+                console.log('Network request for products.json failed with response ' + response.status + ': ' + response.statusText);
+            }
+        });
+
+
+
+
+        // function main(cms_database)
+        // {
+        //     console.log(cms_database);
+        //     for (var i = 0; i < cms_database.length; i++) {
+        //         var webapps = cms_database[i].webapps
+        //         console.log(webapps);
+        //         for(var o= 0; o < webapps.length; o++){
+        //             document.getElementById("allicons").innerHTML += ("<img id='icon' src='" + webapps[o].iconUrl +"' />");
+        //         }
+        //     }
+        // }
+
+
+
+
+        var xmlhttp = new XMLHttpRequest();
+        var url = "/rest/allApps";
+
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var allApps = JSON.parse(this.responseText);
+                allAppsContainer = document.getElementById("allicons");
+                showWebapps(allAppsContainer, allApps);
+                console.log('Network request for allApps.json succeeded. JSON:');
+                console.log(allApps);
+            }
+            else {
+                console.log('Network request for allApps.json failed with response ' + this.status);
+            }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+
+        var webAppsHTML = "";
+        function showWebapps(allAppsContainer, webapps) {
+
+            for(var o= 0; o < webapps.length; o++){
+                console.log("Adding "+webapps[o].Name+" iconContainer to the HTML");
+                webAppsHTML += "<div id='iconContainer'>";
+                webAppsHTML += ("<img id='icon' src='" + webapps[o].IconURL +"' />");
+                webAppsHTML += ("<div id='iconText'>");
+                webAppsHTML += (webapps[o].Name + " Ultra");
+                webAppsHTML += ("</div>");
+                webAppsHTML += ("</div>");
+            }
+
+            allAppsContainer.innerHTML = (webAppsHTML);
+        }
+        </script>
     </body>
 </html>

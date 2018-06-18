@@ -1,43 +1,39 @@
-* {
-  box-sizing: border-box;
-}
-
-/* This technique doesn't naturally cause horizontal overflow, but once there is natural vertical overflow, it causes horizontal overflow, so stopping here. */
 body {
-  overflow-x: hidden;
+  margin: 0;
+
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
 }
 
-img {
-  max-width: 100%;
+#iconContainer
+{
+    display: inline-grid;
+    text-align: center;
+    word-wrap: break-word;
+}
+#iconContainer #iconText{
+    width: 104px;
+    padding-left: 7px;
 }
 
-main {
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+img#icon {
+	border-radius: 22.5%;
+	border: 1px solid rgba(0, 0, 0, 0.125);
+    height:88px;
+    width:88px;
+    margin-left:16px;
+    margin-right:16px;
+    margin-bottom:18px;
+    margin-top:32px;
 }
 
-.full-width {
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-}
-
-p, figure {
-  margin: 15px 0;
-}
-figcaption {
-  text-align: center;
-  color: #999;
-}
-
-#invisibleClickableBox{
-    position: absolute;
-    width: 75px;
-    height: 121px;
-    top: 323px;
-    left: 621px;
+@supports (mask-size: cover) or (-webkit-mask-size: cover) {
+	img#icon {
+		border-radius: 0;
+		border: none;
+		-webkit-mask-image: url(/images/samsung_mask.svg);
+		-webkit-mask-size: cover;
+		mask-image: url(/images/samsung_mask.svg);
+		mask-size: cover;
+	}
 }
