@@ -13,10 +13,9 @@
                 <div id="filterText">
                     Platform
                 </div>
-                <select>
+                <select name="platform" onchange="selectChange(this); this.oldvalue = this.value;">
                      <option value="star">🔯</option>
-                  <option value="volvo">Samsung J2</option>
-
+                  <option value="samsungJ2">Samsung J2</option>
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
                 </select>
@@ -25,9 +24,9 @@
                 <div id="filterText">
                     Operator
                 </div>
-                <select>
+                <select name="operator" onchange="selectChange(this); this.oldvalue = this.value;">
                       <option value="star">🔯</option>
-                  <option value="volvo">T-Mobile</option>
+                  <option value="tmobile">T-Mobile</option>
 
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
@@ -37,9 +36,9 @@
                 <div id="filterText">
                     Country
                 </div>
-                <select>
+                <select name="country"  onchange="selectChange(this); this.oldvalue = this.value;">
                     <option value="star">🔯</option>
-                  <option value="volvo">Afghanistan</option>
+                  <option value="afghanistan">Afghanistan</option>
 
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
@@ -49,9 +48,9 @@
                 <div id="filterText">
                     Version
                 </div>
-                <select>
+                <select name="version"  onchange="selectChange(this); this.oldvalue = this.value;">
                     <option value="star">🔯</option>
-                    <option value="volvo">2.4</option>
+                    <option value="2.4">2.4</option>
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
                 </select>
@@ -60,20 +59,20 @@
                 <div id="checkboxFilterText">
                     Featured Location
                 </div>
-                <div class="checkboxContainer" checked="false" id="maxCheck">
+                <div class="checkboxContainer" id="maxCheck">
                     Max
                 </div>
-                <div class="checkboxContainer" checked="false" id="folderCheck">
+                <div class="checkboxContainer" id="folderCheck">
                     Folder
                 </div>
-                <div class="checkboxContainer" checked="false" id="homescreenCheck">
+                <div class="checkboxContainer" id="homescreenCheck">
                     Homescreen
                 </div>
             </div>
             <div id = "starandsearch">
                 <div class="clicked" id="star">
                 </div>
-                 <input type="text" placeholder="Search..">
+                 <input class="search" type="text" placeholder="Search..">
             </div>
         </div>
 
@@ -88,7 +87,7 @@
                 </div>
             </div>
         </main>
-
-        <script src="javascript/index.js"></script>
+        <script type="text/javascript" src="javascript/rest.js"></script>
+        <script type="text/javascript" src="javascript/index.js"></script>
     </body>
 </html>
