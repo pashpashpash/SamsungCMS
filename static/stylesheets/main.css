@@ -3,6 +3,7 @@ body {
 
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
+  overflow: hidden;
 }
 main{
     /* background-image: url("/images/blur_bg_3.gif"); */
@@ -60,7 +61,7 @@ main{
 
 
 select,form{
-    padding: 10px 30px 8px 8px;
+    padding: 9px 30px 8px 8px;
     font-size: 16px;
     border: 1px solid black;
     height: 44px;
@@ -87,11 +88,60 @@ select,form{
 #filterContainer #filterText{
     font-size:16px;
     padding-top: 12px;
+
 }
 #filterContainer #checkboxFilterText{
     font-size:16px;
     padding-top: 20px;
+    padding-top: 24px;
 }
+#star{
+    display: inline-flex;
+    /* padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 10px;
+    padding-bottom: 9px; */
+    font-size:16px;
+    border-radius: 8px;
+    margin-right: 18px;
+    width:48px;
+    height:48px;
+    background-repeat: no-repeat;
+    background-size:100%;
+}
+#star:hover{
+    background-color:#f5f5f5;
+}
+.unclicked{
+    background-image: url('/images/STAR-UNCLICKED.png');
+}
+.clicked {
+    background-image: url('/images/STAR-CLICKED.png');
+}
+
+
+#starandsearch{
+    display: inline-flex;
+    float:right;
+    margin-top:19px;
+    margin-right: 54px;
+    /* margin-left: 400px; */
+}
+#starandsearch input[type=text] {
+
+    display: inline-flex;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 10px;
+    padding-bottom: 9px;
+    font-size:16px;
+    border:1px solid black;
+    border-radius: 8px;
+    margin-right: 48px;
+    font-size: 16px;
+}
+
+
 #appTray{
     margin: auto;
     width: 1074px;
@@ -128,6 +178,11 @@ img#icon {
     margin-right:18px;
     margin-bottom:18px;
     margin-top:32px;
+    cursor: pointer;
+}
+img#icon :focus{
+    outline-style: outset;
+    outline-color: blue;
 }
 
 @supports (mask-size: cover) or (-webkit-mask-size: cover) {
@@ -145,72 +200,29 @@ img#icon {
 
 
 /* =====================CHECKBOXES=========================== */
-.checkboxContainer
-{
-    padding-top:10px;
-}
-
 .checkboxContainer input[type="checkbox"] {
     opacity: 0;
 }
-.checkboxContainer label {
+.checkboxContainer{
     position: relative;
     display: inline-block;
-
-    /*16px width of fake checkbox + 6px distance between fake checkbox and text*/
-    /* padding-left: 22px; */
-    padding-left:7px;
-    padding-right:7px;
-    padding-top: 10px;
-    padding-bottom:9px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 16px;
+    padding-bottom: 12px;
     font-size: 16px;
     border: 1px solid black;
     border-radius: 8px;
+    margin-top: 7px;
+    margin-left: 18px;
 }
-
-.checkboxContainer label::before,
-.checkboxContainer label::after {
-    position: absolute;
-    content: "";
-
-    /*Needed for the line-height to take effect*/
-    display: inline-block;
+.checkboxContainer:hover{
+    background:lightgrey;
 }
-
-/*Outer box of the fake checkbox*/
-.checkboxContainer label::before{
-    height: 100%;
-    width: 100%;
-    margin-right:10px;
-    left: 0px;
-    top: 0px;
+.checked{
+    background:green;
 }
-/*Outer box of the fake checkbox*/
-.checkboxContainer label::after{
-    height: 100%;
-    width: 100%;
-    margin-right:10px;
-    left: 0px;
-    top: 0px;
-    background: red;
-    overflow:none;
-}
-
-/*Hide the checkmark by default*/
-.checkboxContainer input[type="checkbox"] + label::after {
-    content: none;
-}
-
-/*Unhide on the checked state*/
-.checkboxContainer input[type="checkbox"]:checked + label::after {
-    content: "";
-}
-
-/*Adding focus styles on the outer-box of the fake checkbox*/
-.checkboxContainer input[type="checkbox"]:focus + label::before {
-    outline: none;
-}
-/* ======================/CHECKBOXES============================== */
+/* =====================/CHECKBOXES=========================== */
 
 
 

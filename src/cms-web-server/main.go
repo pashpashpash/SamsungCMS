@@ -70,8 +70,7 @@ func restHandler(w http.ResponseWriter, r *http.Request) {
             fmt.Fprint(w, err)
         } else {
             fmt.Fprint(w, string(allAppsJSON))
-            log.Println("Rest Handler – Successfully marshalled JSON:")
-            log.Println(json.MarshalIndent(allAppsJSON, "", "    "))
+            log.Println("Rest Handler – Successfully marshalled JSON")
         }
     }
 }
@@ -161,7 +160,6 @@ func getAllApps() []Webapp {
     var webApps []Webapp
     for _, CmsDatabase := range cms_db.CmsDatabase {
         for _, webApp := range CmsDatabase.Webapps {
-            log.Println(webApp.Name)
             webApps = AppendIfMissing(webApps, Webapp(webApp))
         }
     }

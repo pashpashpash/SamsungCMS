@@ -14,8 +14,9 @@
                     Platform
                 </div>
                 <select>
+                     <option value="star">🔯</option>
                   <option value="volvo">Samsung J2</option>
-                  <option value="saab">Saab</option>
+
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
                 </select>
@@ -25,8 +26,9 @@
                     Operator
                 </div>
                 <select>
+                      <option value="star">🔯</option>
                   <option value="volvo">T-Mobile</option>
-                  <option value="saab">Saab</option>
+
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
                 </select>
@@ -36,8 +38,9 @@
                     Country
                 </div>
                 <select>
+                    <option value="star">🔯</option>
                   <option value="volvo">Afghanistan</option>
-                  <option value="saab">Saab</option>
+
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
                 </select>
@@ -47,28 +50,30 @@
                     Version
                 </div>
                 <select>
-                  <option value="volvo">2.4</option>
-                  <option value="saab">Saab</option>
+                    <option value="star">🔯</option>
+                    <option value="volvo">2.4</option>
                   <option value="mercedes">Mercedes</option>
                   <option value="audi">Audi</option>
                 </select>
             </div>
-            <div id = "filterContainer">
+            <div id = "filterContainer" style="margin-top:12px;">
                 <div id="checkboxFilterText">
                     Featured Location
                 </div>
-                  <div class="checkboxContainer">
-                      <input onchange="check1()" id="checkbox1" type="checkbox" name="location" value="max">
-                      <label for="checkbox1">Max</label>
-                  </div>
-                  <div class="checkboxContainer">
-                      <input onchange="check2()"id="checkbox2" type="checkbox" name="location" value="folder">
-                       <label for="checkbox2">Folder</label>
-                  </div>
-                  <div onchange="check3()" class="checkboxContainer">
-                      <input id="checkbox3" type="checkbox" name="location" value="homescreen">
-                       <label for="checkbox3"> Homescreen</label>
-                  </div>
+                <div class="checkboxContainer" checked="false" id="maxCheck">
+                    Max
+                </div>
+                <div class="checkboxContainer" checked="false" id="folderCheck">
+                    Folder
+                </div>
+                <div class="checkboxContainer" checked="false" id="homescreenCheck">
+                    Homescreen
+                </div>
+            </div>
+            <div id = "starandsearch">
+                <div class="clicked" id="star">
+                </div>
+                 <input type="text" placeholder="Search..">
             </div>
         </div>
 
@@ -84,66 +89,6 @@
             </div>
         </main>
 
-        <script>
-        var cms_database
-        fetch('cms-database.json').then(function(response) {
-            if(response.ok)
-            {
-                response.json().then(function(json) {
-                    cms_database = json;
-                });
-            }
-            else
-            {
-                console.log('Network request for products.json failed with response ' + response.status + ': ' + response.statusText);
-            }
-        });
-
-        var xmlhttp = new XMLHttpRequest();
-        var url = "/rest/allApps";
-
-        xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var allApps = JSON.parse(this.responseText);
-                allAppsContainer = document.getElementById("allicons");
-                showWebapps(allAppsContainer, allApps);
-                console.log('Network request for allApps.json succeeded. JSON:');
-                console.log(allApps);
-            }
-            else {
-                console.log('Network request for allApps.json failed with response ' + this.status);
-            }
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-
-        var webAppsHTML = "";
-        function showWebapps(allAppsContainer, webapps) {
-
-            for(var o= 0; o < webapps.length; o++){
-                console.log("Adding "+webapps[o].name+" iconContainer to the HTML");
-                webAppsHTML += "<div id='iconContainer'>";
-                webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl + "'");
-                webAppsHTML += (" onclick=\"javascript:window.location.href='/ultra/"+ webapps[o].id +"'; return false;\"");
-                webAppsHTML += (" />");
-
-
-                webAppsHTML += ("<div id='iconText'>");
-                webAppsHTML += (webapps[o].name + " Ultra");
-                webAppsHTML += ("</div>");
-                webAppsHTML += ("</div>");
-            }
-
-            webAppsHTML += "<div id='iconContainer'>";
-            webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"' />");
-            webAppsHTML += ("<div id='iconText'>");
-            webAppsHTML += ("Create new Ultra App");
-            webAppsHTML += ("</div>");
-            webAppsHTML += ("</div>");
-
-            allAppsContainer.innerHTML = (webAppsHTML);
-        }
-
-        </script>
+        <script src="javascript/index.js"></script>
     </body>
 </html>
