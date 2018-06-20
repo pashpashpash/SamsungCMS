@@ -12,4 +12,4 @@ Ultra Apps Content Management Service
 
 3) Once you know how to filter the cms_db object (either locally or on server), hook up the home page reactive filtering
 
-    a) Basically just implement the applyFilters() function in main.js
+    – To do this, basically just implement the applyFilters() function in main.js
