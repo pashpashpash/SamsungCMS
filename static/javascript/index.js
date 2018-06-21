@@ -56,7 +56,7 @@ function allStars(selectsToCheckforStars)
     }
     console.log("ALLSTARS – ALL FILTERS HAVE STARS");
     return true;
-}
+} //hi
 
 function applyFilters()
 {
