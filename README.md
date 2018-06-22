@@ -1,5 +1,5 @@
 # SamsungCMS
-Currently there are a lot of inefficiencies with creating/editing Ultra App configurations. A relatively simple action such as deleting Freebasics Ultra in India requires a lot of manual work from the team (i.e. out main server guy manually figuring out the ordering/inheritance of the country/carrier filter stack & deploying config updates manually).
+Currently there are a lot of inefficiencies with creating/editing Ultra App configurations. A relatively simple action such as deleting Facebook Ultra in India requires a lot of manual work from the team (i.e. out main server guy manually figuring out the ordering/inheritance of the country/carrier filter stack & deploying config updates manually).
 
 Considering our ultimate goal is managing hundreds if not thousands of ultra apps, it would be nice to have a scalable system in place that does all of this work automatically with an easy UI....
 
