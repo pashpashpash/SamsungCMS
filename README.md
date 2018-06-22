@@ -14,8 +14,7 @@ Ultra Apps Content Management Service
      - To do this on client, just implement the applyFilters() function in main.js
      - Golang will need a custom implementation
 
-
-## 
+##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
 - [x] Built out Samsung Ultra CMS Index page (with app tray, working filter mechanics, dynamic elements & mobile css compatibility)
