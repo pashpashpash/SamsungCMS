@@ -13,7 +13,6 @@ Ultra Apps Content Management Service
 - [ ] Get filtering to work globally (server + client filtering logic)
      - To do this on client, just implement the applyFilters() function in main.js
      - Golang will need a custom implementation
-
 ##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
