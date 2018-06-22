@@ -7,6 +7,7 @@ import (
 	"path"
 	"time"
     "fmt"
+    "io"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
 
     "encoding/json"
@@ -44,6 +45,9 @@ func NewServer() *negroni.Negroni {
 	root := GetProjectRoot()
 	mx := mux.NewRouter()
 
+    mx.HandleFunc("/ultra/{appName}", appViewHandler)
+    mx.HandleFunc("/rest/ultra/{appName}", restAppViewHandler)                          //handles all restAPI GET requests
+    mx.HandleFunc("/rest/ultra/", restAppViewDocumentationHandler)
     mx.HandleFunc("/rest/{category}", restHandler)                          //handles all restAPI GET requests
     mx.HandleFunc("/rest/", restDocumentationHandler)                       //if someone types in /rest/ with no category
 	mx.PathPrefix("/").Handler(FileServer(http.Dir(root + "/static/")))     //for all other urls, serve from /static/
@@ -54,6 +58,127 @@ func NewServer() *negroni.Negroni {
 
 
 //ALL URL HANDLERS
+func appViewHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    log.Println("App View Handler – App Name: ", vars["appName"])
+
+    w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+    myHtml := `
+           <!DOCTYPE html>
+           <html>
+           <head>
+                 <title>` + vars["appName"] +`</title>
+                 <link rel="stylesheet" type="text/css" href="../stylesheets/main.css">
+           </head>
+           <body>
+               <div id = "header">
+                   <div id="headerIcon" onClick="location.reload();location.href='../index.html'"></div><div id="headerText" onClick="location.reload();location.href='../index.html'"> Ultra Apps <span id="smallerText">CMS</span></div>
+               </div>
+               <div id = "filters">
+                   <div id = "filterContainer">
+                       <div id="filterText">
+                           Platform
+                       </div>
+                       <select name="platform" onchange="selectChange(this); this.oldvalue = this.value;">
+                            <option value="star">🔯</option>
+                         <option value="samsungJ2">Samsung J2</option>
+                         <option value="mercedes">Mercedes</option>
+                         <option value="audi">Audi</option>
+                       </select>
+                   </div>
+                   <div id = "filterContainer">
+                       <div id="filterText">
+                           Operator
+                       </div>
+                       <select name="operator" onchange="selectChange(this); this.oldvalue = this.value;">
+                             <option value="star">🔯</option>
+                         <option value="tmobile">T-Mobile</option>
+
+                         <option value="mercedes">Mercedes</option>
+                         <option value="audi">Audi</option>
+                       </select>
+                   </div>
+                   <div id = "filterContainer">
+                       <div id="filterText">
+                           Country
+                       </div>
+                       <select name="country"  onchange="selectChange(this); this.oldvalue = this.value;">
+                           <option value="star">🔯</option>
+                         <option value="afghanistan">Afghanistan</option>
+
+                         <option value="mercedes">Mercedes</option>
+                         <option value="audi">Audi</option>
+                       </select>
+                   </div>
+                   <div id = "filterContainer">
+                       <div id="filterText">
+                           Version
+                       </div>
+                       <select name="version"  onchange="selectChange(this); this.oldvalue = this.value;">
+                           <option value="star">🔯</option>
+                           <option value="2.4">2.4</option>
+                         <option value="mercedes">Mercedes</option>
+                         <option value="audi">Audi</option>
+                       </select>
+                   </div>
+                   <div id = "filterContainer" style="margin-top:12px;">
+                       <div id="checkboxFilterText">
+                           Featured Location
+                       </div>
+                       <div class="checkboxContainer" id="maxCheck">
+                           Max
+                       </div>
+                       <div class="checkboxContainer" id="folderCheck">
+                           Folder
+                       </div>
+                       <div class="checkboxContainer" id="homescreenCheck">
+                           Homescreen
+                       </div>
+                   </div>
+                   <div id = "starandsearch">
+                       <div class="clicked" id="star">
+                       </div>
+                        <input class="search" type="text" placeholder="Search..">
+                   </div>
+               </div>
+               <div class ="webApp">
+               </div>
+               </main>
+               <script type="text/javascript" src="../javascript/filters.js"></script>
+               <script type="text/javascript" src="../javascript/rest.js"></script>
+               <script type="text/javascript" src="../javascript/appView.js"></script>
+           </body>
+           `
+    io.WriteString(w, myHtml)
+}
+
+func restAppViewHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    log.Println("Rest App View Handler – App Name: ", vars["appName"])
+
+    w.WriteHeader(http.StatusOK)
+    w.Header().Add("Content-Type", "text/html")
+
+    var allApps []Webapp = getAllApps()
+    for _, app := range allApps {
+        if app.ID == vars["appName"] {
+            appJSON, err := json.Marshal(app)
+            if err != nil {
+                fmt.Fprint(w, err)
+            } else {
+                fmt.Fprint(w, string(appJSON))
+                log.Println("Rest App View Handler – Successfully marshalled JSON")
+            }
+        }
+    }
+}
+func restAppViewDocumentationHandler(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    w.Header().Add("Content-Type", "text/html")
+
+    fmt.Fprint(w, "Please specify appID such as: \n/ultra/facebook")
+}
 
 func restHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)

@@ -6,7 +6,8 @@
 
     <body>
         <div id = "header">
-            <div id="headerIcon" onClick="window.location.reload()"></div><div id="headerText" onClick="window.location.reload()"> Ultra Apps <span id="smallerText">CMS</span></div>
+            <div id="headerIcon"  onClick="location.reload();location.href='../index.html'"></div>
+            <div id="headerText" onClick="location.reload();location.href='../index.html'"> Ultra Apps <span id="smallerText">CMS</span></div>
         </div>
         <div id = "filters">
             <div id = "filterContainer">
@@ -75,18 +76,15 @@
                  <input class="search" type="text" placeholder="Search..">
             </div>
         </div>
-
-        <main>
-            <div class="fullscreen-bg">
-                <video loop muted autoplay poster="images/mp4_bg_preview.jpg" class="fullscreen-bg__video">
-                    <source src="images/mp4_bg.mp4" type="video/mp4">
-                </video>
-            </div>
-            <div id ="appTray">
-                <div id ="allicons">
+        <div id="swapOutContainer">
+            <main>
+                <div id ="appTray">
+                    <div id ="allicons">
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
+        <script type="text/javascript" src="javascript/filters.js"></script>
         <script type="text/javascript" src="javascript/rest.js"></script>
         <script type="text/javascript" src="javascript/index.js"></script>
     </body>
