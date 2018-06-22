@@ -1,7 +1,7 @@
 # SamsungCMS
 Ultra Apps Content Management Service
 
-### TODO
+## To do
 
 - [ ] Get adding to work on client -> user provides the info contained in a webApp json
      - A nice feature to have on top of adding would be autofill (based off DB)
@@ -15,7 +15,7 @@ Ultra Apps Content Management Service
      - Golang will need a custom implementation
 
 
-### CHECKED OFF
+## Checked off
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
 - [x] Built out Samsung Ultra CMS Index page (with app tray, working filter mechanics, dynamic elements & mobile css compatibility)
