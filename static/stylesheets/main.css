@@ -58,7 +58,7 @@ hr{
     border: 0;
     height: 1px;
     background: #333;
-    background-image: linear-gradient(to right, #ebebeb, black, #ebebeb);
+    background-image: linear-gradient(to right, black, #ebebeb);
     margin-left:18%;
     width:59%;
     margin-top:24px;
