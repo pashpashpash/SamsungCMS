@@ -1,5 +1,14 @@
 # SamsungCMS
-Ultra Apps Content Management Service
+Currently there are a lot of inefficiencies with creating/editing Ultra App configurations. A relatively simple action such as deleting Freebasics Ultra in India requires a lot of manual work from the team (i.e. out main server guy manually figuring out the ordering/inheritance of the country/carrier filter stack & deploying config updates manually).
+
+Considering our ultimate goal is managing hundreds if not thousands of ultra apps, it would be nice to have a scalable system in place that does all of this work automatically with an easy UI....
+
+The purpose of the CMS is to create a tool that allows everyone to
+
+1. Log in with their Samsung Opus team credentials
+2. Check what ultra apps are in production (with proper targeting, eg. features enabled/ disabled, etc)  
+3. Add/remove/edit ultra apps in production
+4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
 
