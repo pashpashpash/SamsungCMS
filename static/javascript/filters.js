@@ -64,7 +64,7 @@ function setAllSelectstoStar()
             selects[z].value="star";
         }
     }
-    console.log("SETALLSELECTSTOSTAR – All filters have stars");
+    console.log("SET_ALL_SELECTS_TOSTAR – All filters have stars");
 }
 
 // CHECKBOXES + STAR TOGGLING LOGIC

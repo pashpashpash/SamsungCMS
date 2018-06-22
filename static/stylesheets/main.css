@@ -5,7 +5,7 @@ body {
   font-size: 14px;
 }
 
-/* APP VIEW SECTION */
+/* =====================APP DETAILS SECTION=========================== */
 .center{
     margin: auto;
     width: 64%;
@@ -33,11 +33,16 @@ body {
     border-radius: 8px;
     padding:1em;
     margin-left:14px;
-    cursor: pointer;
     /* margin-bottom: 14px; */
 }
-.webApp .row .rowValue:hover{
-    background-color: #ebebeb;
+.webApp .row .rowValue .rowImage{
+    margin-left: 14px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: -7px;
 }
 .edit{
     float:right;
@@ -65,13 +70,8 @@ hr{
     margin-bottom:32px;
 }
 
-main{
-    /* background-image: url("/images/blur_bg_3.gif"); */
-    /* background-size:100%; */
-    padding-top:50px;
-    color:white;
-    overflow: hidden;
-}
+
+/* =====================HEADERS AND FILTERS=========================== */
 #header{
     display: flex;
     line-height: 32px;
@@ -102,28 +102,8 @@ main{
 #timeline{
     height: 420px;
 }
-.fullscreen-bg {
-    position: fixed;
-    top: 240px;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    overflow: hidden;
-    z-index: -100;
-}
 
-.fullscreen-bg__video {
-    position: absolute;
-    top: 0px;
-    left: 0;
-    /* width: 100%;
-    height: 100%; */
-    height:630px;
-}
-
-
-
-select,form{
+#filters select, #filters form{
     padding: 9px 30px 8px 8px;
     font-size: 16px;
     border: 1px solid black;
@@ -205,7 +185,14 @@ select,form{
     font-size: 16px;
 }
 
-
+/* =====================INDEX APPTRAY BODY=========================== */
+main{
+    /* background-image: url("/images/blur_bg_3.gif"); */
+    /* background-size:100%; */
+    padding-top:50px;
+    color:white;
+    overflow: hidden;
+}
 #appTray{
     margin: auto;
     width: 1074px;
@@ -217,7 +204,6 @@ select,form{
     padding-left:32px;
     color:black;
 }
-
 #allicons{
     width: 900px;
     margin: auto;
@@ -263,6 +249,23 @@ select,form{
 #iconContainer #iconText{
     width: 104px;
 }
+#iconContainer #deleteIcon{
+    opacity:0;
+    background-image: url(/images/delete.svg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: top right;
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    margin-left: 66px;
+    margin-top: 29px;
+    cursor: pointer;
+    z-index: 1;
+}
+#iconContainer #deleteIcon:hover{
+    opacity:1;
+}
 
 img#icon {
 	border-radius: 22.5%;
@@ -287,7 +290,100 @@ img#icon {
 	}
 }
 
+/* =====================APPTRAY ADDAPP POPUP=========================== */
+.addAppPopup {
+    visibility:hidden;
+    position: fixed;
+    width:100%;
+    height:100%;
+    left: 0;
+    top: 0;
+    background-image: url("/images/blur_bg.png");
+    background-blend-mode:overlay;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 150%;
+    z-index: 2;
+}
+.addAppPopup .contents {
+    opacity: 1;
+    position:relative;
+    width: 40%;
+    height:auto;
+    top: 25%;
+    left:30%;
+    background:white;
+    border-radius: 8px;
+    overflow: hidden;
+    padding-bottom: 14px;
+}
+.addAppPopup .contents input{
+    display: block;
+    margin-left: 14px;
+    margin-right: 14px;
+    margin-top: 14px;
+    line-height: 24px;
+    padding-left: 14px;
+    border-radius: 8px;
+    border: 1px solid #ebebeb;
+    width: 80%;
+}
+.addAppPopup .contents input[type=submit]{
+    padding-left: 14px;
+    padding-right: 14px;
+    width:auto;
+}
+.addAppPopup .contents input[type=checkbox]{
+    width: auto;
+    margin: auto;
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+.addAppPopup form{
+    text-align: left;
+}
+.show{
+    visibility:visible;
+    transition-timing-function: ease-in-out;
+    -webkit-animation: fadeIn 0.05s ;
+    animation: fadeIn 0.05s;
+}
+.addAppPopup .closeButton {
+    float:right;
+    cursor: pointer;
+    background-image: url("/images/close.svg");
+    background-size: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #ebebeb;
+    border-bottom-left-radius: 8px;
+    overflow: hidden;
+    width: 36px;
+    height: 36px;
+}
+.addAppPopup .closeButton:hover {
+    background-color: #F1F1F1;
+}
+#addAppEnabledFeatures, #addAppHiddenFeatures{
+    margin-left: 18px;
+    margin-right: 18px;
+}
+.addAppPopup .contents #addAppCheckboxContainer
+{
+    display: inline-grid;
+    margin-left: 24px;
+}
 
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity:1 ;}
+}
 
 
 /* =====================CHECKBOXES=========================== */
