@@ -113,7 +113,7 @@ function showAddAppPopup(){ //shows Add App popup window
 
     var popupHTML = '<div class ="closeButton"';
     popupHTML += (" onclick=\"closeAddAppPopup()\"></div>");
-    popupHTML += generateAddAppInputFields();
+    popupHTML += generateAddAppPopupInputFields();
 
     var addAppPopupContents = addAppPopup.children[0];
     addAppPopupContents.innerHTML = popupHTML;
@@ -231,7 +231,7 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
 }
 
 
-function generateAddAppInputFields(){ //AddApp Popup window helper function
+function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     var hello = '<form onsubmit="submitNewApp(this); return false">'
     hello += '<input type="text" placeholder="Ultra App Name" name="name">'
     hello += '<input type="text" placeholder="Ultra App Rank" name="rank">'
