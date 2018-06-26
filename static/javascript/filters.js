@@ -25,6 +25,10 @@ function selectChange(selectObject){
             starON();
         }
     }
+    if(selectObject.value!="star")
+    {
+        starOFF();
+    }
 
     //get all select filter values + checkbox values
     applyFilters();

@@ -20,7 +20,7 @@ body {
     border-bottom: 1px solid transparent;
     padding-top: 14px;
     padding-bottom: 14px;
-}
+} 
 .webApp .row:hover{
     border-top: 1px solid #ebebeb;
     border-bottom: 1px solid #ebebeb;
@@ -186,6 +186,32 @@ hr{
 }
 
 /* =====================INDEX APPTRAY BODY=========================== */
+.iconContainer {
+    display: inline-grid;
+    text-align: center;
+    word-wrap: break-word;
+}
+.iconContainer #iconText{
+    width: 104px;
+}
+.iconContainer #deleteIcon{
+    opacity:0;
+    background-image: url(/images/delete.svg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: top right;
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    margin-left: 66px;
+    margin-top: 29px;
+    cursor: pointer;
+    z-index: 1;
+}
+.iconContainer #deleteIcon:hover{
+    opacity:1;
+}
+
 main{
     /* background-image: url("/images/blur_bg_3.gif"); */
     /* background-size:100%; */
@@ -240,32 +266,7 @@ main{
         margin-top: 10px;
     }
 }
-#iconContainer
-{
-    display: inline-grid;
-    text-align: center;
-    word-wrap: break-word;
-}
-#iconContainer #iconText{
-    width: 104px;
-}
-#iconContainer #deleteIcon{
-    opacity:0;
-    background-image: url(/images/delete.svg);
-    background-repeat: no-repeat;
-    background-size: 100%;
-    background-position: top right;
-    width: 32px;
-    height: 32px;
-    position: absolute;
-    margin-left: 66px;
-    margin-top: 29px;
-    cursor: pointer;
-    z-index: 1;
-}
-#iconContainer #deleteIcon:hover{
-    opacity:1;
-}
+
 
 img#icon {
 	border-radius: 22.5%;

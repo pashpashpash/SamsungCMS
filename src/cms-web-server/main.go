@@ -9,7 +9,8 @@ import (
     "fmt"
     "io"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
-
+    "database/sql"
+    _ "github.com/go-sql-driver/mysql"
     "encoding/json"
     "io/ioutil"
 
@@ -28,10 +29,67 @@ func main() {
 	}
 
     cms_db = getDB() //THIS IS THE PARSED DATABASE OBJECT
+    db, err := sql.Open("mysql", "root:MaxGo99!@tcp(localhost:3306)/")
+    if err != nil {
+        panic(err)
+    }
+    defer db.Close()
+    create("cms", db, err)
+
+    // =======
+
+    result, err := db.Exec(
+    	"INSERT INTO example (id, data) VALUES (1, 'SWAGGGG')",
+    )
+    log.Println(result)
+
+    var (
+    	id int
+    	name string
+    )
+    rows, err := db.Query("select id, data from example where id = ?", 1)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer rows.Close()
+    for rows.Next() {
+    	err := rows.Scan(&id, &name)
+    	if err != nil {
+    		log.Fatal(err)
+    	}
+    	log.Println(id, name)
+    }
+    err = rows.Err()
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+
+    // =======
 
 	server := NewServer()
 	server.Run(":" + port)
 }
+
+func create(name string, db *sql.DB, err error) {
+
+
+   _,err = db.Exec("CREATE DATABASE IF NOT EXISTS "+name)
+   if err != nil {
+       panic(err)
+   }
+
+   _,err = db.Exec("USE "+name)
+   if err != nil {
+       panic(err)
+   }
+
+   _,err = db.Exec("CREATE TABLE IF NOT EXISTS example ( id integer, data varchar(32) )")
+   if err != nil {
+       panic(err)
+   }
+}
+
 
 // NewServer configures and returns a Server.
 func NewServer() *negroni.Negroni {

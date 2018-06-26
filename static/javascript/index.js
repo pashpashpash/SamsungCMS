@@ -26,21 +26,21 @@ function showWebapps(allAppsContainer, webapps) {
     var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
     for(var o= 0; o < webapps.length; o++){
         console.log("SHOW_WEBAPPS – Adding "+webapps[o].name+" iconContainer to the HTML");
-        webAppsHTML += "<div id='iconContainer'>";
+        webAppsHTML += "<div class='iconContainer' id='" + webapps[o].id + "'>";
             webAppsHTML += ("<div id='deleteIcon' ");
             webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].id +"')\"");
             webAppsHTML += ("></div>");
             webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl + "'");
             webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].id +"')\"");
             webAppsHTML += (" />");
-
+ 
             webAppsHTML += ("<div id='iconText'>");
                 webAppsHTML += (webapps[o].name + " Ultra");
             webAppsHTML += ("</div>");
         webAppsHTML += ("</div>");
     }
 
-    webAppsHTML += "<div id='iconContainer'>"; //ADD ULTRA APP ICON
+    webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
     webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
     webAppsHTML += (" onclick=\"showAddAppPopup()\"");
     webAppsHTML += (" />");
@@ -84,7 +84,7 @@ function deleteAppfromTray(appID)
     console.log("DELETE_APP_FROM_TRAY – CURRENT FILTER STATUS:");
     console.log(filterParams);
     deleteUltraApp(filterParams, appID); //writes to DB
-    //get rid of App from app tray//showWebapps() again?
+    document.getElementById(appID).remove(); //this should be changed later. Need to update DB and refresh showWebapps() again.
 }
 function deleteUltraApp(filterParameters, appID)
 {
