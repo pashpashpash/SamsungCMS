@@ -2,7 +2,7 @@
 var cms_database = fetchDB(); //fetch db object (not used currentlys)
 var server = new restRequest();
 var allAppsContainer = document.getElementById("allicons");
-var filterParams = [selects, maxCheckbox, folderCheckbox, homescreenCheckbox, searchField];
+var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 // var platformSelect = document.getElementsByName("platform")[0];
 
@@ -33,7 +33,7 @@ function showWebapps(allAppsContainer, webapps) {
             webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl + "'");
             webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].id +"')\"");
             webAppsHTML += (" />");
- 
+
             webAppsHTML += ("<div id='iconText'>");
                 webAppsHTML += (webapps[o].name + " Ultra");
             webAppsHTML += ("</div>");

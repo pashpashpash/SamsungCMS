@@ -383,17 +383,6 @@ func appViewHTML(appName string) (string){
      <div id = "filters">
          <div id = "filterContainer">
    <div id="filterText">
-       Platform
-   </div>
-   <select name="platform" onchange="selectChange(this); this.oldvalue = this.value;">
-        <option value="star">🔯</option>
-     <option value="samsungJ2">Samsung J2</option>
-     <option value="mercedes">Mercedes</option>
-     <option value="audi">Audi</option>
-   </select>
-         </div>
-         <div id = "filterContainer">
-   <div id="filterText">
        Operator
    </div>
    <select name="operator" onchange="selectChange(this); this.oldvalue = this.value;">
@@ -426,20 +415,6 @@ func appViewHTML(appName string) (string){
      <option value="mercedes">Mercedes</option>
      <option value="audi">Audi</option>
    </select>
-         </div>
-         <div id = "filterContainer" style="margin-top:12px;">
-   <div id="checkboxFilterText">
-       Featured Location
-   </div>
-   <div class="checkboxContainer" id="maxCheck">
-       Max
-   </div>
-   <div class="checkboxContainer" id="folderCheck">
-       Folder
-   </div>
-   <div class="checkboxContainer" id="homescreenCheck">
-       Homescreen
-   </div>
          </div>
          <div id = "starandsearch">
    <div class="clicked" id="star">

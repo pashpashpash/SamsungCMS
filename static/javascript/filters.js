@@ -1,8 +1,5 @@
 //initialization
 var selects = document.getElementsByTagName('select');
-var maxCheckbox = document.getElementById("maxCheck");
-var folderCheckbox = document.getElementById("folderCheck");
-var homescreenCheckbox = document.getElementById("homescreenCheck");
 var searchField = document.getElementsByClassName('search')[0];
 
 
@@ -70,35 +67,6 @@ function setAllSelectstoStar()
     }
     console.log("SET_ALL_SELECTS_TOSTAR – All filters have stars");
 }
-
-// CHECKBOXES + STAR TOGGLING LOGIC
-document.querySelector('#maxCheck').onclick = function(){
-    if(this.classList.contains("checked")) {
-        this.classList.remove("checked");
-    }
-    else {
-        this.classList.add("checked");
-    }
-    applyFilters();
-};
-document.querySelector('#folderCheck').onclick = function(){
-    if(this.classList.contains("checked")) {
-        this.classList.remove("checked");
-    }
-    else {
-        this.classList.add("checked");
-    }
-    applyFilters();
-};
-document.querySelector('#homescreenCheck').onclick = function(){
-    if(this.classList.contains("checked")) {
-        this.classList.remove("checked");
-    }
-    else {
-        this.classList.add("checked");
-    }
-    applyFilters();
-};
 
 document.querySelector('#star').onclick = function(){
     if(allStars(selects)===false) //change star on click ONLY if all select filters are NOT stars
