@@ -82,3 +82,9 @@ document.querySelector('#star').onclick = function(){
         }
     }
 };
+
+searchField.oninput = function(){
+    console.log("SEARCH_FIELD – Search field changed. New Value:");
+    console.log(searchField.value);
+    applyFilters();
+};

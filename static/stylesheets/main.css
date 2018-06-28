@@ -161,7 +161,6 @@ hr{
 #starandsearch{
     display: inline-flex;
     float:right;
-    margin-right: 54px;
     font-size: 16px;
     height:44px;
     /* margin-left: 400px; */
@@ -175,6 +174,7 @@ hr{
     border-radius: 8px;
 
 }
+
 
 /* =====================INDEX APPTRAY BODY=========================== */
 .iconContainer {
@@ -251,7 +251,15 @@ main{
         display:none;
     }
     #starandsearch{
-                display:contents;
+        display:contents;
+
+    }
+    #starandsearch input[type=text] {
+            line-height: 44px;
+            margin-top: 10px;   
+    }
+    #star{
+        line-height: 44px;
     }
     select{
         margin-top: 10px;
