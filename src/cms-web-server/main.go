@@ -39,38 +39,38 @@ func main() {
     cms_db = getDB() //THIS IS THE PARSED DATABASE OBJECT
 
 
-    db = initDB("cms")
-    log.Println( "main –\tcreating a SQLite table named platformTable")
+    db = initDB("cms_2")
+    log.Println( "main –\t\tcreating a SQLite tables")
     createTables(db)
 
-    statement, _ := db.Prepare("INSERT INTO countryTable (app, country) VALUES (?, ?)")
-    statement.Exec("Twitter", "IN")
-    statement.Exec("Cricbuzz", "IN")
-    statement.Exec("Freebasics", "PL")
+    log.Println( "main –\t\tInserting into countries table...")
+    statement, _ := db.Prepare("INSERT INTO countries (Country_ID, Name, MCC_ID) VALUES (?, ?, ?)")
+    statement.Exec("GE-AB", "Abkhazia", 289)
+    statement.Exec("AF", "Afghanistan", 412)
+    statement.Exec("AL", "Albania", 276)
 
-    statement, _ = db.Prepare("INSERT INTO platformTable (app, platform) VALUES (?, ?)")
-    statement.Exec("Twitter", "Samsung J2")
-    statement.Exec("Cricbuzz", "Samsung J1")
-
-    statement, _ = db.Prepare("INSERT INTO operatorTable (app, operator) VALUES (?, ?)")
-    statement.Exec("Twitter", "T-Mobile")
-    statement.Exec("Cricbuzz", "Verizon")
-
-    statement, _ = db.Prepare("INSERT INTO versionTable (app, version) VALUES (?, ?)")
-    statement.Exec("Twitter", "1.0")
-    statement.Exec("Cricbuzz", "1.0")
-
+    log.Println( "main –\t\tInserting into operators table...")
+    statement, _ = db.Prepare("INSERT INTO operators ( MCCMNC_ID, Operator_Name, Country_ID) VALUES (?, ?, ?)")
+    statement.Exec(28967, "Aquafon JSC", "GE-AB")
+    statement.Exec(41201, "Afghan Wireless Communication Company", "AF")
+    statement.Exec(27601, "Telekom Albania", "AL")
+    //
+    // statement, _ = db.Prepare("INSERT INTO versionTable (app, version) VALUES (?, ?)")
+    // statement.Exec("Twitter", "1.0")
+    // statement.Exec("Cricbuzz", "1.0")
 
 
-    log.Println("main –\tquerying platformTable (app, platform)")
-    rows, err := db.Query("SELECT app, platform FROM platformTable")
+
+    log.Println("main –\t\tquerying operators ( MCCMNC_ID, Operator_Name, Country_ID)")
+    rows, err := db.Query("SELECT MCCMNC_ID, Operator_Name, Country_ID FROM operators")
     checkErr(err)
 
-    var app string
-    var platform string
+    var MCCMNC_ID string
+    var Operator_Name string
+    var Country_ID string
     for rows.Next() {
-        rows.Scan(&app, &platform)
-        log.Println("main –\t" + app + " | " + platform)
+        rows.Scan(&MCCMNC_ID, &Operator_Name, &Country_ID)
+        log.Println("main –\t\t" + MCCMNC_ID + "\t| " + Operator_Name + " | " + Country_ID)
     }
     defer rows.Close()
 
@@ -83,28 +83,44 @@ func main() {
 func initDB(name string) (*sql.DB) {
     tw := new(tabwriter.Writer)
     tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
-    log.Println("initDB –\tInitializing SQLite db with the name " + name)
+    log.Println("initDB –\t\tInitializing SQLite db with the name " + name)
     db, err := sql.Open("sqlite3", "./"+name+".db")
     checkErr(err)
     return db
 }
 
 func createTables(db *sql.DB) {
-    stmt, _ := db.Prepare("CREATE TABLE IF NOT EXISTS platformTable ( app TEXT PRIMARY KEY, platform TEXT )")
+    log.Println( "createTables –\tCreating countries table...")
+    stmt, _ := db.Prepare("CREATE TABLE IF NOT EXISTS countries ( Country_ID TEXT PRIMARY KEY, name TEXT NOT NULL, MCC_ID INTEGER NOT NULL)")
     _, err := stmt.Exec()
     checkErr(err)
 
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS operatorTable ( app TEXT PRIMARY KEY, operator TEXT )")
+    log.Println( "createTables –\tCreating operators table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS operators ( MCCMNC_ID integer PRIMARY KEY, Operator_Name TEXT, Country_ID TEXT, FOREIGN KEY(Country_ID) REFERENCES countries(Country_ID) )")
     _, err = stmt.Exec()
     checkErr(err)
 
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS countryTable ( app TEXT PRIMARY KEY, country TEXT )")
+    log.Println( "createTables –\tCreating versions table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS versions (versionNumber FLOAT PRIMARY KEY)")
     _, err = stmt.Exec()
     checkErr(err)
 
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS versionTable ( app TEXT PRIMARY KEY, version TEXT )")
+    log.Println( "createTables –\tCreating featuredLocations table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS featuredLocations ( featuredLocationName TEXT PRIMARY KEY )")
     _, err = stmt.Exec()
     checkErr(err)
+
+
+    log.Println( "createTables –\tCreating appConfigs table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, versionNumber FLOAT, FOREIGN KEY(versionNumber) REFERENCES versions(versionNumber))")
+    _, err = stmt.Exec()
+    checkErr(err)
+
+    log.Println( "createTables –\tCreating configurationMappings table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS configurationMappings ( id INTEGER PRIMARY KEY AUTOINCREMENT, Config_ID INTEGER, MCCMNC_ID integer, featuredLocationName TEXT,  FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), FOREIGN KEY(MCCMNC_ID) REFERENCES operators(MCCMNC_ID), FOREIGN KEY(featuredLocationName) REFERENCES featuredLocations(featuredLocationName))")
+    _, err = stmt.Exec()
+    checkErr(err)
+
 }
 
 // NewServer configures and returns a Server.
