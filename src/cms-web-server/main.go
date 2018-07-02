@@ -3,19 +3,17 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"path"
 	"time"
     "fmt"
     "io"
+    "os"
     "text/tabwriter"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
-    "database/sql"
      _ "github.com/mattn/go-sqlite3"
 
     "encoding/json"
     "io/ioutil"
-
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 )
@@ -23,11 +21,8 @@ import (
 const NegroniLogFmt = "{{.StartTime}} | {{.Status}} | {{.Duration}} \n          {{.Method}} {{.Path}}\n"
 const NegroniDateFmt = time.Stamp
 var cms_db (CMS_DB)
-var db (*sql.DB)
-
 
 func main() {
-
     tw := new(tabwriter.Writer)
     tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
 
@@ -40,7 +35,7 @@ func main() {
 
 
     db = initDB("cms_2")
-    log.Println( "main –\t\tcreating a SQLite tables")
+    log.Println( "main –\t\tcreating SQLite tables")
     createTables(db)
 
     log.Println( "main –\t\tInserting into countries table...")
@@ -79,49 +74,7 @@ func main() {
 }
 
 
-// DATABASE HELPER FUNCTION
-func initDB(name string) (*sql.DB) {
-    tw := new(tabwriter.Writer)
-    tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
-    log.Println("initDB –\t\tInitializing SQLite db with the name " + name)
-    db, err := sql.Open("sqlite3", "./"+name+".db")
-    checkErr(err)
-    return db
-}
 
-func createTables(db *sql.DB) {
-    log.Println( "createTables –\tCreating countries table...")
-    stmt, _ := db.Prepare("CREATE TABLE IF NOT EXISTS countries ( Country_ID TEXT PRIMARY KEY, name TEXT NOT NULL, MCC_ID INTEGER NOT NULL)")
-    _, err := stmt.Exec()
-    checkErr(err)
-
-    log.Println( "createTables –\tCreating operators table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS operators ( MCCMNC_ID integer PRIMARY KEY, Operator_Name TEXT, Country_ID TEXT, FOREIGN KEY(Country_ID) REFERENCES countries(Country_ID) )")
-    _, err = stmt.Exec()
-    checkErr(err)
-
-    log.Println( "createTables –\tCreating versions table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS versions (versionNumber FLOAT PRIMARY KEY)")
-    _, err = stmt.Exec()
-    checkErr(err)
-
-    log.Println( "createTables –\tCreating featuredLocations table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS featuredLocations ( featuredLocationName TEXT PRIMARY KEY )")
-    _, err = stmt.Exec()
-    checkErr(err)
-
-
-    log.Println( "createTables –\tCreating appConfigs table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, versionNumber FLOAT, FOREIGN KEY(versionNumber) REFERENCES versions(versionNumber))")
-    _, err = stmt.Exec()
-    checkErr(err)
-
-    log.Println( "createTables –\tCreating configurationMappings table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS configurationMappings ( id INTEGER PRIMARY KEY AUTOINCREMENT, Config_ID INTEGER, MCCMNC_ID integer, featuredLocationName TEXT,  FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), FOREIGN KEY(MCCMNC_ID) REFERENCES operators(MCCMNC_ID), FOREIGN KEY(featuredLocationName) REFERENCES featuredLocations(featuredLocationName))")
-    _, err = stmt.Exec()
-    checkErr(err)
-
-}
 
 // NewServer configures and returns a Server.
 func NewServer() *negroni.Negroni {
@@ -145,7 +98,6 @@ func NewServer() *negroni.Negroni {
     n.UseHandler(mx)
 	return n
 }
-
 
 //ALL URL HANDLERS
 func appViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -303,30 +255,6 @@ func getAllApps() []Webapp {
   webApps = AppendIfMissing(webApps, Webapp(webApp))
         }
     }
-    // var webApps = []Webapp {
-    //     Webapp {
-    //         ID:"facebook",
-    //         Rank: 2,
-    //         Name:"swag",
-    //         HomeURL:"swag",
-    //         DefaultEnabledFeatures: []string{"Penn", "Teller"},
-    //         HiddenUI: []string{"Penn", "Teller"},
-    //         HiddenFeatures: []string{"Penn", "Teller"},
-    //         NativeApps: []string{"Penn", "Teller"},
-    //         IconURL:"swag",
-    //     },
-    //     Webapp {
-    //         ID:"facebook",
-    //         Rank: 2,
-    //         Name:"swag",
-    //         HomeURL:"swag",
-    //         DefaultEnabledFeatures: []string{"Penn", "Teller"},
-    //         HiddenUI: []string{"Penn", "Teller"},
-    //         HiddenFeatures: []string{"Penn", "Teller"},
-    //         NativeApps: []string{"Penn", "Teller"},
-    //         IconURL:"swag",
-    //     },
-    // }
     return webApps
 }
 
@@ -349,7 +277,6 @@ func checkErr(err error) {
 
 
 // TYPE DECLARATIONS
-
 type CMS_DB struct {
 	CmsDatabase []struct {
 		ConfigName string   `json:"config_name"`
@@ -383,67 +310,4 @@ type Webapp struct {
     HiddenFeatures         []string `json:"hiddenFeatures"`
     NativeApps   []string `json:"nativeApps,omitempty"`
     IconURL      string   `json:"iconUrl"`
-}
-func appViewHTML(appName string) (string){
-    return `
- <!DOCTYPE html>
- <html>
- <head>
-       <title>` + appName +`</title>
-       <link rel="stylesheet" type="text/css" href="../stylesheets/main.css">
- </head>
- <body>
-     <div id = "header">
-         <div id="headerIcon" onClick="location.reload();location.href='../index.html'"></div><div id="headerText" onClick="location.reload();location.href='../index.html'"> Ultra Apps <span id="smallerText">CMS</span></div>
-     </div>
-     <div id = "filters">
-     <div id = "filterContainer">
-         <div id="filterText">
-             Country
-         </div>
-         <select name="country"  onchange="selectChange(this); this.oldvalue = this.value;">
-             <option value="star">🔯</option>
-           <option value="af">Afghanistan</option>
-
-           <option value="ge">Germany</option>
-           <option value="uk">United Kingdom</option>
-         </select>
-     </div>
-     <div id = "filterContainer">
-         <div id="filterText">
-             Operator
-         </div>
-         <select name="operator" onchange="selectChange(this); this.oldvalue = this.value;">
-               <option value="star">🔯</option>
-           <option value="tmobile(333444)">T-Mobile (333444)</option>
-
-           <option value="T-Mobile(333445)">T-Mobile (333445)</option>
-           <option value="AT&T(456932)">AT&T (456932)</option>
-         </select>
-     </div>
-     <div id = "filterContainer">
-         <div id="filterText">
-             Version
-         </div>
-         <select name="version"  onchange="selectChange(this); this.oldvalue = this.value;">
-             <option value="star">🔯</option>
-             <option value="2.4">2.4</option>
-           <option value="2.5">2.5</option>
-           <option value="2.6">2.6</option>
-         </select>
-     </div>
-         <div id = "starandsearch">
-   <div class="clicked" id="star">
-   </div>
-    <input class="search" type="text" placeholder="Search..">
-         </div>
-     </div>
-     <div class ="webApp">
-     </div>
-     </main>
-     <script type="text/javascript" src="../javascript/filters.js"></script>
-     <script type="text/javascript" src="../javascript/rest.js"></script>
-     <script type="text/javascript" src="../javascript/appView.js"></script>
- </body>
- `
 }
