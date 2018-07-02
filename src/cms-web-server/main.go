@@ -34,46 +34,43 @@ func main() {
     cms_db = getDB() //THIS IS THE PARSED DATABASE OBJECT
 
 
-    db = initDB("cms_2")
+    db = initDB("cms")
     log.Println( "main –\t\tcreating SQLite tables")
     createTables(db)
 
-    log.Println( "main –\t\tInserting into countries table...")
-    statement, _ := db.Prepare("INSERT INTO countries (Country_ID, Name, MCC_ID) VALUES (?, ?, ?)")
-    statement.Exec("GE-AB", "Abkhazia", 289)
-    statement.Exec("AF", "Afghanistan", 412)
-    statement.Exec("AL", "Albania", 276)
-
-    log.Println( "main –\t\tInserting into operators table...")
-    statement, _ = db.Prepare("INSERT INTO operators ( MCCMNC_ID, Operator_Name, Country_ID) VALUES (?, ?, ?)")
-    statement.Exec(28967, "Aquafon JSC", "GE-AB")
-    statement.Exec(41201, "Afghan Wireless Communication Company", "AF")
-    statement.Exec(27601, "Telekom Albania", "AL")
-    //
-    // statement, _ = db.Prepare("INSERT INTO versionTable (app, version) VALUES (?, ?)")
-    // statement.Exec("Twitter", "1.0")
-    // statement.Exec("Cricbuzz", "1.0")
-
-
-
-    log.Println("main –\t\tquerying operators ( MCCMNC_ID, Operator_Name, Country_ID)")
-    rows, err := db.Query("SELECT MCCMNC_ID, Operator_Name, Country_ID FROM operators")
+    statement, _ := db.Prepare(`UPDATE mytable SET MCCMNC_ID = mcc||""||mnc`)
+    _, err := statement.Exec()
     checkErr(err)
 
-    var MCCMNC_ID string
+
+    log.Println("main –\t\tquerying mytable")
+    // rows, err := db.Query("SELECT COALESCE(mcc, '') || COALESCE(mnc, '') FROM mytable") //interesting way of concatting
+    rows, err := db.Query("SELECT Operator_Name, Country_ID, MCCMNC_ID FROM mytable")
+    checkErr(err)
+
     var Operator_Name string
     var Country_ID string
+    var MCCMNC_ID string
     for rows.Next() {
-        rows.Scan(&MCCMNC_ID, &Operator_Name, &Country_ID)
-        log.Println("main –\t\t" + MCCMNC_ID + "\t| " + Operator_Name + " | " + Country_ID)
+        rows.Scan(&Operator_Name, &Country_ID, &MCCMNC_ID)
+        // log.Println("main –\t\t" + MCCMNC_ID + " | " + Operator_Name + " | " + Country_ID)
     }
     defer rows.Close()
+
+
+    log.Println("main –\t\tInitializing operators table with temporary MCC table data...")
+    statement, _ = db.Prepare(`INSERT or IGNORE  INTO operators (MCCMNC_ID, Operator_Name, Country_ID) SELECT CAST(MCCMNC_ID AS INTEGER), Operator_Name, Country_ID FROM mytable`)
+    _, err = statement.Exec()
+    checkErr(err)
+
+    log.Println("main –\t\tInitializing countries table with temporary MCC table data...")
+    statement, _ = db.Prepare(`INSERT or IGNORE  INTO countries (Country_ID, name, MCC_ID) SELECT Country_ID, country, mcc FROM mytable`)
+    _, err = statement.Exec()
+    checkErr(err)
 
 	server := NewServer()
 	server.Run(":" + port)
 }
-
-
 
 
 // NewServer configures and returns a Server.
