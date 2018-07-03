@@ -30,6 +30,8 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [ ] Create new global "Add Ultra App" view which allows user to check all locations/versions they want ultra app to have (different from appTray "Add Ultra App" view)
      -  [ ] Reuse "Add Ultra App" view components to create a new "ultraApps global view" which shows a breakdown of all apps and their states (different from "ultraApps appTray view")
 - [ ] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
+- [ ] Write a translator in go that translates ultra app configs to config.ini sections
+- [ ] Write logic that pushes go-generated config.ini's to production (dev cluster)
 ##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
