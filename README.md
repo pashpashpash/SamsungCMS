@@ -37,4 +37,5 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [x] Get "appTray adding" to work on client-> user provides the info contained in a webApp json
      -  [ ] A nice feature to have on top of adding would be autofill (based off DB)
 - [x] Get deleting to work on client
-- [x] Figure out NEW SQL DB SCHEMA for CMS.
+- [x] Designed DB schema for the CMS
+- [x] Implemented SQLite implementation of DB schema for the CMS
