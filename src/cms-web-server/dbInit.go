@@ -14,6 +14,59 @@ func initDB(name string) (*sql.DB) {
     log.Println("initDB –\t\tInitializing SQLite db with the name " + name)
     db, err := sql.Open("sqlite3", "./"+name+".db")
     checkErr(err)
+
+    //===============================================//
+    log.Println( "initDB –\t\tcreating SQLite tables")
+    createTables(db)
+
+    statement, _ := db.Prepare(`UPDATE mytable SET MCCMNC_ID = mcc||""||mnc`)
+    _, err = statement.Exec()
+    checkErr(err)
+
+    log.Println("initDB –\t\tInitializing operators table with temporary MCC table data...")
+    statement, _ = db.Prepare(`INSERT or IGNORE  INTO operators (MCCMNC_ID, Operator_Name, Country_ID) SELECT CAST(MCCMNC_ID AS INTEGER), Operator_Name, Country_ID FROM mytable`)
+    _, err = statement.Exec()
+    checkErr(err)
+
+    log.Println("initDB –\t\tInitializing countries table with temporary MCC table data...")
+    statement, _ = db.Prepare(`INSERT or IGNORE  INTO countries (Country_ID, name, MCC_ID) SELECT Country_ID, country, mcc FROM mytable`)
+    _, err = statement.Exec()
+    checkErr(err)
+
+    log.Println("initDB –\t\tInitializing featuredLocations table with all possible featured locations...")
+    statement, _ = db.Prepare(`INSERT or IGNORE  INTO featuredLocations (featuredLocationName) VALUES (?)`)
+    _, err = statement.Exec("folder")
+    checkErr(err)
+    _, err = statement.Exec("homescreen")
+    checkErr(err)
+    _, err = statement.Exec("max")
+    checkErr(err)
+    _, err = statement.Exec("maxGo")
+    checkErr(err)
+
+    log.Println("initDB –\t\tInitializing versions table with all possible Samsung Max versions...")
+    statement, _ = db.Prepare(`INSERT or IGNORE  INTO versions (versionNumber) VALUES (?)`)
+    _, err = statement.Exec(3.1)
+    checkErr(err)
+
+
+    //==============================================//
+
+    // //EXAMPLE SELECT CODE
+    // log.Println("initDB –\t\tquerying mytable")
+    // rows, err := db.Query("SELECT Operator_Name, Country_ID, MCCMNC_ID FROM mytable")
+    // checkErr(err)
+    // // rows, err := db.Query("SELECT COALESCE(mcc, '') || COALESCE(mnc, '') FROM mytable") //interesting way of concatting
+    //
+    // var Operator_Name string
+    // var Country_ID string
+    // var MCCMNC_ID string
+    // for rows.Next() {
+    //     rows.Scan(&Operator_Name, &Country_ID, &MCCMNC_ID)
+    //     // log.Println("main –\t\t" + MCCMNC_ID + " | " + Operator_Name + " | " + Country_ID)
+    // }
+    // defer rows.Close()
+
     return db
 }
 

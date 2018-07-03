@@ -33,40 +33,8 @@ func main() {
 
     cms_db = getDB() //THIS IS THE PARSED DATABASE OBJECT
 
-
+    log.Println("main –\t\tCalling initDB with schema name 'cms'...")
     db = initDB("cms")
-    log.Println( "main –\t\tcreating SQLite tables")
-    createTables(db)
-
-    statement, _ := db.Prepare(`UPDATE mytable SET MCCMNC_ID = mcc||""||mnc`)
-    _, err := statement.Exec()
-    checkErr(err)
-
-
-    log.Println("main –\t\tquerying mytable")
-    // rows, err := db.Query("SELECT COALESCE(mcc, '') || COALESCE(mnc, '') FROM mytable") //interesting way of concatting
-    rows, err := db.Query("SELECT Operator_Name, Country_ID, MCCMNC_ID FROM mytable")
-    checkErr(err)
-
-    var Operator_Name string
-    var Country_ID string
-    var MCCMNC_ID string
-    for rows.Next() {
-        rows.Scan(&Operator_Name, &Country_ID, &MCCMNC_ID)
-        // log.Println("main –\t\t" + MCCMNC_ID + " | " + Operator_Name + " | " + Country_ID)
-    }
-    defer rows.Close()
-
-
-    log.Println("main –\t\tInitializing operators table with temporary MCC table data...")
-    statement, _ = db.Prepare(`INSERT or IGNORE  INTO operators (MCCMNC_ID, Operator_Name, Country_ID) SELECT CAST(MCCMNC_ID AS INTEGER), Operator_Name, Country_ID FROM mytable`)
-    _, err = statement.Exec()
-    checkErr(err)
-
-    log.Println("main –\t\tInitializing countries table with temporary MCC table data...")
-    statement, _ = db.Prepare(`INSERT or IGNORE  INTO countries (Country_ID, name, MCC_ID) SELECT Country_ID, country, mcc FROM mytable`)
-    _, err = statement.Exec()
-    checkErr(err)
 
 	server := NewServer()
 	server.Run(":" + port)
@@ -203,7 +171,7 @@ func getDB() CMS_DB { //gets JSON from hard-coded filepath & parses it into an O
         fmt.Println(err.Error())
         os.Exit(1)
     }
-    log.Println("Successfully found JSON")
+    log.Println("getDB –\t\tFound JSON & parsing into cmsDatabase object (But this isn't used really)...")
 
     c := struct {
         CmsDatabase []struct {
@@ -230,7 +198,7 @@ func getDB() CMS_DB { //gets JSON from hard-coded filepath & parses it into an O
 
     json.Unmarshal(raw, &c)
 
-    log.Println("Generated CMS_DB")
+    log.Println("getDB –\t\tFound JSON file & converted to CmsDatabase struct (not used)...")
     // log.Println(c.CmsDatabase[0].Webapps[0].Name)
 
     return CMS_DB(c)

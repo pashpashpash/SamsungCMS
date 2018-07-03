@@ -11,20 +11,30 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-
-- [ ] Get editing to work on client
+- [ ] Finish implementing DB initialization function – need to fill these tables during init:
+     -  [x] Countries (All possible countries + MCC codes)
+     -  [x] Operators (All possible operators + MCCMNC codes)
+     -  [x] FeaturedLocations (All possible featured locations, total of 4)
+     -  [x] Versions (All possible supported minVersions of Samsung Max, only 3.1 exists so far)
+     -  [ ] AppConfigs (Every existing ultra app state)
+     -  [ ] ConfigMappings (Maps every existing ultra app state to an operator and a featured Location)
+- [ ] Update existing site load mechanics to query the SQL DB instead of the current JSONDB that I made by hand.
+     -  [ ] Homepage (Apptray should query appConfigs table to display all apps with unique originalName's)
+     -  [ ] Appview Page (On icon click in appTray, JS should query appConfigs+Mappings tables to figure out correct appConfig to show on that page)
+- [ ] Start building out the select filters.
+     -  [ ] Country+Operator select filters should work together, with one reacting based off a selection in the other.
+     -  [ ] Update appTray on change, query the appConfig+configMappings tables to figure out which apps to show.
+          - To do this on client, just implement the applyFilters() function in main.js
 - [ ] Add login functionality + server validation
-- [ ] Figure out NEW DB based off sergey's excel sheet.
-- [ ] Add new view based off excel sheet.
-- [ ] Implement DB add/edit/delete with half-done add/edit/delte functions in the client.
-- [ ] Get filtering to work globally (server + client filtering logic)
-     - To do this on client, just implement the applyFilters() function in main.js
-     - Golang will need a custom implementation
+- [ ] Create new global "Add Ultra App" view which allows user to check all locations/versions they want ultra app to have (different from appTray "Add Ultra App" view)
+     -  [ ] Reuse "Add Ultra App" view components to create a new "ultraApps global view" which shows a breakdown of all apps and their states (different from "ultraApps appTray view")
+- [ ] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
 ##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
-- [x] Built out Samsung Ultra CMS Index page (with app tray, working filter mechanics, dynamic elements & mobile css compatibility)
+- [x] Built out Samsung Ultra CMS Index page (with "ultraApps appTray view", working filter mechanics, dynamic elements & mobile css compatibility)
 - [x] Built out App Details page with javascript that generates HTML for the app based off a [webApp] JSON object request at /rest/ultra/{appID}
-- [x] Get adding to work on client -> user provides the info contained in a webApp json
+- [x] Get "appTray adding" to work on client-> user provides the info contained in a webApp json
      -  [ ] A nice feature to have on top of adding would be autofill (based off DB)
 - [x] Get deleting to work on client
+- [x] Figure out NEW SQL DB SCHEMA for CMS.

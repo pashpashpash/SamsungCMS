@@ -58,7 +58,7 @@ function starON()
 }
 function setAllSelectstoStar()
 {
-    var selects = document.getElementsByTagName('select');
+    selects = document.getElementsByTagName('select');
     for(var z=0; z<selects.length; z++){
         if(selects[z].value!="star")
         {
