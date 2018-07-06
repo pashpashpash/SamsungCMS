@@ -73,36 +73,108 @@ func initDB(name string) (*sql.DB) {
     return db
 }
 
+func similarConfigs(db *sql.DB, originalName string, Config_ID string) []string{
+    var returnArrayOfConfig_IDs []string
+    log.Println("similarConfigs –\tChecking appConfigs table for configs with originalName = " +originalName)
+    rows, err := db.Query("SELECT Config_ID FROM appConfigs WHERE originalName = \"" + originalName+"\"")
+    checkErr(err)
+
+    var Config_ID2 string
+    for rows.Next() {
+        err = rows.Scan(&Config_ID2)
+        checkErr(err)
+        if(Config_ID != Config_ID2){
+            log.Println("similarConfigs –\tAppName: "+originalName + " | Config_ID: " + Config_ID2)
+            returnArrayOfConfig_IDs = append(returnArrayOfConfig_IDs, Config_ID2)
+        }
+    }
+
+    rows.Close() //good habit to close
+
+    return returnArrayOfConfig_IDs
+}
+
 func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredLocations string, originalName string, modifiableName string, iconURL string, homeURL string, rank string, versionNumber string) {
     log.Println("newAppConfig –\tInserting " + modifiableName + " " +config_section + " entries...")
     statement, _ := db.Prepare(`INSERT OR IGNORE INTO appConfigs (Config_ID, originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?, ?)`)
     _, err := statement.Exec(Config_ID, originalName, modifiableName, iconURL, homeURL, rank, versionNumber)
     checkErr(err)
+    var similarConfigs_IDs []string = similarConfigs(db, originalName, Config_ID)
+    if(len(similarConfigs_IDs) == 0) {
 
-    if(featuredLocations == "folder" || featuredLocations == "ALL") {
-        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'folder' FROM operators"
-        _, err = db.Exec(execText)
-        checkErr(err)
-    } else if(featuredLocations == "homescreen" || featuredLocations == "ALL") {
-        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'homescreen' FROM operators"
-        _, err = db.Exec(execText)
-        checkErr(err)
-    } else if(featuredLocations == "max" || featuredLocations == "ALL"){
-        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'max' FROM operators"
-        _, err = db.Exec(execText)
-        checkErr(err)
-    } else if(featuredLocations == "maxGo" || featuredLocations == "ALL"){
-        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'maxGo' FROM operators"
-        _, err = db.Exec(execText)
-        checkErr(err)
-    } else if(strings.Contains(featuredLocations, ",")) {
-        locations := strings.Split(featuredLocations, ",")
-        for _, location := range locations {
-            if location != ""{
-                execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \""+location+ "\"FROM operators"
+        if(featuredLocations == "folder" || featuredLocations == "ALL") {
+            execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'folder' FROM operators"
+            _, err = db.Exec(execText)
+            checkErr(err)
+        } else if(featuredLocations == "homescreen" || featuredLocations == "ALL") {
+            execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'homescreen' FROM operators"
+            _, err = db.Exec(execText)
+            checkErr(err)
+        } else if(featuredLocations == "max" || featuredLocations == "ALL"){
+            execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'max' FROM operators"
+            _, err = db.Exec(execText)
+            checkErr(err)
+        } else if(featuredLocations == "maxGo" || featuredLocations == "ALL"){
+            execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'maxGo' FROM operators"
+            _, err = db.Exec(execText)
+            checkErr(err)
+        } else if(strings.Contains(featuredLocations, ",")) {
+            locations := strings.Split(featuredLocations, ",")
+            for _, location := range locations {
+                if location != ""{
+                    execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \""+location+ "\"FROM operators"
+                    _, err = db.Exec(execText)
+                    checkErr(err)
+                }
+            }
+        }
+    } else {
+        for index, _ := range similarConfigs_IDs {
+            log.Println("newAppConfig –\tReplacing " + similarConfigs_IDs[index] + " with " +Config_ID +"...")
+
+            if(featuredLocations == "folder" || featuredLocations == "ALL") {
+                execText := "UPDATE configurationMappings SET Config_ID = \""+Config_ID+"\" WHERE Config_ID = \""+similarConfigs_IDs[index]+"\" AND featuredLocationName = \"folder\""
+                _, err := db.Exec(execText)
+                checkErr(err)
+                execText = "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \"folder\"FROM operators"
                 _, err = db.Exec(execText)
                 checkErr(err)
+            } else if(featuredLocations == "homescreen" || featuredLocations == "ALL") {
+                execText := "UPDATE configurationMappings SET Config_ID = \""+Config_ID+"\" WHERE Config_ID = \""+similarConfigs_IDs[index]+"\" AND featuredLocationName = \"homescreen\""
+                _, err := db.Exec(execText)
+                checkErr(err)
+                execText = "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \"homescreen\"FROM operators"
+                _, err = db.Exec(execText)
+                checkErr(err)
+            } else if(featuredLocations == "max" || featuredLocations == "ALL") {
+                execText := "UPDATE configurationMappings SET Config_ID = \""+Config_ID+"\" WHERE Config_ID = \""+similarConfigs_IDs[index]+"\" AND featuredLocationName = \"max\""
+                _, err := db.Exec(execText)
+                checkErr(err)
+                execText = "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \"max\"FROM operators"
+                _, err = db.Exec(execText)
+                checkErr(err)
+            } else if(featuredLocations == "maxGo" || featuredLocations == "ALL"){
+                execText := "UPDATE configurationMappings SET Config_ID = \""+Config_ID+"\" WHERE Config_ID = \""+similarConfigs_IDs[index]+"\" AND featuredLocationName = \"maxGo\""
+                _, err := db.Exec(execText)
+                checkErr(err)
+                execText = "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \"maxGo\"FROM operators"
+                _, err = db.Exec(execText)
+                checkErr(err)
+            } else if(strings.Contains(featuredLocations, ",")) {
+                locations := strings.Split(featuredLocations, ",")
+                for _, location := range locations {
+                    if location != ""{
+                        execText := "UPDATE configurationMappings SET Config_ID = \""+Config_ID+"\" WHERE Config_ID = \""+similarConfigs_IDs[index]+"\" AND featuredLocationName = \""+location+"\""
+                        _, err := db.Exec(execText)
+                        checkErr(err)
+
+                        execText = "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \""+location+ "\"FROM operators"
+                        _, err = db.Exec(execText)
+                        checkErr(err)
+                    }
+                }
             }
+
         }
     }
 }
@@ -320,10 +392,9 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("DROP TABLE IF EXISTS configurationMappings")
 
     log.Println( "createTables –\tCreating configurationMappings table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS configurationMappings ( id INTEGER PRIMARY KEY AUTOINCREMENT, Config_ID INTEGER, MCCMNC_ID integer, featuredLocationName TEXT,  FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), FOREIGN KEY(MCCMNC_ID) REFERENCES operators(MCCMNC_ID), FOREIGN KEY(featuredLocationName) REFERENCES featuredLocations(featuredLocationName))")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS configurationMappings ( id INTEGER PRIMARY KEY AUTOINCREMENT, Config_ID INTEGER, MCCMNC_ID integer, featuredLocationName TEXT, CONSTRAINT uniqueTuples UNIQUE (MCCMNC_ID, featuredLocationName, Config_ID),  FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), FOREIGN KEY(MCCMNC_ID) REFERENCES operators(MCCMNC_ID), FOREIGN KEY(featuredLocationName) REFERENCES featuredLocations(featuredLocationName))")
     _, err = stmt.Exec()
     checkErr(err)
-
 }
 
 
