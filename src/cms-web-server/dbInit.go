@@ -49,6 +49,9 @@ func initDB(name string) (*sql.DB) {
     _, err = statement.Exec(3.1)
     checkErr(err)
 
+    log.Println("initDB –\t\tLodaing config tables...")
+    loadConfigTables(db)
+
 
     //==============================================//
 
@@ -68,6 +71,217 @@ func initDB(name string) (*sql.DB) {
     // defer rows.Close()
 
     return db
+}
+
+func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredLocations string, originalName string, modifiableName string, iconURL string, homeURL string, rank string, versionNumber string) {
+    log.Println("newAppConfig –\tInserting " + modifiableName + " " +config_section + " entries...")
+    statement, _ := db.Prepare(`INSERT OR IGNORE INTO appConfigs (Config_ID, originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    _, err := statement.Exec(Config_ID, originalName, modifiableName, iconURL, homeURL, rank, versionNumber)
+    checkErr(err)
+
+    if(featuredLocations == "folder" || featuredLocations == "ALL") {
+        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'folder' FROM operators"
+        _, err = db.Exec(execText)
+        checkErr(err)
+    } else if(featuredLocations == "homescreen" || featuredLocations == "ALL") {
+        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'homescreen' FROM operators"
+        _, err = db.Exec(execText)
+        checkErr(err)
+    } else if(featuredLocations == "max" || featuredLocations == "ALL"){
+        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'max' FROM operators"
+        _, err = db.Exec(execText)
+        checkErr(err)
+    } else if(featuredLocations == "maxGo" || featuredLocations == "ALL"){
+        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'maxGo' FROM operators"
+        _, err = db.Exec(execText)
+        checkErr(err)
+    } else if(strings.Contains(featuredLocations, ",")) {
+        locations := strings.Split(featuredLocations, ",")
+        for _, location := range locations {
+            if location != ""{
+                execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, \""+location+ "\"FROM operators"
+                _, err = db.Exec(execText)
+                checkErr(err)
+            }
+        }
+    }
+}
+
+func loadConfigTables(db *sql.DB) {
+    log.Println("loadConfigTables –\tInitializing [DEFAULT] appConfigs+configurationMappings tables...")
+    statement, _ := db.Prepare(`INSERT INTO appConfigs (originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?)`)
+    // =============================== INSTAGRAM [DEFAULT] ==================================//
+    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "2", "3.1")
+    // =============================== vKontakte [DEFAULT] ==================================//
+    log.Println("loadConfigTables –\tInserting vKontakte [DEFAULT] entries...")
+    _, err := statement.Exec("vk", "vKontakte", "ultra_apps/vkontakte_ultra.png","https://vk.com", "4" , "3.1")
+    checkErr(err)
+
+    log.Println("loadConfigTables –\tCreating temporary indiaOperators table to exclude vKontakte from...")
+    _, err = db.Exec(`CREATE TABLE indiaOperators AS SELECT (MCCMNC_ID) FROM operators WHERE Country_ID='in'`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 2, MCCMNC_ID, "folder" FROM operators WHERE MCCMNC_ID not in (SELECT MCCMNC_ID FROM indiaOperators)`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 2, MCCMNC_ID, "homescreen" FROM operators WHERE MCCMNC_ID not in (SELECT MCCMNC_ID FROM indiaOperators)`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 2, MCCMNC_ID, "max" FROM operators WHERE MCCMNC_ID not in (SELECT MCCMNC_ID FROM indiaOperators)`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 2, MCCMNC_ID, "maxGo" FROM operators WHERE MCCMNC_ID not in (SELECT MCCMNC_ID FROM indiaOperators)`)
+    checkErr(err)
+
+    _, err = db.Exec(`DROP TABLE indiaOperators`)
+    checkErr(err)
+    // =============================== Cricbuzz [DEFAULT] ==================================//
+    newAppConfig(db, "3", "[DEFAULT]", "ALL", "cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png", "http://m.cricbuzz.com", "5", "3.1")
+    // =============================== Wikipedia [DEFAULT] ==================================//
+    newAppConfig(db, "4", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "7", "3.1")
+    // =============================== Free Basics [freebasic] ==================================//
+    log.Println("loadConfigTables –\tInserting Free Basics [freebasic] entries...")
+    _, err = statement.Exec("freebasics", "Free Basics", "ultra_apps/ic_free_basics.png","https://freebasics.com/?ref=s_max_bookmark", "6" , "3.1")
+    checkErr(err)
+
+    log.Println("loadConfigTables –\tCreating temporary freeBasicOperators table to include freebasics in...")
+    _, err = db.Exec(`CREATE TABLE freeBasicOperators AS SELECT (MCCMNC_ID) FROM operators WHERE MCCMNC_ID='45204' OR MCCMNC_ID='45206' OR MCCMNC_ID='45208' OR MCCMNC_ID='71404' OR MCCMNC_ID='33402' OR MCCMNC_ID='33402' OR MCCMNC_ID='732001' OR MCCMNC_ID='732103' OR MCCMNC_ID='732111' OR MCCMNC_ID='73601' OR MCCMNC_ID='45201'`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 5, MCCMNC_ID, "folder" FROM freeBasicOperators`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 5, MCCMNC_ID, "homescreen" FROM freeBasicOperators`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 5, MCCMNC_ID, "max" FROM freeBasicOperators`)
+    checkErr(err)
+
+    _, err = db.Exec(`DROP TABLE freeBasicOperators`)
+    checkErr(err)
+    // =============================== Facebook [global_and_preloaded] ==================================//
+    newAppConfig(db, "6", "[global_and_preloaded]", "folder,homescreen,max", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png","https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
+    // =============================== Facebook [android_go] ==================================//
+    newAppConfig(db, "7", "[android_go]", "maxGo", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png","https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
+    // =============================== Twitter [android_go] ==================================//
+    newAppConfig(db, "8", "[android_go]", "maxGo", "twitter", "Twitter", "ultra_apps/twitter_ultra.png","https://mobile.twitter.com", "3" , "3.1")
+    // =============================== Make My Trip [android_go] ==================================//
+    newAppConfig(db, "9", "[android_go]", "maxGo", "makemytrip", "Make My Trip", "ultra_apps/ic_makemytrip_ultra.png","https://makemytrip.com", "10" , "3.1")
+    // =============================== Amazon [android_go] ==================================//
+    newAppConfig(db, "10", "[android_go]", "maxGo", "amazon", "Amazon", "ultra_apps/ic_amazon.png","https://amazon.in", "11" , "3.1")
+    // =============================== DailyHunt [android_go] ==================================//
+    newAppConfig(db, "11", "[android_go]", "maxGo", "DailyHunt", "Dailyhunt", "ultra_apps/ic_dailyhunt.png","https://m.dailyhunt.in", "12" , "3.1")
+    // =============================== Paytm Mall [android_go] ==================================//
+    newAppConfig(db, "12", "[android_go]", "maxGo", "paytmall", "Paytm Mall", "ultra_apps/ic_paytmmall_ultra.png","https://paytmmall.com", "13" , "3.1")
+    // =============================== Nitro StreetRun 2 [android_go] ==================================//
+    newAppConfig(db, "13", "[android_go]", "maxGo", "nitrostreet", "Nitro StreetRun 2", "ultra_apps/ic_nitrostreet_ultra.png","http://play.ludigames.com/games/nitroStreetRun2Free/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "20" , "3.1")
+    // =============================== Puzzle Pets Pairs [android_go] ==================================//
+    newAppConfig(db, "14", "[android_go]", "maxGo", "puzzlepets", "Puzzle Pets Pairs", "ultra_apps/ic_puzzlepets_ultra.png","http://play.ludigames.com/games/puzzlePetsPairsFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "21" , "3.1")
+    // =============================== Paper Flight [android_go] ==================================//
+    newAppConfig(db, "15", "[android_go]", "maxGo", "paperflight", "Paper Flight", "ultra_apps/ic_paperflight_ultra.png","http://play.ludigames.com/games/paperFlightFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "22" , "3.1")
+    // =============================== Ludibubbles [android_go] ==================================//
+    newAppConfig(db, "16", "[android_go]", "maxGo", "ludibubbles", "Ludibubbles", "ultra_apps/ic_ludibubbles_ultra.png","http://play.ludigames.com/games/ludibubblesFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "23" , "3.1")
+    // =============================== DuckDuckGo [android_go] ==================================//
+    newAppConfig(db, "17", "[android_go]", "maxGo", "duckduckgo", "DuckDuckGo", "ultra_apps/ic_duckduckgo_ultra.png","https://duckduckgo.com", "24" , "3.1")
+    // =============================== Worldreader [android_go] ==================================//
+    newAppConfig(db, "18", "[android_go]", "maxGo", "worldreader", "Worldreader", "ultra_apps/ic_worldreader_ultra.png","https://www.worldreader.org", "25" , "3.1")
+    // =============================== Facebook [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Facebook [android_go_india] entries...")
+    _, err = statement.Exec("facebook", "Facebook", "ultra_apps/facebook_ultra_color.png","https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
+    checkErr(err)
+
+    log.Println("loadConfigTables –\tCreating temporary indiaOperators table to include Facebook with...")
+    _, err = db.Exec(`CREATE TABLE indiaOperators AS SELECT (MCCMNC_ID) FROM operators WHERE Country_ID='in'`)
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 19, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Instagram [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Instagram [android_go_india] entries...")
+    _, err = statement.Exec("instagram", "Instagram", "ultra_apps/instagram_ultra.png","https://www.instagram.com/?utm_source=samsung_max_sd", "2" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 20, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Twitter [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Twitter [android_go_india] entries...")
+    _, err = statement.Exec("twitter", "Twitter", "ultra_apps/twitter_ultra.png","https://mobile.twitter.com", "3" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 21, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Cricbuzz [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Cricbuzz [android_go_india] entries...")
+    _, err = statement.Exec("cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "5" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 22, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Wikipedia [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Wikipedia [android_go_india] entries...")
+    _, err = statement.Exec("wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png","https://www.wikipedia.org", "7" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 23, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Dailyhunt [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Dailyhunt [android_go_india] entries...")
+    _, err = statement.Exec("dailyhunt", "Dailyhunt", "ultra_apps/ic_dailyhunt.png","https://m.dailyhunt.in", "12" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 24, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Nitro StreetRun 2 [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Nitro StreetRun 2 [android_go_india] entries...")
+    _, err = statement.Exec("nitrostreet", "Nitro StreetRun 2", "ultra_apps/ic_nitrostreet_ultra.png","http://play.ludigames.com/games/nitroStreetRun2Free/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "20" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 25, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Puzzle Pets Pairs [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Puzzle Pets Pairs [android_go_india] entries...")
+    _, err = statement.Exec("puzzlepets", "Puzzle Pets Pairs", "ultra_apps/ic_puzzlepets_ultra.png","http://play.ludigames.com/games/puzzlePetsPairsFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "21" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 26, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Paper Flight [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Paper Flight [android_go_india] entries...")
+    _, err = statement.Exec("paperflight", "Paper Flight", "ultra_apps/ic_paperflight_ultra.png","http://play.ludigames.com/games/paperFlightFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "22" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 27, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Ludibubbles [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Ludibubbles [android_go_india] entries...")
+    _, err = statement.Exec("ludibubbles", "Ludibubbles", "ultra_apps/ic_ludibubbles_ultra.png","http://play.ludigames.com/games/ludibubblesFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "23" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 28, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+    // =============================== Worldreader [android_go_india] ==================================//
+    log.Println("loadConfigTables –\tInserting Worldreader [android_go_india] entries...")
+    _, err = statement.Exec("worldreader", "Worldreader", "ultra_apps/ic_worldreader_ultra.png","https://www.worldreader.org", "25" , "3.1")
+    checkErr(err)
+
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT 29, MCCMNC_ID, "maxGo" FROM indiaOperators`)
+    checkErr(err)
+
+
+    _, err = db.Exec(`DROP TABLE indiaOperators`)
+    checkErr(err)
+
+
 }
 
 func createTables(db *sql.DB) {
@@ -94,11 +308,16 @@ func createTables(db *sql.DB) {
     _, err = stmt.Exec()
     checkErr(err)
 
+    log.Println("createTables –\tDropping appConfigs table if exists...")
+    _, err = db.Exec("DROP TABLE IF EXISTS appConfigs")
 
     log.Println( "createTables –\tCreating appConfigs table...")
     stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, versionNumber FLOAT, FOREIGN KEY(versionNumber) REFERENCES versions(versionNumber))")
     _, err = stmt.Exec()
     checkErr(err)
+
+    log.Println("createTables –\tDropping configurationMappings table if exists...")
+    _, err = db.Exec("DROP TABLE IF EXISTS configurationMappings")
 
     log.Println( "createTables –\tCreating configurationMappings table...")
     stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS configurationMappings ( id INTEGER PRIMARY KEY AUTOINCREMENT, Config_ID INTEGER, MCCMNC_ID integer, featuredLocationName TEXT,  FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), FOREIGN KEY(MCCMNC_ID) REFERENCES operators(MCCMNC_ID), FOREIGN KEY(featuredLocationName) REFERENCES featuredLocations(featuredLocationName))")

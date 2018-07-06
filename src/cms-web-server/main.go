@@ -235,7 +235,7 @@ func checkErr(err error) {
     tw := new(tabwriter.Writer)
     tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
      if err != nil {
-         log.Println(err)
+         log.Println("checkErr –\t\t" + "ERROR FOUND")
          panic(err)
      }
  }
