@@ -7,6 +7,7 @@ var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 
 var post_url = "/post/";
+var site_loaded = false;
 var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
 var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
 var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
@@ -24,6 +25,11 @@ server_post.post(post_url, postRequestJSON, function(appsToLoad) {
     showWebapps(appTray, appsToLoad);
 });
 
+updateFilterValues();
+
+
+
+
 function applyFilters()
 {
     var post_url = "/post/";
@@ -39,9 +45,9 @@ function applyFilters()
     console.log("applyFilters – Sending post request with the following JSON:");
     console.log(postRequestJSON);
     server_post.post(post_url, postRequestJSON, function(appsToLoad) {
-        console.log("applyFilters – POST REQUEST SUCCESS!!! RESPONSE:");
-        console.log(appsToLoad);
+        console.log("applyFilters – Post request success. Applying filters and updating select filter rows:");
         showWebapps(appTray, appsToLoad);
+        updateFilterValues()
     });
 
 }

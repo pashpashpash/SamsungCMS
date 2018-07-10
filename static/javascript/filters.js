@@ -1,7 +1,65 @@
 //initialization
 var selects = document.getElementsByTagName('select');
 var searchField = document.getElementsByClassName('search')[0];
+//time to initialize (load in filter values)
 
+
+function updateFilterValues() {
+    var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
+    var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
+    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
+    var postRequestJSON = JSON.parse('{"functionToCall" : "updateFilterValues", "data" : {'
+    + ' "Selected_country" : "'+ selected_country + '",'
+    + ' "Selected_operator" : "'+ selected_operator + '",'
+    + ' "Selected_version" : "'+ selected_version + '"'
+    +'}}');
+    console.log("updateFilterValues – Sending post request to call updateFilterValues method");
+    server_post.post(post_url, postRequestJSON, function(filterData) {
+        console.log("updateFilterValues – Post Request success. Calling loadFilters...");
+        loadFilters(filterData);
+    });
+}
+function loadFilters(filterData){
+    var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex];
+    var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex];
+    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex]
+    console.log("loadFilters – Loading in filter data...");
+    console.log("loadFilters – New filter values: ");
+    console.log(selected_country, selected_operator, selected_version);
+    console.log("loadFilters – Data to be loaded into filters: ");
+    console.log(filterData);
+    if(filterData.countryFilterRows != null)
+    {
+        filterParams[0][0].options.length = 0;
+        if(filterData.countryFilterRows.length != 1) {
+            filterParams[0][0].options.add(new Option("🔯", "star", true, true));
+        }
+        for (var i = 0; i < filterData.countryFilterRows.length; i++) {
+            filterParams[0][0].options.add(new Option(filterData.countryFilterRows[i].Country_ID, filterData.countryFilterRows[i].name, false, false));
+        }
+        if(filterData.countryFilterRows.length === 1){
+            filterParams[0][0].options.add(new Option("🔯", "star", false, false));
+        }
+    }
+    if(filterData.operatorFilterRows != null)
+    {
+        filterParams[0][1].options.length = 0;
+        filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+        for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
+            filterData.operatorFilterRows[i];
+            filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+        }
+    }
+    if(filterData.versionNumberRows != null)
+    {
+        filterParams[0][2].options.length = 0;
+        filterParams[0][2].options.add(new Option("🔯", "star", true, true));
+        for (var i = 0; i < filterData.versionNumberRows.length; i++) {
+            filterData.versionNumberRows[i];
+            filterParams[0][2].options.add(new Option(filterData.versionNumberRows[i].versionNumber, filterData.versionNumberRows[i].versionNumber, false, false));
+        }
+    }
+}
 
 //FILTER STUFF
 function selectChange(selectObject){
@@ -81,6 +139,7 @@ document.querySelector('#star').onclick = function(){
             setAllSelectstoStar();
         }
     }
+    applyFilters()
 };
 
 searchField.oninput = function(){

@@ -126,6 +126,7 @@ hr{
 #filterContainer select{
     margin-left:18px;
     margin-right:32px;
+    width: 128px;
 }
 #filterContainer #filterText{
     font-size:16px;
@@ -256,7 +257,7 @@ main{
     }
     #starandsearch input[type=text] {
             line-height: 44px;
-            margin-top: 10px;   
+            margin-top: 10px;
     }
     #star{
         line-height: 44px;

@@ -9,7 +9,7 @@ import (
     "io"
     "os"
     "text/tabwriter"
-        "database/sql"
+        // "database/sql"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
      _ "github.com/mattn/go-sqlite3"
 
@@ -75,7 +75,7 @@ type data struct {
     Searchfield_text string `json:Searchfield_text, string, omitempty`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
-    log.Printf("postHandler –\tIncoming post request:")
+    log.Printf("postHandler –\t\tIncoming post request:")
 
     requestData := requestData{}
 
@@ -92,9 +92,111 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         jsonResponse := loadAppTray(requestData.Data)
         w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="appView") {
+        log.Println("postHandler –\tAll view method request detected")
         jsonResponse := appView(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="updateFilterValues") {
+        log.Println("postHandler –\tupdateFilterValues method request detected")
+        jsonResponse := updateFilterValues(requestData.Data)
+        w.Write([]byte(jsonResponse))
     }
+}
+type CountryFilterRow struct {
+    Value string `json:"name" db:"name"`
+    Text string `json:"Country_ID" db:"Country_ID"`
+}
+type OperatorFilterRow struct {
+    Value string `json:"MCCMNC_ID" db:"MCCMNC_ID" `
+    Text string `json:"Operator_Name" db:"Operator_Name"`
+}
+type VersionNumberRow struct {
+    Value string `json:"versionNumber" db:"versionNumber"`
+}
+type FilterRows struct{
+    CountryFilterRows []CountryFilterRow `json:"countryFilterRows"`
+    OperatorFilterRows []OperatorFilterRow `json:"operatorFilterRows"`
+    VersionNumberRows []VersionNumberRow `json:"versionNumberRows"`
+}
+func updateFilterValues(Filters data) ([]byte) {
+    log.Println("updateFilterValues –\tRecieved request to update filter items based off existing filter selection.")
+
+    var filterRows = FilterRows{}
+
+    if(Filters.Selected_operator != "star") { //if operator is not star, I don't need to update country table
+        full_query := string(`
+        SELECT countries.Country_ID, countries.name from operators
+        JOIN     countries USING (Country_ID)
+        WHERE MCCMNC_ID="`+Filters.Selected_operator+`"
+        `)
+        rows, err := db.Query(full_query)
+        checkErr(err)
+        //country query here, returns rows
+        for rows.Next() {
+            var countryFilterRow = CountryFilterRow{}
+            rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
+            log.Println("updateFilterValues –\t" + countryFilterRow.Value + " | " + countryFilterRow.Text)
+            filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
+        }
+        rows.Close()
+    } else if (Filters.Selected_country != "star") { //operator IS star, country is NOT star. Thus we need to update operator dropdown
+        full_query := string(`
+            SELECT MCCMNC_ID, Operator_Name from operators
+            WHERE Country_ID = "`+Filters.Selected_country+`"
+        `)
+        rows, err := db.Query(full_query)
+        checkErr(err)
+
+        //operator query here, returns rows
+        for rows.Next() {
+            var operatorFilterRow = OperatorFilterRow{}
+            rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
+            log.Println("updateFilterValues –\t" + operatorFilterRow.Value + " | " + operatorFilterRow.Text)
+            filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
+        }
+        rows.Close()
+    } else { //stars in both country and operator, load full tables
+
+        full_query := string(`SELECT DISTINCT Country_ID, name from countries`) //country query -- all distinct countries by value and name
+        rows, err := db.Query(full_query)
+        checkErr(err)
+        for rows.Next() {
+            var countryFilterRow = CountryFilterRow{}
+            rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
+            log.Println("updateFilterValues –\t" + countryFilterRow.Value + " | " + countryFilterRow.Text)
+            filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
+        }
+        rows.Close()
+
+        full_query = string(`SELECT DISTINCT MCCMNC_ID, Operator_Name from operators`) //operator query -- all distinct operators
+        rows, err = db.Query(full_query)
+        checkErr(err)
+        for rows.Next() {
+            var operatorFilterRow = OperatorFilterRow{}
+            rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
+            log.Println("updateFilterValues –\t" + operatorFilterRow.Value + " | " + operatorFilterRow.Text)
+            filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
+        }
+        rows.Close()
+
+        full_query = string(`SELECT DISTINCT versionNumber from versions`) //version query -- all distinct versions by value
+        rows, err = db.Query(full_query)
+        checkErr(err)
+        for rows.Next() {
+            var versionNumberRow = VersionNumberRow{}
+            rows.Scan(&versionNumberRow.Value)
+            log.Println("updateFilterValues –\t" + versionNumberRow.Value)
+            filterRows.VersionNumberRows = append(filterRows.VersionNumberRows, versionNumberRow)
+        }
+        rows.Close()
+    }
+    if(Filters.Selected_version != "star") {
+        var versionNumberRow = VersionNumberRow{"3.1"}
+        filterRows.VersionNumberRows = append(filterRows.VersionNumberRows, versionNumberRow)
+    }
+
+    jsonResponse, err := json.Marshal(filterRows)
+    checkErr(err)
+    return jsonResponse
 }
 
 type AppsContainer struct {
@@ -135,31 +237,60 @@ func appView(Data data) ([]byte) {
     return jsonResponse
 }
 
-func loadAppTray(Data data) ([]byte) {
+func loadAppTray(Filters data) ([]byte) {
     log.Println("loadAppTray –\t\tquerying db")
-    var rows *sql.Rows
-    var err error
-    if(Data.Selected_country != "star"){
-        var queryString = `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
-        JOIN     configurationMappings USING (Config_ID)
-        WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
-        MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "`+ Data.Selected_country +`" )) GROUP BY rank`
 
-        rows, err = db.Query(queryString)
-    } else {
-        rows, err = db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
-        JOIN     configurationMappings USING (Config_ID)
-        WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
-        MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%" )) GROUP BY rank`)
-        checkErr(err)
+    searchfield_query := string("")
+    country_code := string("")
+    operator_query := string("")
+    version_query := string("")
+
+
+    if(Filters.Selected_operator != "star") { //more specific than country
+        operator_query = `AND MCCMNC_ID like "%` + Filters.Selected_operator +`%"`
+    } else if (Filters.Selected_country != "star") {
+        country_code = Filters.Selected_country
     }
+    if(Filters.Searchfield_text != ""){ //search field is NOT empty
+        searchfield_query = `AND originalName like "%` + Filters.Searchfield_text +`%"`
+    }
+    if(Filters.Selected_version != "star") {
+        version_query = `AND versionNumber >= ` + Filters.Selected_version +``
+    }
+    full_query := string(`
+    SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
+    homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+    JOIN     configurationMappings USING (Config_ID)
+    WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+    MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%`+country_code+`%"` + operator_query + `)) `+ searchfield_query + " " + version_query + `
+    GROUP BY rank
+    `)
+    log.Println("loadAppTray –\t\tQuery looks like : " + full_query)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    //
+    //     if(Filters.Selected_country != "star")
+    // if(Filters.Selected_country != "star"){
+    //     var queryString = `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+    //     JOIN     configurationMappings USING (Config_ID)
+    //     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+    //     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "`+ Filters.Selected_country +`" )) GROUP BY rank`
+    //
+    //     rows, err = db.Query(queryString)
+    // } else {
+    //     rows, err = db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+    //     JOIN     configurationMappings USING (Config_ID)
+    //     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+    //     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%" )) GROUP BY rank`)
+    //     checkErr(err)
+    // }
 
     var appsContainer = AppsContainer{}
 
     for rows.Next() {
         var app = App{}
         rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
-        log.Println("allApps –\t\t" + app.Rank + " | " + app.OriginalName + " | " + app.FeaturedLocationName)
+        log.Println("loadAppTray –\t\t" + app.Rank + " | " + app.OriginalName + " | " + app.FeaturedLocationName)
         appsContainer.Apps = append(appsContainer.Apps, app)
     }
     defer rows.Close()
