@@ -14,14 +14,13 @@ import (
      _ "github.com/mattn/go-sqlite3"
 
     "encoding/json"
-    "io/ioutil"
+    // "io/ioutil"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 )
 
 const NegroniLogFmt = "{{.StartTime}} | {{.Status}} | {{.Duration}} \n          {{.Method}} {{.Path}}\n"
 const NegroniDateFmt = time.Stamp
-var cms_db (CMS_DB)
 
 func main() {
     tw := new(tabwriter.Writer)
@@ -31,8 +30,6 @@ func main() {
 	if len(port) == 0 {
 		port = "8080"
 	}
-
-    cms_db = getDB() //THIS IS THE PARSED DATABASE OBJECT
 
     log.Println("main –\t\tCalling initDB with schema name 'cms'...")
     db = initDB("cms")
@@ -271,47 +268,6 @@ func GetProjectRoot() string {
 	return root
 }
 
-func getDB() CMS_DB { //gets JSON from hard-coded filepath & parses it into an OBJECT
-    tw := new(tabwriter.Writer)
-    tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
-    raw, err := ioutil.ReadFile("./static/cms-database.json") //JSON CONFIG FILE
-    if err != nil {
-        fmt.Println(err.Error())
-        os.Exit(1)
-    }
-    log.Println("getDB –\t\tFound JSON & parsing into cmsDatabase object (But this isn't used really)...")
-
-    c := struct {
-        CmsDatabase []struct {
-    		ConfigName string   `json:"config_name"`
-    		Order      int      `json:"order"`
-    		Inherit    []string `json:"inherit,omitempty"`
-    		Filter     []struct {
-    			Product  []string `json:"product,omitempty"`
-    			Operator []string `json:"operator,omitempty"`
-    		} `json:"filter,omitempty"`
-    		Webapps []struct {
-    			ID string   `json:"id"`
-    			Rank         int      `json:"rank"`
-    			Name         string   `json:"name"`
-    			HomeURL      string   `json:"homeUrl"`
-    			DefaultEnabledFeatures []string `json:"defaultEnabledFeatures"`
-    			HiddenUI     []string `json:"hiddenUI,omitempty"`
-    			HiddenFeatures         []string `json:"hiddenFeatures"`
-    			NativeApps   []string `json:"nativeApps,omitempty"`
-    			IconURL      string   `json:"iconUrl"`
-    		} `json:"webapps"`
-    	} `json:"cms_database"`
-    }{}
-
-    json.Unmarshal(raw, &c)
-
-    log.Println("getDB –\t\tFound JSON file & converted to CmsDatabase struct (not used)...")
-    // log.Println(c.CmsDatabase[0].Webapps[0].Name)
-
-    return CMS_DB(c)
-}
-
 func AppendIfMissing(slice []Webapp, app Webapp) []Webapp {
     for _, ele := range slice {
         if ele.ID == app.ID {
@@ -323,11 +279,6 @@ func AppendIfMissing(slice []Webapp, app Webapp) []Webapp {
 
 func getAllApps() []Webapp {
     var webApps []Webapp
-    for _, CmsDatabase := range cms_db.CmsDatabase {
-        for _, webApp := range CmsDatabase.Webapps {
-  webApps = AppendIfMissing(webApps, Webapp(webApp))
-        }
-    }
     return webApps
 }
 
@@ -348,30 +299,6 @@ func checkErr(err error) {
      }
  }
 
-
-// TYPE DECLARATIONS
-type CMS_DB struct {
-	CmsDatabase []struct {
-		ConfigName string   `json:"config_name"`
-		Order      int      `json:"order"`
-		Inherit    []string `json:"inherit,omitempty"`
-		Filter     []struct {
-			Product  []string `json:"product,omitempty"`
-			Operator []string `json:"operator,omitempty"`
-		} `json:"filter,omitempty"`
-		Webapps []struct {
-			ID string   `json:"id"`
-			Rank         int      `json:"rank"`
-			Name         string   `json:"name"`
-			HomeURL      string   `json:"homeUrl"`
-			DefaultEnabledFeatures []string `json:"defaultEnabledFeatures"`
-			HiddenUI     []string `json:"hiddenUI,omitempty"`
-			HiddenFeatures         []string `json:"hiddenFeatures"`
-			NativeApps   []string `json:"nativeApps,omitempty"`
-			IconURL      string   `json:"iconUrl"`
-		} `json:"webapps"`
-	} `json:"cms_database"`
-}
 
 type Webapp struct {
     ID string   `json:"id"`
