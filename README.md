@@ -11,16 +11,6 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-- [ ] Finish implementing DB initialization function – need to fill these tables during init:
-     -  [x] Countries (All possible countries + MCC codes)
-     -  [x] Operators (All possible operators + MCCMNC codes)
-     -  [x] FeaturedLocations (All possible featured locations, total of 4)
-     -  [x] Versions (All possible supported minVersions of Samsung Max, only 3.1 exists so far)
-     -  [ ] AppConfigs (Every existing ultra app state)
-     -  [ ] ConfigMappings (Maps every existing ultra app state to an operator and a featured Location)
-- [ ] Update existing site load mechanics to query the SQL DB instead of the current JSONDB that I made by hand.
-     -  [ ] Homepage (Apptray should query appConfigs table to display all apps with unique originalName's)
-     -  [ ] Appview Page (On icon click in appTray, JS should query appConfigs+Mappings tables to figure out correct appConfig to show on that page)
 - [ ] Finish building "smart" select filters.
      -  [ ] Country+Operator select filters should work together, with one reacting based off a selection in the other.
      -  [ ] Update appTray on change, query the appConfig+configMappings tables to figure out which apps to show.
@@ -42,3 +32,13 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [x] Get deleting to work on client
 - [x] Designed DB schema for the CMS
 - [x] Implemented SQLite implementation of DB schema for the CMS
+- [x] Finish implementing DB initialization function – need to fill these tables during init:
+     -  [x] Countries (All possible countries + MCC codes)
+     -  [x] Operators (All possible operators + MCCMNC codes)
+     -  [x] FeaturedLocations (All possible featured locations, total of 4)
+     -  [x] Versions (All possible supported minVersions of Samsung Max, only 3.1 exists so far)
+     -  [x] AppConfigs (Every existing ultra app state)
+     -  [x] ConfigMappings (Maps every existing ultra app state to an operator and a featured Location)
+- [x] Update existing site load mechanics to query the SQL DB instead of the current JSONDB that I made by hand.
+     -  [x] Homepage (Apptray should query appConfigs table to display all apps with unique originalName's)
+     -  [x] Appview Page (On icon click in appTray, JS should query appConfigs+Mappings tables to figure out correct appConfig to show on that page)
