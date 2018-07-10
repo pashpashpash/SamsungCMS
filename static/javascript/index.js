@@ -1,41 +1,68 @@
 //initialization
 var cms_database = fetchDB(); //fetch db object (not used currentlys)
-var server = new restRequest();
-var allAppsContainer = document.getElementById("allicons");
+var server_get = new restRequest();
+var server_post = new postRequest();
+var appTray = document.getElementById("allicons");
 var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
-// var platformSelect = document.getElementsByName("platform")[0];
 
-// Sending rest request for a json of all ultra apps at /rest/allApps
-var url = "/rest/allApps";
-server.get(url, function(allApps) {
-    showWebapps(allAppsContainer, allApps);
+var post_url = "/post/";
+var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
+var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
+var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
+var searchfield_text = filterParams[1].value;
+var postRequestJSON = JSON.parse('{"functionToCall" : "loadAppTray", "data" : {'
++ ' "Selected_country" : "'+ selected_country + '",'
++ ' "Selected_operator" : "'+ selected_operator + '",'
++ ' "Selected_version" : "'+ selected_version + '"'
++'}}');
+console.log("MAIN – Sending post request with the following JSON:");
+console.log(postRequestJSON);
+server_post.post(post_url, postRequestJSON, function(appsToLoad) {
+    console.log("MAIN – POST REQUEST SUCCESS!!! RESPONSE:");
+    console.log(appsToLoad);
+    showWebapps(appTray, appsToLoad);
 });
 
 function applyFilters()
 {
-    console.log("APPLY_FILTERS – Current filter status:");
-    console.log(filterParams);
-    console.log("APPLY_FILTERS – Applying filters... (Currently not implemented)")
+    var post_url = "/post/";
+    var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
+    var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
+    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
+    var searchfield_text = filterParams[1].value;
+    var postRequestJSON = JSON.parse('{"functionToCall" : "loadAppTray", "data" : {'
+    + ' "Selected_country" : "'+ selected_country + '",'
+    + ' "Selected_operator" : "'+ selected_operator + '",'
+    + ' "Selected_version" : "'+ selected_version + '"'
+    +'}}');
+    console.log("applyFilters – Sending post request with the following JSON:");
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(appsToLoad) {
+        console.log("applyFilters – POST REQUEST SUCCESS!!! RESPONSE:");
+        console.log(appsToLoad);
+        showWebapps(appTray, appsToLoad);
+    });
+
 }
 
 
 //================================== APP TRAY PAGE ========================================//
 //input an app container + a json of webapps, and this func will display them in the container with proper nesting
-function showWebapps(allAppsContainer, webapps) {
+function showWebapps(appTray, webapps) {
     var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
     for(var o= 0; o < webapps.length; o++){
-        console.log("SHOW_WEBAPPS – Adding "+webapps[o].name+" iconContainer to the HTML");
-        webAppsHTML += "<div class='iconContainer' id='" + webapps[o].id + "'>";
+        console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML");
+        webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
             webAppsHTML += ("<div id='deleteIcon' ");
-            webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].id +"')\"");
+            webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
             webAppsHTML += ("></div>");
-            webAppsHTML += ("<img id='icon' src='" + webapps[o].iconUrl + "'");
-            webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].id +"')\"");
+            webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+            webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
             webAppsHTML += (" />");
 
             webAppsHTML += ("<div id='iconText'>");
-                webAppsHTML += (webapps[o].name + " Ultra");
+                webAppsHTML += (webapps[o].ModifiableName + " Ultra");
             webAppsHTML += ("</div>");
         webAppsHTML += ("</div>");
     }
@@ -52,7 +79,7 @@ function showWebapps(allAppsContainer, webapps) {
     webAppsHTML += ("Create new Ultra App");
     webAppsHTML += ("</div>");
     webAppsHTML += ("</div>");
-    allAppsContainer.innerHTML = (webAppsHTML);
+    appTray.innerHTML = (webAppsHTML);
 }
 
 function swapOut(appID)
@@ -60,19 +87,29 @@ function swapOut(appID)
     console.log("SWAPOUT – Swapping out app tray for single ultra app view...");
     console.log("SWAPOUT – Current filter status: ");
     console.log(filterParams);
-    console.log("SWAPOUT – Figuring out app info based off app ID and current filter status...")
+    console.log("SWAPOUT – Figuring out app info based off app ID and current filter status...");
 
     // Sending rest request for a specific ultra app
-    var url = "/rest/ultra/" + appID;
+    var url = "/post/";
+    var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
+    var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
+    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
+    var searchfield_text = filterParams[1].value;
 
-    server.get(url, function(app) {
+    var postRequestJSON = JSON.parse('{"functionToCall" : "appView", "data" : {'
+    + ' "Selected_country" : "'+ selected_country + '",'
+    + ' "Selected_operator" : "'+ selected_operator + '",'
+    + ' "Selected_version" : "'+ selected_version + '"'
+    +'}}');
+
+    server_post.post(post_url, postRequestJSON, function(app) {
          //set webAppHTML string to null, so we can += to it later
-        console.log("SWAPOUT – Adding "+app.name+" app to the HTML");
-        window.history.pushState("", "", '/ultra/' + app.id);
+        console.log("SWAPOUT – Adding "+app.ModifiableName+" app to the HTML");
+        window.history.pushState("", "", '/ultra/' + app.OriginalName);
         var swapinHTML =  "<hr>";
         swapinHTML += generateAppDetailsHTML(app);
         swapOutContainer.innerHTML = swapinHTML;
-        document.getElementById('header').children[1].innerHTML =  app.name + '<span id="smallerText"> Ultra</span>';
+        document.getElementById('header').children[1].innerHTML =  app.ModifiableName + '<span id="smallerText"> Ultra</span>';
         console.log("SWAPOUT – Successfully swapped out html ");
     });
 }
@@ -84,7 +121,7 @@ function deleteAppfromTray(appID)
     console.log("DELETE_APP_FROM_TRAY – CURRENT FILTER STATUS:");
     console.log(filterParams);
     deleteUltraApp(filterParams, appID); //writes to DB
-    document.getElementById(appID).remove(); //this should be changed later. Need to update DB and refresh showWebapps() again.
+    document.getElementById(appID).remove(); //this should be changed later. Need to update DB and refresh showWebapps_Old() again.
 }
 function deleteUltraApp(filterParameters, appID)
 {
@@ -99,7 +136,7 @@ function submitNewApp(form){
     addUltraApp(filterParams, form); //writes to DB
     console.log("SUBMIT_NEW_APP – Closing popup window...")
     closeAddAppPopup();
-    //add App to app tray//showWebapps() again?
+    //add App to app tray//showWebapps_Old() again?
 }
 function addUltraApp(filterParameters, addAppForm)
 {
@@ -128,8 +165,10 @@ function closeAddAppPopup(){ //closes the AddApp Popup window
 //================================== HTML GENERATOR FUNCTIONS ========================================//
 function generateAppDetailsHTML(app) //Responsible for generating app details HTML (in swapout func)
 {
+    console.log("GENERATE_APP_HTML – Recieved the following app");
+    console.log(app);
     var webAppHTML = "";
-    console.log("GENERATE_APP_HTML – Generating " + app.name + " html...")
+    console.log("GENERATE_APP_HTML – Generating " + app.ModifiableName + " html...")
     webAppHTML += '<div class ="webApp">';
 
         webAppHTML += "<div class='row'>";
@@ -137,7 +176,7 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
                 webAppHTML += "Name";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
-                webAppHTML += app.name;
+                webAppHTML += app.ModifiableName;
             webAppHTML += ("</div>");
             webAppHTML += "<div class='edit'></div>";
         webAppHTML += "</div>";
@@ -147,7 +186,7 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
                 webAppHTML += "Rank";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
-                webAppHTML += app.rank;
+                webAppHTML += app.Rank;
             webAppHTML += ("</div>");
             webAppHTML += "<div class='edit'></div>";
         webAppHTML += "</div>";
@@ -157,7 +196,7 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
                 webAppHTML += "Webapp Link";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
-                webAppHTML += extractRootDomain(app.homeUrl) + "/...";
+                webAppHTML += extractRootDomain(app.homeURL) + "/...";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='edit'></div>";
         webAppHTML += "</div>";
@@ -212,8 +251,8 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
                 webAppHTML += "Icon URL";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
-                webAppHTML += app.iconUrl;
-                webAppHTML += "<div class='rowImage' style='background-image: url(\"../" + app.iconUrl + "\"); background-repeat: no-repeat; background-size:100%;'>";
+                webAppHTML += app.IconUrl;
+                webAppHTML += "<div class='rowImage' style='background-image: url(\"../" + app.IconUrl + "\"); background-repeat: no-repeat; background-size:100%;'>";
                 webAppHTML += ("</div>");
             webAppHTML += ("</div>");
             webAppHTML += "<div class='edit'></div>";

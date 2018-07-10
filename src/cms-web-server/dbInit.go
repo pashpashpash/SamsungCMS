@@ -7,6 +7,7 @@ import ("strings"
 
 var db (*sql.DB)
 
+
 // DATABASE HELPER FUNCTION
 func initDB(name string) (*sql.DB) {
     tw := new(tabwriter.Writer)
@@ -73,6 +74,15 @@ func initDB(name string) (*sql.DB) {
     return db
 }
 
+// SELECT DISTINCT Config_ID, featuredLocationName FROM configurationMappings WHERE
+// MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "in" )  //appTray for country=India without name
+
+// SELECT DISTINCT appConfigs.Config_ID, originalName, configurationMappings.featuredLocationName FROM appConfigs
+// JOIN     configurationMappings USING (Config_ID)
+// WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+// MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "in" )) ;  //appTray for country=India
+
+
 func similarConfigs(db *sql.DB, originalName string, Config_ID string) []string{
     var returnArrayOfConfig_IDs []string
     log.Println("similarConfigs –\tChecking appConfigs table for configs with originalName = " +originalName)
@@ -100,6 +110,10 @@ func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredL
     _, err := statement.Exec(Config_ID, originalName, modifiableName, iconURL, homeURL, rank, versionNumber)
     checkErr(err)
     var similarConfigs_IDs []string = similarConfigs(db, originalName, Config_ID)
+    if(len(similarConfigs_IDs)>0){
+        log.Println("newAppConfig –\tFound similarConfig:")
+        log.Println(similarConfigs_IDs)
+    }
     if(featuredLocations == "folder" || featuredLocations == "ALL") {
         execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID, featuredLocationName) SELECT " + Config_ID + ", MCCMNC_ID, 'folder' FROM operators"
         _, err = db.Exec(execText)
@@ -126,8 +140,8 @@ func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredL
             }
         }
     }
-    }
 }
+
 
 func loadConfigTables(db *sql.DB) {
     log.Println("loadConfigTables –\tInitializing [DEFAULT] appConfigs+configurationMappings tables...")

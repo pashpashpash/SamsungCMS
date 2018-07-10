@@ -1,6 +1,6 @@
 //initialization
 var server = new restRequest();
-var filterParams = [selects, maxCheckbox, folderCheckbox, homescreenCheckbox, searchField]; //from filters.js
+var filterParams = [selects, searchField]; //from filters.js
 var appContainer = document.getElementsByClassName("webApp")[0];
 
 

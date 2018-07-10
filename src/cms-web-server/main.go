@@ -9,6 +9,7 @@ import (
     "io"
     "os"
     "text/tabwriter"
+        "database/sql"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
      _ "github.com/mattn/go-sqlite3"
 
@@ -58,12 +59,119 @@ func NewServer() *negroni.Negroni {
     mx.HandleFunc("/rest/ultra/", restAppViewDocumentationHandler)
     mx.HandleFunc("/rest/{category}", restHandler)      //handles all restAPI GET requests
     mx.HandleFunc("/rest/", restDocumentationHandler)   //if someone types in /rest/ with no category
+    mx.HandleFunc("/post/", postHandler)   //handles all post requests
 	mx.PathPrefix("/").Handler(FileServer(http.Dir(root + "/static/")))     //for all other urls, serve from /static/
 
     n.UseHandler(mx)
 	return n
 }
 
+
+type requestData struct {
+    FunctionToCall string `json:functionToCall`
+    Data data `json:data, string, omitempty`
+}
+type data struct {
+    Selected_country string `json:Selected_country, string, omitempty`
+    Selected_operator string `json:Selected_operator, string, omitempty`
+    Selected_version string `json:Selected_version, string, omitempty`
+    Searchfield_text string `json:Searchfield_text, string, omitempty`
+}
+func postHandler(w http.ResponseWriter, r *http.Request) {
+    log.Printf("postHandler –\tIncoming post request:")
+
+    requestData := requestData{}
+
+    if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+      fmt.Println(err)
+    }
+
+
+    w.Header().Set("Content-Type", "application/json")
+
+    if (requestData.FunctionToCall=="loadAppTray") {
+        log.Println("postHandler –\tAll apps method request detected – Data: ")
+        log.Println(requestData.Data)
+        jsonResponse := loadAppTray(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="appView") {
+        jsonResponse := appView(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    }
+}
+
+type AppsContainer struct {
+    Apps []App
+}
+
+type App struct {
+    Config_ID string `json:"Config_ID" db:"Config_ID" `
+    OriginalName string `json: "originalName" db:"originalName" `
+    ModifiableName string `json: "modifiableName" db:"modifiableName" `
+    IconUrl string `json: "iconUrl" db:"iconURL" `
+    HomeUrl string `json:"homeURL" db:"homeURL"`
+    Rank string `json: "rank" db:"rank" `
+    FeaturedLocationName string `json:"featuredLocationName" db:"featuredLocationName"`
+}
+
+func appView(Data data) ([]byte) {
+    log.Println("appView –\t\tquerying db")
+
+    rows, err := db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeURL, rank, configurationMappings.featuredLocationName FROM appConfigs
+    JOIN     configurationMappings USING (Config_ID)
+    WHERE originalName = "facebook" LIMIT 1`)
+    checkErr(err)
+
+    var app = App{}
+    for rows.Next() {
+
+        rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
+        log.Println("appView –\t\t" + app.Rank + " | " + app.OriginalName + " | " + app.FeaturedLocationName)
+    }
+    defer rows.Close()
+
+    jsonResponse, err := json.Marshal(app)
+    jsonString := string(jsonResponse)
+    checkErr(err)
+    log.Println("appView –\t\tReturning the following JSON string:")
+    log.Println(jsonString)
+    return jsonResponse
+}
+
+func loadAppTray(Data data) ([]byte) {
+    log.Println("loadAppTray –\t\tquerying db")
+    var rows *sql.Rows
+    var err error
+    if(Data.Selected_country != "star"){
+        var queryString = `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+        JOIN     configurationMappings USING (Config_ID)
+        WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+        MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "`+ Data.Selected_country +`" )) GROUP BY rank`
+
+        rows, err = db.Query(queryString)
+    } else {
+        rows, err = db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+        JOIN     configurationMappings USING (Config_ID)
+        WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+        MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%" )) GROUP BY rank`)
+        checkErr(err)
+    }
+
+    var appsContainer = AppsContainer{}
+
+    for rows.Next() {
+        var app = App{}
+        rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
+        log.Println("allApps –\t\t" + app.Rank + " | " + app.OriginalName + " | " + app.FeaturedLocationName)
+        appsContainer.Apps = append(appsContainer.Apps, app)
+    }
+    defer rows.Close()
+
+
+    jsonResponse, err := json.Marshal(appsContainer.Apps)
+    checkErr(err)
+    return jsonResponse
+}
 //ALL URL HANDLERS
 func appViewHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -121,10 +229,10 @@ func restHandler(w http.ResponseWriter, r *http.Request) {
         // var appNames = getAppNames(allApps)
         allAppsJSON, err := json.Marshal(allApps)
         if err != nil {
-  fmt.Fprint(w, err)
-        } else {
-  fmt.Fprint(w, string(allAppsJSON))
-  log.Println("Rest Handler –\tSuccessfully marshalled JSON")
+            fmt.Fprint(w, err)
+                } else {
+            fmt.Fprint(w, string(allAppsJSON))
+            log.Println("Rest Handler –\tSuccessfully marshalled JSON")
         }
     }
 }
@@ -147,7 +255,7 @@ func FileServer(fs http.FileSystem) http.Handler {
 		_, err := fs.Open(path.Clean(r.URL.Path))
 
 		if os.IsNotExist(err) {
-  log.Println("Path doesnt exist")
+            log.Println("Path doesnt exist")
 			return
 		}
 
