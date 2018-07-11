@@ -11,10 +11,6 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-- [ ] Finish building "smart" select filters.
-     -  [ ] Country+Operator select filters should work together, with one reacting based off a selection in the other.
-     -  [ ] Update appTray on change, query the appConfig+configMappings tables to figure out which apps to show.
-          - To do this on client, just implement the applyFilters() function in main.js
 - [ ] Implement add/edit/delete RPC's + UX (Button press on client -> javascript function specifying what method the server should call -> server validates method, client, and method arguments -> server either runs methods and returns result, or returns error message)
 - [ ] Add login functionality + server validation
 - [ ] Create new global "Add Ultra App" view which allows user to check all locations/versions they want ultra app to have (different from appTray "Add Ultra App" view)
@@ -42,3 +38,7 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [x] Update existing site load mechanics to query the SQL DB instead of the current JSONDB that I made by hand.
      -  [x] Homepage (Apptray should query appConfigs table to display all apps with unique originalName's)
      -  [x] Appview Page (On icon click in appTray, JS should query appConfigs+Mappings tables to figure out correct appConfig to show on that page)
+- [x] Finish building "smart" select filters.
+     -  [x] Country+Operator select filters should work together, with one reacting based off a selection in the other.
+     -  [x] Update appTray on change, query the appConfig+configMappings tables to figure out which apps to show.
+          - To do this on client, just implement the applyFilters() function in main.js
