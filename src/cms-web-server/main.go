@@ -73,6 +73,7 @@ type data struct {
     Selected_operator string `json:Selected_operator, string, omitempty`
     Selected_version string `json:Selected_version, string, omitempty`
     Searchfield_text string `json:Searchfield_text, string, omitempty`
+    App_name string `json:App_name, string, omitempty`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -92,7 +93,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         jsonResponse := loadAppTray(requestData.Data)
         w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="appView") {
-        log.Println("postHandler –\tAll view method request detected")
+        log.Println("postHandler –\tApp view method request detected")
         jsonResponse := appView(requestData.Data)
         w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="updateFilterValues") {
@@ -122,7 +123,7 @@ func updateFilterValues(Filters data) ([]byte) {
 
     var filterRows = FilterRows{}
 
-    if(Filters.Selected_operator != "star") { //if operator is not star, I don't need to update country table
+    if(Filters.Selected_operator != "star") { //if operator is not star, I don't need to update country dropdown
         full_query := string(`
         SELECT countries.Country_ID, countries.name from operators
         JOIN     countries USING (Country_ID)
@@ -130,7 +131,6 @@ func updateFilterValues(Filters data) ([]byte) {
         `)
         rows, err := db.Query(full_query)
         checkErr(err)
-        //country query here, returns rows
         for rows.Next() {
             var countryFilterRow = CountryFilterRow{}
             rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
@@ -214,12 +214,25 @@ type App struct {
 }
 
 func appView(Data data) ([]byte) {
-    log.Println("appView –\t\tquerying db")
+    log.Println("appView –\t\tquerying db...")
 
-    rows, err := db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeURL, rank, configurationMappings.featuredLocationName FROM appConfigs
+    country_code := string("")
+    operator_query := string("")
+    if(Data.Selected_operator != "star") { //more specific than country
+        operator_query = `AND MCCMNC_ID like "%` + Data.Selected_operator +`%"`
+    } else if (Data.Selected_country != "star") {
+        country_code = Data.Selected_country
+    }
+
+    appViewQuery := `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName,
+    iconURL, homeURL, rank, configurationMappings.featuredLocationName FROM appConfigs
     JOIN     configurationMappings USING (Config_ID)
-    WHERE originalName = "facebook" LIMIT 1`)
+    WHERE originalName = "` + Data.App_name +`"
+    AND Config_ID in (SELECT Config_ID from configurationMappings
+    WHERE MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%`+country_code+`%" ` + operator_query + `))` + ` LIMIT 1`
+    rows, err := db.Query(appViewQuery)
     checkErr(err)
+    log.Println("appView –\t\t" +  appViewQuery)
 
     var app = App{}
     for rows.Next() {

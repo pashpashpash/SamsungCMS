@@ -101,11 +101,13 @@ function swapOut(appID)
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
     var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
     var searchfield_text = filterParams[1].value;
+    var app_name = appID;
 
     var postRequestJSON = JSON.parse('{"functionToCall" : "appView", "data" : {'
     + ' "Selected_country" : "'+ selected_country + '",'
     + ' "Selected_operator" : "'+ selected_operator + '",'
-    + ' "Selected_version" : "'+ selected_version + '"'
+    + ' "Selected_version" : "'+ selected_version + '",'
+    + ' "App_name" : "'+ app_name + '"'
     +'}}');
 
     server_post.post(post_url, postRequestJSON, function(app) {
