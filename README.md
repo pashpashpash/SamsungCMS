@@ -11,12 +11,21 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-- [ ] Implement add/edit/delete RPC's + UX (Button press on client -> javascript function specifying what method the server should call -> server validates method, client, and method arguments -> server either runs methods and returns result, or returns error message)
+- [ ] Finish "Add Ultra App" view.
+     -  [x] Currently all it has is all of the fields to input the appConfig
+     -  [ ] But, it doesn't have a UX for inputting where to insert this appConfig.
+          -  [ ] By default, ALL countries is selected (if app already exists, this config will override the shit out of it everywhere)
+          -  [ ] Search-field -> Input a country, press enter -> "ALL" bubble gets replaced with inputted country.
+               -  [ ] Country bubble has a dropdown which on press shows all operators that are in the country, all selected by default.
+          -  [ ] Submit button, packages all data (appConfig + appMappings) into json, sends to server for insert.
+               -  [ ]  Server either rejects & sends error message or approves.
+-  [ ] Reuse finished "Add Ultra App" view components to create a new "ultraApps global view" which shows a breakdown of all apps and their states (different from "ultraApps appTray view")
+-  [ ] Build appConfig inspection window, allowing people to see which configs effect which operators, and allow them to uncheck operators from the list, effectively "deleting" ultra apps from areas.
+     -  Alternatively, can build a "delete" screen which lets you ban an app in certain countries.
 - [ ] Add login functionality + server validation
-- [ ] Create new global "Add Ultra App" view which allows user to check all locations/versions they want ultra app to have (different from appTray "Add Ultra App" view)
-     -  [ ] Reuse "Add Ultra App" view components to create a new "ultraApps global view" which shows a breakdown of all apps and their states (different from "ultraApps appTray view")
 - [ ] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
 - [ ] Write a translator in go that translates ultra app configs to config.ini sections
+     -  [ ] CURRENTLY BLOCKED: Once Michal gets back he will make a simplified version of the config (2 weeks?).
 - [ ] Write logic that pushes go-generated config.ini's to production (dev cluster)
 ##
 
