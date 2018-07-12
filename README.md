@@ -11,7 +11,7 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-- [ ] Finish "Add Ultra App" view.
+-  [ ] Finish "Add Ultra App" view.
      -  [x] Currently all it has is all of the fields to input the appConfig
      -  [ ] But, it doesn't have a UX for inputting where to insert this appConfig.
           -  [ ] By default, ALL countries is selected (if app already exists, this config will override the shit out of it everywhere)
@@ -27,6 +27,8 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [ ] Write a translator in go that translates ultra app configs to config.ini sections
      -  [ ] CURRENTLY BLOCKED: Once Michal gets back he will make a simplified version of the config (2 weeks?).
 - [ ] Write logic that pushes go-generated config.ini's to production (dev cluster)
+-  Maybe figure out country mappings instead of just operators...
+     -  [ ] Talk to Sergey about this.
 ##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
