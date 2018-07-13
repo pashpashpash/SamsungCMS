@@ -74,6 +74,8 @@ type data struct {
     Selected_version string `json:Selected_version, string, omitempty`
     Searchfield_text string `json:Searchfield_text, string, omitempty`
     App_name string `json:App_name, string, omitempty`
+    Country_Name string `json:name, string, omitempty`
+    Country_ID string `json:Country_ID, string, omitempty`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -84,24 +86,87 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
       fmt.Println(err)
     }
 
-
     w.Header().Set("Content-Type", "application/json")
 
     if (requestData.FunctionToCall=="loadAppTray") {
-        log.Println("postHandler –\tAll apps method request detected – Data: ")
+        log.Println("postHandler –\t\tAll apps method request detected – Data: ")
         log.Println(requestData.Data)
         jsonResponse := loadAppTray(requestData.Data)
         w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="appView") {
-        log.Println("postHandler –\tApp view method request detected")
+        log.Println("postHandler –\t\tApp view method request detected")
         jsonResponse := appView(requestData.Data)
         w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="updateFilterValues") {
-        log.Println("postHandler –\tupdateFilterValues method request detected")
+        log.Println("postHandler –\t\tupdateFilterValues method request detected")
         jsonResponse := updateFilterValues(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getCountryByName") {
+        log.Println("postHandler –\t\tgetCountryByName method request detected")
+        jsonResponse := getCountryByName(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getOperatorsByCountryID") {
+        log.Println("postHandler –\t\tgetOperatorsByCountryID method request detected")
+        jsonResponse := getOperatorsByCountryID(requestData.Data)
         w.Write([]byte(jsonResponse))
     }
 }
+type OperatorRows struct {
+    OperatorRows []OperatorRow `json:"operatorRows"`
+}
+type OperatorRow struct {
+    MCCMNC_ID string `json: MCCMNC_ID`
+    Operator_Name string `json: Operator_Name`
+    Country_ID string `json: Country_ID`
+}
+func getOperatorsByCountryID(Country data) ([]byte) {
+    log.Println("getOperatorsByCountryID –\tRecieved request to get operators in " + Country.Country_ID)
+
+    var operatorRows = OperatorRows{}
+    full_query := string(`
+    SELECT MCCMNC_ID, Operator_Name, Country_ID from operators
+    WHERE Country_ID="`+Country.Country_ID+`"
+    `)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    for rows.Next() {
+        var operatorRow = OperatorRow{}
+        rows.Scan(&operatorRow.MCCMNC_ID, &operatorRow.Operator_Name, &operatorRow.Country_ID)
+        log.Println("getOperatorsByCountryID –\t" + operatorRow.MCCMNC_ID + " | " + operatorRow.Operator_Name + " | " + operatorRow.Country_ID)
+        operatorRows.OperatorRows = append(operatorRows.OperatorRows, operatorRow)
+    }
+    rows.Close()
+
+    jsonResponse, err := json.Marshal(operatorRows)
+    checkErr(err)
+    return jsonResponse
+}
+type CountryRow struct {
+    Country_ID string `json:"Country_ID" db:"Country_ID"`
+    CountryName string `json:"name" db:"name"`
+    MCC_ID string `json:"MCC_ID" db:"MCC_ID"`
+}
+func getCountryByName(Country data) ([]byte) {
+    log.Println("getCountryByName –\t\tRecieved request to get country by " + Country.Country_Name)
+
+    var countryRow = CountryRow{}
+    full_query := string(`
+    SELECT Country_ID, name, MCC_ID from countries
+    WHERE name="`+Country.Country_Name+`"
+    `)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    for rows.Next() {
+        rows.Scan(&countryRow.Country_ID, &countryRow.CountryName, &countryRow.MCC_ID)
+        log.Println("getCountryByName –\t\t" + countryRow.Country_ID + " | " + countryRow.CountryName + " | " + countryRow.MCC_ID)
+    }
+    rows.Close()
+
+    jsonResponse, err := json.Marshal(countryRow)
+    checkErr(err)
+    return jsonResponse
+}
+
 type CountryFilterRow struct {
     Value string `json:"name" db:"name"`
     Text string `json:"Country_ID" db:"Country_ID"`

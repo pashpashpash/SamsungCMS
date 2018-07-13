@@ -6,6 +6,17 @@ var appTray = document.getElementById("allicons");
 var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 
+window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.keyIdentifier=='Enter'||e.keyCode==13){if(e.target.nodeName=='INPUT'&&e.target.type=='text'){
+    e.preventDefault();
+    if(e.srcElement===document.getElementById('countrySearch'))
+    {
+        console.log("searchForCountry");
+        displayCountrySearchResults(document.getElementById('countrySearch').value)
+    }
+    return false;
+}}},true);
+
+
 var post_url = "/post/";
 var site_loaded = false;
 var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
@@ -141,7 +152,7 @@ function submitNewApp(form){
     console.log("SUBMIT_NEW_APP – Filter Status: ")
     console.log(filterParams);
     console.log("SUBMIT_NEW_APP – Taking the popup form + filter status and adding app for current filter configuration... ")
-    addUltraApp(filterParams, form); //writes to DB
+    addUltraApp(filterParams, form); //writes to DB ->> new Add App View should use user-specified filterParams within the Add App view, not the appTray filters.
     console.log("SUBMIT_NEW_APP – Closing popup window...")
     closeAddAppPopup();
     //add App to app tray//showWebapps_Old() again?
@@ -279,52 +290,139 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
 
 
 function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
-    var hello = '<form onsubmit="submitNewApp(this); return false">'
-    hello += '<input type="text" placeholder="Ultra App Name" name="name">'
-    hello += '<input type="text" placeholder="Ultra App Rank" name="rank">'
-    hello += '<input type="text" placeholder="Webapp Link" name="homeUrl">'
-    hello += '<div id ="addAppEnabledFeatures">'
-        hello += 'Default Enabled Features '
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="defaultEnabledFeatures" value="savings" checked />'
-            hello += '<label for="savings">Savings</label>'
-        hello += '</div>'
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="defaultEnabledFeatures" value="privacy" checked />'
-            hello += '<label for="privacy">Privacy</label>'
-        hello += '</div>'
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="defaultEnabledFeatures" value="adBlock" checked />'
-            hello += '<label for="adBlock">Adblock</label>'
-        hello += '</div>'
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="defaultEnabledFeatures" value="noImages" checked />'
-            hello += '<label for="noImages">No Images</label>'
-        hello += '</div>'
-    hello += '</div>'
-    hello += '<div id ="addAppHiddenFeatures">'
-        hello += 'Default Hidden Features '
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="hiddenFeatures" value="savings" checked />'
-            hello += '<label for="savings">Savings</label>'
-        hello += '</div>'
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="hiddenFeatures" value="privacy" checked />'
-            hello += '<label for="privacy">Privacy</label>'
-        hello += '</div>'
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="hiddenFeatures" value="adBlock" checked />'
-            hello += '<label for="adBlock">Adblock</label>'
-        hello += '</div>'
-        hello += '<div id="addAppCheckboxContainer">'
-            hello += '<input type="checkbox" name="hiddenFeatures" value="noImages" checked />'
-            hello += '<label for="noImages">No Images</label>'
-        hello += '</div>'
-    hello += '</div>'
-    hello += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">'
-    hello += '<input type="text" placeholder="Icon URL Link" name="iconUrl">'
-    hello += '<input type="submit" value="Submit"></form>';
-    return hello;
+    var addAppViewHTML = '<form id="addAppForm" onsubmit="submitNewApp(this); return false"><div id="appConfig">';
+    addAppViewHTML += '<input type="text" placeholder="Ultra App Name" name="name">';
+    addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';
+    addAppViewHTML += '<input type="text" placeholder="Webapp Link" name="homeUrl">';
+    addAppViewHTML += '<div id ="addAppEnabledFeatures">';
+        addAppViewHTML += 'Default Enabled Features ';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="savings" checked />';
+            addAppViewHTML += '<label for="savings">Savings</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="privacy" checked />';
+            addAppViewHTML += '<label for="privacy">Privacy</label>';
+        addAppViewHTML += '</div>'
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="adBlock" checked />';
+            addAppViewHTML += '<label for="adBlock">Adblock</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="noImages" checked />';
+            addAppViewHTML += '<label for="noImages">No Images</label>';
+        addAppViewHTML += '</div>';
+    addAppViewHTML += '</div>';
+    addAppViewHTML += '<div id ="addAppHiddenFeatures">';
+        addAppViewHTML += 'Default Hidden Features ';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="savings" checked />';
+            addAppViewHTML += '<label for="savings">Savings</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="privacy" checked />';
+            addAppViewHTML += '<label for="privacy">Privacy</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="adBlock" checked />';
+            addAppViewHTML += '<label for="adBlock">Adblock</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="noImages" checked />';
+            addAppViewHTML += '<label for="noImages">No Images</label>';
+        addAppViewHTML += '</div>';
+    addAppViewHTML += '</div>';
+    addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
+    addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
+    addAppViewHTML += '</div>';
+    addAppViewHTML += '<div id="configurationMapping">';
+        addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search..">'
+        addAppViewHTML += '<div class="countrySearchResults"><div class="rowValue">ALL COUNTRIES<div class="rowImage" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div></div>'
+    addAppViewHTML += '</div>';
+    addAppViewHTML += '<input type="submit" value="Submit"></form>';
+    return addAppViewHTML;
+}
+function displayCountrySearchResults(countrySearchFieldText){
+    console.log("displayCountrySearchResults – User input: " + countrySearchFieldText);
+    var countrySearchResults = document.getElementsByClassName("countrySearchResults")[0];
+    if(countrySearchFieldText != "")//only want to do things if textfield isn't empty
+    {
+        console.log("displayCountrySearchResults – getting country by name: "+ countrySearchFieldText);
+        getCountryByName(countrySearchFieldText, function(country){
+            console.log("displayCountrySearchResults – GOT COUNTRY");
+            if(country.name != "")//only want to do things if real country
+            {
+                if(countrySearchResults.children[0].textContent === "ALL COUNTRIES")
+                {
+                    console.log("displayCountrySearchResults – 'All countries' bubble detected, deleting it")
+                    console.log("displayCountrySearchResults – Country returned from search is not null, adding bubble")
+                    countrySearchResults.innerHTML = ""; //get rid of all countries if valid country
+                    console.log("Contents:");
+                    console.log(country);
+                }
+
+                var countryBubbleHTML = getCountryBubbleHTML(country);
+
+                console.log("displayCountrySearchResults – Adding to the countrySearchResults html the following bubble:");
+                console.log(countryBubbleHTML);
+                countrySearchResults.innerHTML += countryBubbleHTML;
+            }
+        });
+    }
+}
+function getCountryBubbleHTML(country){
+    var returnHTML = "";
+    returnHTML += '<div class="rowValue" id="'+country.Country_ID+'">'+country.name+'<div class="rowImage" onClick="toggleCountryBubble(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div>'
+    return returnHTML;
+}
+function toggleCountryBubble(countryBubble) {
+    console.log("toggleCountryBubble – BUBBLE CLICKED:");
+    console.log(countryBubble);
+
+    countryBubble.classList.toggle("wide");
+    if(!countryBubble.classList.contains("wide")) { //no longer expanded
+        var operatorElement;
+        for (var i = 0; i < countryBubble.childNodes.length; i++) {
+            if (countryBubble.childNodes[i].className == 'operators') {
+              operatorElement = countryBubble.childNodes[i];
+              break;
+            }
+        }
+        operatorElement.remove();
+
+    }
+    else { //now Expanded
+        var postRequestJSON = JSON.parse('{"functionToCall" : "getOperatorsByCountryID", "data" : {'
+        + ' "Country_ID" : "'+ countryBubble.id + '"'
+        +'}}');
+
+        server_post.post(post_url, postRequestJSON, function(operators) {
+            console.log("toggleCountryBubble – Recieved the following JSON: ");
+            console.log(operators);
+                var html = "";
+                html+= ("<div class = 'operators'>");
+                for(var i = 0; i < operators.operatorRows.length; i++){
+                    var operator = operators.operatorRows[i];
+                    html+= (operator.Operator_Name + "<br>");
+                }
+                html+= ("</div>");
+                countryBubble.innerHTML += html;
+        });
+    }
+}
+
+function getCountryByName(countryName, functionUsingCountry){
+    var country = {"hi" : "hello"};
+
+    var postRequestJSON = JSON.parse('{"functionToCall" : "getCountryByName", "data" : {'
+    + ' "Country_Name" : "'+ countryName + '"'
+    +'}}');
+
+    server_post.post(post_url, postRequestJSON, function(countryRow) {
+        console.log("getCountryByName – Recieved the following JSON: ");
+        console.log(countryRow);
+        functionUsingCountry(countryRow);
+    });
 }
 
 

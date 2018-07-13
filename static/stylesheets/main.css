@@ -25,7 +25,8 @@ body {
     border-top: 1px solid #ebebeb;
     border-bottom: 1px solid #ebebeb;
 }
-.webApp .row .rowDescription,.rowValue,.edit{
+
+.webApp .row .rowDescription,.rowValue,.edit, .countrySearchResults{
     display: inline-block;
 }
 .webApp .row .rowValue{
@@ -58,6 +59,42 @@ body {
 .edit:hover{
     background-color: #ebebeb;
 }
+.countrySearchResults {
+    margin-top: 14px;
+    padding-left:14px;
+    padding-right: 14px;
+    width:100%;
+}
+.wide {
+    width: 91%;
+    height: auto;
+}
+.countrySearchResults  .row{
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    height:32px;
+}
+.countrySearchResults .rowValue{
+    border: 1px solid black;
+    border-radius: 8px;
+    padding:1em;
+    margin-bottom: 14px;
+    margin-right:14px;
+    /* margin-bottom: 14px; */
+}
+.countrySearchResults .rowImage{
+    float: right;
+    margin-right: -4px;
+    display: inline-block;
+    width: 34px;
+    height: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: -8px;
+}
+
 
 hr{
     border: 0;

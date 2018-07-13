@@ -14,8 +14,8 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 -  [ ] Finish "Add Ultra App" view.
      -  [x] Currently all it has is all of the fields to input the appConfig
      -  [ ] But, it doesn't have a UX for inputting where to insert this appConfig.
-          -  [ ] By default, ALL countries is selected (if app already exists, this config will override the shit out of it everywhere)
-          -  [ ] Search-field -> Input a country, press enter -> "ALL" bubble gets replaced with inputted country.
+          -  [x] By default, ALL countries is selected (if app already exists, this config will override the shit out of it everywhere)
+          -  [x] Search-field -> Input a country, press enter -> "ALL" bubble gets replaced with inputted country.
                -  [ ] Country bubble has a dropdown which on press shows all operators that are in the country, all selected by default.
           -  [ ] Submit button, packages all data (appConfig + appMappings) into json, sends to server for insert.
                -  [ ]  Server either rejects & sends error message or approves.
