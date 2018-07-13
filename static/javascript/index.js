@@ -149,7 +149,7 @@ function swapOut(appID)
     server_post.post(post_url, postRequestJSON, function(app) {
          //set webAppHTML string to null, so we can += to it later
         console.log("SWAPOUT – Adding "+app.ModifiableName+" app to the HTML");
-        window.history.pushState("", "", '/ultra/' + app.OriginalName);
+        // window.history.pushState("", "", '/ultra/' + app.OriginalName); //changes url without reloading page, might be useful
         var swapinHTML =  "<hr>";
         swapinHTML += generateAppDetailsHTML(app);
         swapOutContainer.innerHTML = swapinHTML;
@@ -191,7 +191,7 @@ function addUltraApp(filterParameters, addAppForm)
 function showAddAppPopup(){ //shows Add App popup window
     var addAppPopup = document.getElementsByClassName("addAppPopup")[0];
     addAppPopup.classList.toggle("show");
-
+    document.getElementsByTagName("BODY")[0].classList.toggle("overflow-hidden");
     var popupHTML = '<div class ="closeButton"';
     popupHTML += (" onclick=\"closeAddAppPopup()\"></div>");
     popupHTML += generateAddAppPopupInputFields();
@@ -203,6 +203,7 @@ function showAddAppPopup(){ //shows Add App popup window
 function closeAddAppPopup(){ //closes the AddApp Popup window
     var addAppPopup = document.getElementsByClassName("addAppPopup")[0];
     addAppPopup.classList.toggle("show");
+    document.getElementsByTagName("BODY")[0].classList.toggle("overflow-hidden");
     console.log("CLOSE_ADD_APP_POPUP – Closed popup window.");
 }
 
@@ -362,7 +363,7 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id="configurationMapping">';
         addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search..">'
-        addAppViewHTML += '<div class="countrySearchResults"><div class="rowValue">ALL COUNTRIES<div class="rowImage" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div></div>'
+        addAppViewHTML += '<div class="countrySearchResults"><div class="rowValue">ALL COUNTRIES</div></div>'
     addAppViewHTML += '</div>';
     addAppViewHTML += '<input type="submit" value="Submit"></form>';
     return addAppViewHTML;
