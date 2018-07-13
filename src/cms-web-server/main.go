@@ -199,7 +199,6 @@ func updateFilterValues(Filters data) ([]byte) {
         for rows.Next() {
             var countryFilterRow = CountryFilterRow{}
             rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
-            log.Println("updateFilterValues –\t" + countryFilterRow.Value + " | " + countryFilterRow.Text)
             filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
         }
         rows.Close()
@@ -215,7 +214,6 @@ func updateFilterValues(Filters data) ([]byte) {
         for rows.Next() {
             var operatorFilterRow = OperatorFilterRow{}
             rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
-            log.Println("updateFilterValues –\t" + operatorFilterRow.Value + " | " + operatorFilterRow.Text)
             filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
         }
         rows.Close()
@@ -227,7 +225,6 @@ func updateFilterValues(Filters data) ([]byte) {
         for rows.Next() {
             var countryFilterRow = CountryFilterRow{}
             rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
-            log.Println("updateFilterValues –\t" + countryFilterRow.Value + " | " + countryFilterRow.Text)
             filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
         }
         rows.Close()
@@ -238,7 +235,6 @@ func updateFilterValues(Filters data) ([]byte) {
         for rows.Next() {
             var operatorFilterRow = OperatorFilterRow{}
             rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
-            log.Println("updateFilterValues –\t" + operatorFilterRow.Value + " | " + operatorFilterRow.Text)
             filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
         }
         rows.Close()
@@ -249,7 +245,6 @@ func updateFilterValues(Filters data) ([]byte) {
         for rows.Next() {
             var versionNumberRow = VersionNumberRow{}
             rows.Scan(&versionNumberRow.Value)
-            log.Println("updateFilterValues –\t" + versionNumberRow.Value)
             filterRows.VersionNumberRows = append(filterRows.VersionNumberRows, versionNumberRow)
         }
         rows.Close()
@@ -341,6 +336,7 @@ func loadAppTray(Filters data) ([]byte) {
     JOIN     configurationMappings USING (Config_ID)
     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%`+country_code+`%"` + operator_query + `)) `+ searchfield_query + " " + version_query + `
+    AND originalName like "%`+Filters.Searchfield_text+`%"`+` 
     GROUP BY rank
     `)
     log.Println("loadAppTray –\t\tQuery looks like : " + full_query)

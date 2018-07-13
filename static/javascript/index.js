@@ -12,6 +12,9 @@ window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.ke
     {
         console.log("searchForCountry");
         displayCountrySearchResults(document.getElementById('countrySearch').value)
+    } else if(e.srcElement===document.getElementsByClassName('search')[0]) {
+        console.log("searchForApp");
+        applyFilters();
     }
     return false;
 }}},true);
@@ -52,6 +55,28 @@ function applyFilters()
     + ' "Selected_country" : "'+ selected_country + '",'
     + ' "Selected_operator" : "'+ selected_operator + '",'
     + ' "Selected_version" : "'+ selected_version + '"'
+    +'}}');
+    console.log("applyFilters – Sending post request with the following JSON:");
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(appsToLoad) {
+        console.log("applyFilters – Post request success. Applying filters and updating select filter rows:");
+        showWebapps(appTray, appsToLoad);
+        updateFilterValues()
+    });
+
+}
+function searchApplyFilters(searchValue)
+{
+    var post_url = "/post/";
+    var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
+    var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
+    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
+    var searchfield_text = filterParams[1].value;
+    var postRequestJSON = JSON.parse('{"functionToCall" : "loadAppTray", "data" : {'
+    + ' "Selected_country" : "'+ selected_country + '",'
+    + ' "Selected_operator" : "'+ selected_operator + '",'
+    + ' "Selected_version" : "'+ selected_version + '",'
+    + ' "Searchfield_text" : "'+ searchValue + '"'
     +'}}');
     console.log("applyFilters – Sending post request with the following JSON:");
     console.log(postRequestJSON);
@@ -345,7 +370,15 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
 function displayCountrySearchResults(countrySearchFieldText){
     console.log("displayCountrySearchResults – User input: " + countrySearchFieldText);
     var countrySearchResults = document.getElementsByClassName("countrySearchResults")[0];
-    if(countrySearchFieldText != "")//only want to do things if textfield isn't empty
+    countryBubbleExists = false;
+    for(var i = 0; i < countrySearchResults.children.length; i++) {
+        if(countrySearchResults.children[i].textContent===countrySearchFieldText) {
+            countryBubbleExists = true;
+            console.log("displayCountrySearchResults – Country bubble for " +countrySearchFieldText +" already exits!");
+            break;
+        }
+    }
+    if(countrySearchFieldText != ""  && !countryBubbleExists)//only want to do things if textfield isn't empty, and bubble doens't already exist
     {
         console.log("displayCountrySearchResults – getting country by name: "+ countrySearchFieldText);
         getCountryByName(countrySearchFieldText, function(country){

@@ -2,7 +2,7 @@ body {
   margin: 0;
 
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* =====================APP DETAILS SECTION=========================== */
@@ -11,8 +11,8 @@ body {
     width: 64%;
 }
 .webApp{
-    margin-left: 18%;
-    width: 59%;
+    margin-left: 16%;
+    width: 70%;
 }
 .webApp .row{
     max-height: 46px;
@@ -63,7 +63,7 @@ body {
     margin-top: 14px;
     padding-left:14px;
     padding-right: 14px;
-    width:100%;
+    width: 90%;
 }
 .wide {
     width: 91%;
@@ -77,7 +77,8 @@ body {
     height:32px;
 }
 .countrySearchResults .rowValue{
-    border: 1px solid black;
+    background: #c6279c;
+    color:white;
     border-radius: 8px;
     padding:1em;
     margin-bottom: 14px;
@@ -93,6 +94,7 @@ body {
     border-radius: 8px;
     overflow: hidden;
     margin-top: -8px;
+    fill: white;
 }
 
 
@@ -101,8 +103,8 @@ hr{
     height: 1px;
     background: #333;
     background-image: linear-gradient(to right, black, #ebebeb);
-    margin-left:18%;
-    width:59%;
+    margin-left:16%;
+    width:68%;
     margin-top:24px;
     margin-bottom:32px;
 }
@@ -115,25 +117,25 @@ hr{
 
     margin:auto;
     margin-top: 44px;
-    width: 64.5%;
+    width: 68.35%;
     cursor: pointer;
 }
 #headerIcon{
     background-image: url("/images/favicon.ico");
     background-repeat: no-repeat;
     background-size:100%;
-    width:32px;
-    height:32px;
+    width: 28px;
+    height: 28px;
 
 }
 #headerText {
-    font-size:32px;
+    font-size:28px;
     margin-left: 8px;
     font-weight: 200;
 }
 #smallerText
 {
-    font-size:18px;
+    font-size:16px;
     font-weight: 600;
 }
 #timeline{
@@ -151,7 +153,7 @@ hr{
     background-color: #ebebeb;
 }
 #filters{
-    width: 64%;
+    width: 68%;
     margin: auto;
     margin-top: 24px;
     margin-bottom:32px;
@@ -166,7 +168,7 @@ hr{
     width: 128px;
 }
 #filterContainer #filterText{
-    font-size:16px;
+    font-size:14px;
     padding-top: 12px;
 
 }
@@ -244,20 +246,21 @@ hr{
 main{
     /* background-image: url("/images/blur_bg_3.gif"); */
     /* background-size:100%; */
-    padding-top:50px;
+    padding-top:8px;
     color:white;
     overflow: hidden;
+    margin: auto;
 }
 #appTray{
     margin: auto;
-    width: 1074px;
-    background-image: url("/images/s8_landscape_colorful.png");
+    width: 895px;
+    background-image: url(/images/s8_landscape_colorful.png);
     background-repeat: no-repeat;
-    background-size:100%;
+    background-size: 100%;
     height: 700px;
-    padding-top: 14px;
-    padding-left:32px;
-    color:black;
+    padding-top: 6px;
+    padding-left: 100px;
+    color: black;
 }
 #allicons{
     width: 900px;
@@ -266,16 +269,15 @@ main{
     overflow: scroll;
     padding-top: 2px;
 }
-@media screen  and (max-width: 1500px) /* Tablet */ {
+@media screen  and (max-width: 1400px) /* Tablet */ {
     #appTray {
-        top:500px;
-        left:100px;
 
         margin:auto;
         text-align: center;
         width: 70%;
         /* height: 1300px; */
         background-image: url("/images/s8_portrait_colorful.png");
+        padding-left:0px;
     }
     body{
         overflow:auto;
@@ -308,8 +310,8 @@ main{
 img#icon {
 	border-radius: 22.5%;
 	border: 1px solid rgba(0, 0, 0, 0.125);
-    height:72px;
-    width:72px;
+    height:64px;
+    width:64px;
     margin-left:18px;
     margin-right:18px;
     margin-bottom:18px;
@@ -347,12 +349,12 @@ img#icon {
     opacity: 1;
     position:relative;
     width: 40%;
-    height:auto;
-    top: 25%;
+    height:70%;
+    top: 15%;
     left:30%;
     background:white;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: scroll;
     padding-bottom: 14px;
 }
 .addAppPopup .contents input{
