@@ -4,6 +4,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
 }
+.popupTitle {
+    color: white;
+    position: absolute;
+    top: 11%;
+    left: 30%;
+}
 
 .overflow-hidden{
     width:100%;
@@ -100,6 +106,21 @@ body {
     overflow: hidden;
     margin-top: -8px;
     fill: white;
+}
+.checked {
+    border: 1px solid white;
+    border-radius: 8px;
+    background: green;
+    padding: 4px;
+    margin-top: 14px;
+}
+.countrySearchResults .countryBubbleTitle {
+    display: inline-block;
+}
+.operator {
+    display:inline-grid;
+    max-width: 480px;
+    margin-right: 14px;
 }
 
 
@@ -345,7 +366,7 @@ img#icon {
     top: 0;
     background-image: url("/images/blur_bg.png");
     background-blend-mode:overlay;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     background-position: center;
     background-size: 150%;
     z-index: 2;

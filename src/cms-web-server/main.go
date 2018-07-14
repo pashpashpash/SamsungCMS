@@ -12,7 +12,7 @@ import (
         // "database/sql"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
      _ "github.com/mattn/go-sqlite3"
-
+    "strconv"
     "encoding/json"
     // "io/ioutil"
 	"github.com/codegangsta/negroni"
@@ -76,6 +76,20 @@ type data struct {
     App_name string `json:App_name, string, omitempty`
     Country_Name string `json:name, string, omitempty`
     Country_ID string `json:Country_ID, string, omitempty`
+
+    AppModifiableName        string `json:"App_ModifiableName"`
+    AppOriginalName          string `json:"App_OriginalName"`
+    AppRank                  string `json:"App_Rank"`
+    AppHomeURL               string `json:"App_HomeURL"`
+    AppNativeURL             string `json:"App_NativeURL"`
+    AppIconURL               string `json:"App_IconURL"`
+    AppVersionNumber         string `json:"App_VersionNumber"`
+    AppExistsEverywhere      bool   `json:"App_ExistsEverywhere"`
+    AppConfigurationMappings struct {
+        Countries           []string `json:"Countries, omitempty"`
+        Operators           []string `json:"Operators, omitempty"`
+        FeaturedLocations   []string `json:"FeaturedLocations, omitempty"`
+    } `json:"App_ConfigurationMappings"`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -109,8 +123,73 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\tgetOperatorsByCountryID method request detected")
         jsonResponse := getOperatorsByCountryID(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="addNewConfig") {
+        log.Println("postHandler –\t\taddNewConfig method request detected")
+        jsonResponse := addNewConfig(requestData.Data)
+        w.Write([]byte(jsonResponse))
     }
 }
+// AppModifiableName        string `json:"App_ModifiableName"`
+// AppOriginalName          string `json:"App_OriginalName"`
+// AppRank                  string `json:"App_Rank"`
+// AppHomeURL               string `json:"App_HomeURL"`
+// AppNativeURL             string `json:"App_NativeURL"`
+// AppIconURL               string `json:"App_IconURL"`
+// AppConfigurationMappings struct {
+//     Countries []string `json:"Countries"`
+//     Operators []string `json:"Operators"`
+// } `json:"App_ConfigurationMappings"`
+func addNewConfig(Config data) ([]byte) {
+    log.Println(Config.AppConfigurationMappings.Countries)
+    log.Println(Config.AppConfigurationMappings.Operators)
+    log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName)
+
+    statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, versionNumber) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppVersionNumber + `"` + `)`)
+    res, err := db.Exec(statement)
+    checkErr(err)
+    id, err := res.LastInsertId()
+    checkErr(err)
+    log.Println("addNewConfig –\t\tLast insert id: ", id)
+    var New_App_Config_ID = id
+    New_App_Config_ID_string := strconv.Itoa(int(New_App_Config_ID))
+
+
+    for _, country := range Config.AppConfigurationMappings.Countries {
+        for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, (SELECT MCCMNC_ID FROM operators WHERE Country_ID = '`+country+`'), "`+location+`")`)
+            log.Println("addNewConfig –\t"+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
+    }
+    for _, operator := range Config.AppConfigurationMappings.Operators {
+        for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
+            log.Println("addNewConfig –\t\t" +operator +" | "+ location)
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, (SELECT MCCMNC_ID FROM operators WHERE MCCMNC_ID = '`+operator+`'), "`+location+`")`)
+            log.Println("addNewConfig –\t\t"+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
+    }
+    if(Config.AppExistsEverywhere) {
+        for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, (SELECT MCCMNC_ID FROM operators), "`+location+`")`)
+            log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
+    }
+
+
+    var returnResult = ResultMessage{"SUCCESS"}
+    jsonResponse, err := json.Marshal(returnResult)
+    checkErr(err)
+    return jsonResponse
+}
+type ResultMessage struct {
+    Result string `json:"result"`
+}
+
 type OperatorRows struct {
     OperatorRows []OperatorRow `json:"operatorRows"`
 }
@@ -126,7 +205,7 @@ func getOperatorsByCountryID(Country data) ([]byte) {
     full_query := string(`
     SELECT MCCMNC_ID, Operator_Name, Country_ID from operators
     WHERE Country_ID="`+Country.Country_ID+`"
-    `)
+    ORDER BY Operator_Name`)
     rows, err := db.Query(full_query)
     checkErr(err)
     for rows.Next() {
@@ -336,7 +415,7 @@ func loadAppTray(Filters data) ([]byte) {
     JOIN     configurationMappings USING (Config_ID)
     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%`+country_code+`%"` + operator_query + `)) `+ searchfield_query + " " + version_query + `
-    AND originalName like "%`+Filters.Searchfield_text+`%"`+` 
+    AND originalName like "%`+Filters.Searchfield_text+`%"`+`
     GROUP BY rank
     `)
     log.Println("loadAppTray –\t\tQuery looks like : " + full_query)

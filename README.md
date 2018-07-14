@@ -11,14 +11,6 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
--  [ ] Finish "Add Ultra App" view.
-     -  [x] Currently all it has is all of the fields to input the appConfig
-     -  [ ] But, it doesn't have a UX for inputting where to insert this appConfig.
-          -  [x] By default, ALL countries is selected (if app already exists, this config will override the shit out of it everywhere)
-          -  [x] Search-field -> Input a country, press enter -> "ALL" bubble gets replaced with inputted country.
-               -  [ ] Country bubble has a dropdown which on press shows all operators that are in the country, all selected by default.
-          -  [ ] Submit button, packages all data (appConfig + appMappings) into json, sends to server for insert.
-               -  [ ]  Server either rejects & sends error message or approves.
 -  [ ] Reuse finished "Add Ultra App" view components to create a new "ultraApps global view" which shows a breakdown of all apps and their states (different from "ultraApps appTray view")
 -  [ ] Build appConfig inspection window, allowing people to see which configs effect which operators, and allow them to uncheck operators from the list, effectively "deleting" ultra apps from areas.
      -  Alternatively, can build a "delete" screen which lets you ban an app in certain countries.
@@ -53,3 +45,11 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
      -  [x] Country+Operator select filters should work together, with one reacting based off a selection in the other.
      -  [x] Update appTray on change, query the appConfig+configMappings tables to figure out which apps to show.
           - To do this on client, just implement the applyFilters() function in main.js
+-  [x] Finish "Add Ultra App" view.
+   -  [x] Currently all it has is all of the fields to input the appConfig
+   -  [x] But, it doesn't have a UX for inputting where to insert this appConfig.
+        -  [x] By default, ALL countries is selected (if app already exists, this config will override the shit out of it everywhere)
+        -  [x] Search-field -> Input a country, press enter -> "ALL" bubble gets replaced with inputted country.
+             -  [x] Country bubble has a dropdown which on press shows all operators that are in the country, all selected by default.
+        -  [x] Submit button, packages all data (appConfig + appMappings) into json, sends to server for insert.
+             -  [ ]  Still need to finish Server validation – either rejects & sends error message or approves.

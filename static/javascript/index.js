@@ -36,7 +36,7 @@ console.log(postRequestJSON);
 server_post.post(post_url, postRequestJSON, function(appsToLoad) {
     console.log("MAIN – POST REQUEST SUCCESS!!! RESPONSE:");
     console.log(appsToLoad);
-    showWebapps(appTray, appsToLoad);
+    applyFilters();
 });
 
 updateFilterValues();
@@ -174,17 +174,81 @@ function deleteUltraApp(filterParameters, appID)
 function submitNewApp(form){
     console.log("SUBMIT_NEW_APP – Submitting new app form... Form: ")
     console.log(form);
-    console.log("SUBMIT_NEW_APP – Filter Status: ")
-    console.log(filterParams);
     console.log("SUBMIT_NEW_APP – Taking the popup form + filter status and adding app for current filter configuration... ")
-    addUltraApp(filterParams, form); //writes to DB ->> new Add App View should use user-specified filterParams within the Add App view, not the appTray filters.
+    addUltraApp(form); //writes to DB ->> new Add App View should use user-specified filterParams within the Add App view, not the appTray filters.
     console.log("SUBMIT_NEW_APP – Closing popup window...")
     closeAddAppPopup();
     //add App to app tray//showWebapps_Old() again?
 }
-function addUltraApp(filterParameters, addAppForm)
+function addUltraApp(form)
 {
-    console.log("ADD_ULTRA_APP – Adding " + addAppForm.children[0].value + " Ultra for the current filter configuration. (Not implemented yet...)");
+    console.log("addUltraApp – Adding " + form.children[0].children[0].value + " Ultra for the current filter configuration. (Not implemented yet...)");
+    var countriesList= "";
+    var operatorsList = "";
+    // console.log(configMappings.children[0].textContent);
+    var configMappings = form.children[1].children[1];
+    var existsEverywhere = false;
+    if(configMappings.children[0].textContent === "ALL COUNTRIES"){ //insert app globally
+        console.log("addUltraApp – ALL COUNTRIES DETECTED");
+        existsEverywhere = true;
+    }
+    else {
+        for(var i = 0; i < configMappings.children.length; i++) { //iterates through all bubbles
+            var allOperatorsChecked = true;
+
+            if(configMappings.children[i].children.length > 2) { //operators specified
+                for(var o = 0; o < configMappings.children[i].children[2].children.length; o++){ //iterates through all operators, looking 4 unchecked
+                    if(!configMappings.children[i].children[2].children[o].classList.contains("checked")) {
+                        console.log(configMappings.children[i].children[2].children[o].textContent);
+                        allOperatorsChecked = false;
+                        console.log("addUltraApp – Not all operators in " + configMappings.children[i].children[o].textContent +" are checked, adding specified operators to operatorList." )
+                    }
+                }
+            }
+            if(allOperatorsChecked) {
+                console.log("addUltraApp – Adding " + configMappings.children[i].children[0].textContent + "to list of countries");
+                countriesList += ("\""+configMappings.children[i].id+"\"" + ", ");
+            } else {
+                for(var o = 0; o < configMappings.children[i].children[2].children.length; o++){ //iterates through all operators,
+                    if(configMappings.children[i].children[2].children[o].classList.contains("checked")) {
+                        console.log("addUltraApp – " + configMappings.children[i].children[2].children[o].textContent);
+                        operatorsList += ("\""+configMappings.children[i].children[2].children[o].id+"\"" + ", ");
+                    }
+                }
+            }
+        }
+
+        console.log("addUltraApp – Countries List: " + countriesList + " | Operators List: " + operatorsList );
+    }
+    countriesList = countriesList.replace(/,\s*$/, "");
+    operatorsList = operatorsList.replace(/,\s*$/, "");
+    var json = ('{"functionToCall" : "addNewConfig", "data" : {'
+        + ' "App_ModifiableName" : "'+ form.children[0].children[0].value+ '",'
+        + ' "App_OriginalName" : "'+ form.children[0].children[0].value.toLowerCase() + '",'
+        + ' "App_Rank" : "'+ form.children[0].children[1].value + '",'
+        + ' "App_HomeURL" : "'+ form.children[0].children[2].value + '",'
+        + ' "App_NativeURL" : "'+ form.children[0].children[5].value + '",'
+        + ' "App_IconURL" : "'+ form.children[0].children[6].value + '",'
+        + ' "App_ExistsEverywhere" : '+ existsEverywhere + ','
+        + ' "App_ConfigurationMappings" : { '
+            + ' "Countries" : ['
+                + countriesList
+            + '], "Operators" : ['
+                + operatorsList
+            + '], "FeaturedLocations" : ['
+                + '"maxGo", "homescreen", "max", "folder"'
+            + ']'
+        +'}'
+    +'}}');
+    console.log(json);
+    json = JSON.parse(json);
+    console.log("addUltraApp – Sending post request with the following JSON:");
+    console.log(json);
+    server_post.post(post_url, json, function(message) {
+        console.log("addUltraApp – POST REQUEST SUCCESS!!! RESPONSE:");
+        console.log(message);
+        applyFilters();
+    });
 }
 
 //================================== "ADD APP" POPUP WINDOW ========================================//
@@ -195,9 +259,13 @@ function showAddAppPopup(){ //shows Add App popup window
     var popupHTML = '<div class ="closeButton"';
     popupHTML += (" onclick=\"closeAddAppPopup()\"></div>");
     popupHTML += generateAddAppPopupInputFields();
-
     var addAppPopupContents = addAppPopup.children[0];
     addAppPopupContents.innerHTML = popupHTML;
+
+    var title = document.createElement("div");
+    title.innerHTML = "<div class = 'popupTitle'>Create new Ultra App Configuration</div>";
+    addAppPopupContents.parentElement.appendChild(title);
+
     console.log("ADD_APP_WINDOW – Showed popup window");
 }
 function closeAddAppPopup(){ //closes the AddApp Popup window
@@ -406,7 +474,7 @@ function displayCountrySearchResults(countrySearchFieldText){
 }
 function getCountryBubbleHTML(country){
     var returnHTML = "";
-    returnHTML += '<div class="rowValue" id="'+country.Country_ID+'">'+country.name+'<div class="rowImage" onClick="toggleCountryBubble(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div>'
+    returnHTML += '<div class="rowValue" id="'+country.Country_ID+'"><div class="countryBubbleTitle">'+country.name+'</div><div class="rowImage" onClick="toggleCountryBubble(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div>'
     return returnHTML;
 }
 function toggleCountryBubble(countryBubble) {
@@ -437,12 +505,17 @@ function toggleCountryBubble(countryBubble) {
                 html+= ("<div class = 'operators'>");
                 for(var i = 0; i < operators.operatorRows.length; i++){
                     var operator = operators.operatorRows[i];
-                    html+= (operator.Operator_Name + "<br>");
+                    // if(operator.Operator_Name!=""){ //should probably get rid of this check, and get rid of null entries in DB
+                        html+= ("<div value='"+operator.Operator_Name+"' id ='"+operator.MCCMNC_ID+"' class='operator checked' onClick='toggleOperator(this);'>"+operator.Operator_Name + " (" +operator.MCCMNC_ID+")</div>");
+                    // }
                 }
                 html+= ("</div>");
                 countryBubble.innerHTML += html;
         });
     }
+}
+function toggleOperator(operator){
+    operator.classList.toggle("checked");
 }
 
 function getCountryByName(countryName, functionUsingCountry){
