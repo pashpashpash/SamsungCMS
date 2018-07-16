@@ -291,9 +291,18 @@ main{
 #allicons{
     width: 900px;
     margin: auto;
-    height: 446px;
+    height: 436.5px;
     overflow: scroll;
-    padding-top: 18px;
+    margin-top: 12px;
+}
+.locationCategory{
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding-bottom: 28px;
+    padding-top: 14px;
+    width: 92.5%;
+}
+#max {
+    border-bottom: none;
 }
 @media screen  and (max-width: 1400px) /* Tablet */ {
     #appTray {
@@ -303,7 +312,7 @@ main{
         width: 70%;
         /* height: 1300px; */
         background-image: url("/images/s8_portrait_colorful.png");
-        padding-left:0px;
+        padding-left:20px;
     }
     body{
         overflow:auto;

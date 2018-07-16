@@ -93,34 +93,131 @@ function searchApplyFilters(searchValue)
 //input an app container + a json of webapps, and this func will display them in the container with proper nesting
 function showWebapps(appTray, webapps) {
     var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
-    for(var o= 0; o < webapps.length; o++){
-        console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML");
-        webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-            webAppsHTML += ("<div id='deleteIcon' ");
-            webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-            webAppsHTML += ("></div>");
-            webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-            webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-            webAppsHTML += (" />");
+    webAppsHTML += ("<div class = 'locationCategory' id = 'maxGO'>"); //MAXGO
+        for(var o= 0; o < webapps.length; o++){
+            if(webapps[o].featuredLocationName==="maxGo") {
+                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
+                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
+                    webAppsHTML += ("<div id='deleteIcon' ");
+                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += ("></div>");
+                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += (" />");
 
-            webAppsHTML += ("<div id='iconText'>");
-                webAppsHTML += (webapps[o].ModifiableName + " Ultra");
-            webAppsHTML += ("</div>");
-        webAppsHTML += ("</div>");
-    }
-
-    webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
-    webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
-    webAppsHTML += (" onclick=\"showAddAppPopup()\"");
-    webAppsHTML += (" />");
-    webAppsHTML += '<div class="addAppPopup">'
-        webAppsHTML += '<div class= "contents">'
+                    webAppsHTML += ("<div id='iconText'>");
+                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+                    webAppsHTML += ("</div>");
+                webAppsHTML += ("</div>");
+            }
+        }
+        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
+        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
+        webAppsHTML += (" />");
+        webAppsHTML += '<div class="addAppPopup">'
+            webAppsHTML += '<div class= "contents">'
+            webAppsHTML += '</div>';
         webAppsHTML += '</div>';
-    webAppsHTML += '</div>';
-    webAppsHTML += ("<div id='iconText'>");
-    webAppsHTML += ("Create new Ultra App");
+        webAppsHTML += ("<div id='iconText'>");
+        webAppsHTML += ("Create new Ultra App");
+        webAppsHTML += ("</div>");
+        webAppsHTML += ("</div>");
     webAppsHTML += ("</div>");
+    webAppsHTML += "<div class = 'locationCategory'  id = 'homescreen'>" //HOMESCREEN
+        for(var o= 0; o < webapps.length; o++){
+            if(webapps[o].featuredLocationName==="homescreen") {
+                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | HOMESCREEN");
+                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
+                    webAppsHTML += ("<div id='deleteIcon' ");
+                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += ("></div>");
+                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += (" />");
+
+                    webAppsHTML += ("<div id='iconText'>");
+                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+                    webAppsHTML += ("</div>");
+                webAppsHTML += ("</div>");
+            }
+        }
+        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
+        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
+        webAppsHTML += (" />");
+        webAppsHTML += '<div class="addAppPopup">'
+            webAppsHTML += '<div class= "contents">'
+            webAppsHTML += '</div>';
+        webAppsHTML += '</div>';
+        webAppsHTML += ("<div id='iconText'>");
+        webAppsHTML += ("Create new Ultra App");
+        webAppsHTML += ("</div>");
+        webAppsHTML += ("</div>");
     webAppsHTML += ("</div>");
+    webAppsHTML += ("<div class = 'locationCategory'  id = 'folder'>"); //FOLDER
+        for(var o= 0; o < webapps.length; o++){
+            if(webapps[o].featuredLocationName==="folder") {
+                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | FOLDER");
+                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
+                    webAppsHTML += ("<div id='deleteIcon' ");
+                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += ("></div>");
+                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += (" />");
+
+                    webAppsHTML += ("<div id='iconText'>");
+                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+                    webAppsHTML += ("</div>");
+                webAppsHTML += ("</div>");
+            }
+        }
+        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
+        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
+        webAppsHTML += (" />");
+        webAppsHTML += '<div class="addAppPopup">'
+            webAppsHTML += '<div class= "contents">'
+            webAppsHTML += '</div>';
+        webAppsHTML += '</div>';
+        webAppsHTML += ("<div id='iconText'>");
+        webAppsHTML += ("Create new Ultra App");
+        webAppsHTML += ("</div>");
+        webAppsHTML += ("</div>");
+    webAppsHTML += ("</div>");
+    webAppsHTML += ("<div class = 'locationCategory'  id = 'max'>"); //MAX
+        for(var o= 0; o < webapps.length; o++){
+            if(webapps[o].featuredLocationName==="max") {
+                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAX");
+                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
+                    webAppsHTML += ("<div id='deleteIcon' ");
+                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += ("></div>");
+                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
+                    webAppsHTML += (" />");
+
+                    webAppsHTML += ("<div id='iconText'>");
+                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+                    webAppsHTML += ("</div>");
+                webAppsHTML += ("</div>");
+            }
+        }
+        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
+        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
+        webAppsHTML += (" />");
+        webAppsHTML += '<div class="addAppPopup">'
+            webAppsHTML += '<div class= "contents">'
+            webAppsHTML += '</div>';
+        webAppsHTML += '</div>';
+        webAppsHTML += ("<div id='iconText'>");
+        webAppsHTML += ("Create new Ultra App");
+        webAppsHTML += ("</div>");
+        webAppsHTML += ("</div>");
+    webAppsHTML += ("</div>");
+
     appTray.innerHTML = (webAppsHTML);
 }
 
@@ -193,6 +290,7 @@ function addUltraApp(form)
         existsEverywhere = true;
     }
     else {
+        debugger;
         for(var i = 0; i < configMappings.children.length; i++) { //iterates through all bubbles
             var allOperatorsChecked = true;
 
@@ -201,7 +299,7 @@ function addUltraApp(form)
                     if(!configMappings.children[i].children[2].children[o].classList.contains("checked")) {
                         console.log(configMappings.children[i].children[2].children[o].textContent);
                         allOperatorsChecked = false;
-                        console.log("addUltraApp – Not all operators in " + configMappings.children[i].children[o].textContent +" are checked, adding specified operators to operatorList." )
+                        console.log("addUltraApp – Not all operators in " + configMappings.children[i].children[2].children[o].textContent +" are checked, adding specified operators to operatorList." )
                     }
                 }
             }
@@ -296,6 +394,18 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
 
         webAppHTML += "<div class='row'>";
             webAppHTML += "<div class='rowDescription'>";
+                webAppHTML += "Icon URL";
+            webAppHTML += ("</div>");
+            webAppHTML += "<div class='rowValue'>";
+                webAppHTML += app.IconUrl;
+                webAppHTML += "<div class='rowImage' style='background-image: url(\"../" + app.IconUrl + "\"); background-repeat: no-repeat; background-size:100%;'>";
+                webAppHTML += ("</div>");
+            webAppHTML += ("</div>");
+            webAppHTML += "<div class='edit'></div>";
+        webAppHTML += "</div>";
+
+        webAppHTML += "<div class='row'>";
+            webAppHTML += "<div class='rowDescription'>";
                 webAppHTML += "Rank";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
@@ -361,14 +471,11 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
 
         webAppHTML += "<div class='row'>";
             webAppHTML += "<div class='rowDescription'>";
-                webAppHTML += "Icon URL";
+                webAppHTML += "Featured Location";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
-                webAppHTML += app.IconUrl;
-                webAppHTML += "<div class='rowImage' style='background-image: url(\"../" + app.IconUrl + "\"); background-repeat: no-repeat; background-size:100%;'>";
-                webAppHTML += ("</div>");
+                webAppHTML += app.featuredLocationName;
             webAppHTML += ("</div>");
-            webAppHTML += "<div class='edit'></div>";
         webAppHTML += "</div>";
 
     webAppHTML += ("</div>");
