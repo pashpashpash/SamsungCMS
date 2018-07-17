@@ -127,18 +127,66 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\taddNewConfig method request detected")
         jsonResponse := addNewConfig(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="globalView") {
+        log.Println("postHandler –\t\tglobalView method request detected")
+        jsonResponse := globalView(requestData.Data)
+        w.Write([]byte(jsonResponse))
     }
 }
-// AppModifiableName        string `json:"App_ModifiableName"`
-// AppOriginalName          string `json:"App_OriginalName"`
-// AppRank                  string `json:"App_Rank"`
-// AppHomeURL               string `json:"App_HomeURL"`
-// AppNativeURL             string `json:"App_NativeURL"`
-// AppIconURL               string `json:"App_IconURL"`
-// AppConfigurationMappings struct {
-//     Countries []string `json:"Countries"`
-//     Operators []string `json:"Operators"`
-// } `json:"App_ConfigurationMappings"`
+type GlobalData struct {
+    GlobalDataApps []GlobalDataApp `json: "globalDataApps"`
+}
+type GlobalDataApp struct {
+    OriginalName string `json: "originalName" db:"originalName"`
+    Countries []GlobalDataCountry `json: "countries"`
+}
+type GlobalDataCountry struct {
+    Country_ID string `json:"Country_ID" db:"Country_ID"`
+    CountryName string `json:"name" db:"name"`
+    MCC_ID string `json:"MCC_ID" db:"MCC_ID"`
+    OperatorRows []GlobalOperatorRow `json:"operatorRows"`
+    App_Config []App `json:"appConfig"`
+}
+type GlobalOperatorRow struct {
+    MCCMNC_ID string `json: MCCMNC_ID`
+    Operator_Name string `json: Operator_Name`
+    Country_ID string `json: Country_ID`
+    App_Config []App `json:"appConfig"`
+}
+// type App struct {
+//     Config_ID string `json:"Config_ID" db:"Config_ID" `
+//     OriginalName string `json: "originalName" db:"originalName" `
+//     ModifiableName string `json: "modifiableName" db:"modifiableName" `
+//     IconUrl string `json: "iconUrl" db:"iconURL" `
+//     HomeUrl string `json:"homeURL" db:"homeURL"`
+//     Rank string `json: "rank" db:"rank" `
+//     FeaturedLocationName string `json:"featuredLocationName" db:"featuredLocationName"`
+// }
+func globalView(Data data) ([]byte) {
+    log.Println("globalView –\t\tgetting global data by app from db...")
+
+    globalViewQuery := `SELECT DISTINCT originalName from appConfigs`
+    rows, err := db.Query(globalViewQuery)
+    checkErr(err)
+    log.Println("globalView –\t\t" +  globalViewQuery)
+    uniqueAppList := []string{}
+    for rows.Next() {
+        var uniqueApp string
+        rows.Scan(&uniqueApp)
+        uniqueAppList = append(uniqueAppList, uniqueApp)
+    }
+    defer rows.Close()
+    for _, uniqueApp := range uniqueAppList {
+        log.Println("globalView –\t\t" + uniqueApp)
+    }
+    jsonResponse, err := json.Marshal(uniqueAppList)
+    jsonString := string(jsonResponse)
+    checkErr(err)
+    log.Println("globalView –\t\tReturning the following JSON string:")
+    log.Println(jsonString)
+    return jsonResponse
+}
+
 func addNewConfig(Config data) ([]byte) {
     log.Println(Config.AppConfigurationMappings.Countries)
     log.Println(Config.AppConfigurationMappings.Operators)
@@ -211,7 +259,6 @@ func getOperatorsByCountryID(Country data) ([]byte) {
     for rows.Next() {
         var operatorRow = OperatorRow{}
         rows.Scan(&operatorRow.MCCMNC_ID, &operatorRow.Operator_Name, &operatorRow.Country_ID)
-        log.Println("getOperatorsByCountryID –\t" + operatorRow.MCCMNC_ID + " | " + operatorRow.Operator_Name + " | " + operatorRow.Country_ID)
         operatorRows.OperatorRows = append(operatorRows.OperatorRows, operatorRow)
     }
     rows.Close()

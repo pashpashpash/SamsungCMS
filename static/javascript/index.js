@@ -5,6 +5,8 @@ var server_post = new postRequest();
 var appTray = document.getElementById("allicons");
 var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
+var globalViewButton = document.getElementById('globalViewButton');
+
 
 window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.keyIdentifier=='Enter'||e.keyCode==13){if(e.target.nodeName=='INPUT'&&e.target.type=='text'){
     e.preventDefault();
@@ -219,6 +221,30 @@ function showWebapps(appTray, webapps) {
     webAppsHTML += ("</div>");
 
     appTray.innerHTML = (webAppsHTML);
+}
+
+function toggleGlobalView(){
+    globalViewButton.classList.toggle('globalViewON');
+    filters.classList.toggle("hidden");
+    if(globalViewButton.classList.contains('globalViewON')){ //GLOBAL VIEW IS ON
+        var swapinHTML =  "<hr>";
+        swapinHTML += "";
+        console.log("toggleGlobalView – Global view turned on, requesting globalData from server...");
+        var postRequestJSON = JSON.parse('{"functionToCall" : "globalView", "data" : {}}');
+        server_post.post(post_url, postRequestJSON, function(globalData) {
+            console.log("toggleGlobalView – Success! Server returned:");
+            console.log(globalData);
+            swapOutContainer.innerHTML = swapinHTML;
+        });
+
+
+
+
+    } else {
+        swapOutContainer.innerHTML = '<main><div id ="appTray"></div></main>';
+        swapOutContainer.children[0].children[0].appendChild(appTray);
+        applyFilters();
+    }
 }
 
 function swapOut(appID)

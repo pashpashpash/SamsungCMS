@@ -1,6 +1,7 @@
 //initialization
 var selects = document.getElementsByTagName('select');
 var searchField = document.getElementsByClassName('search')[0];
+var filters = document.getElementById('filters');
 //time to initialize (load in filter values)
 
 
