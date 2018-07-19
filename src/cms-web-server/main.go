@@ -145,13 +145,13 @@ type GlobalDataCountry struct {
     CountryName string `json:"name" db:"name"`
     MCC_ID string `json:"MCC_ID" db:"MCC_ID"`
     OperatorRows []GlobalOperatorRow `json:"operatorRows"`
-    App_Config []App `json:"appConfig"`
+    App_Config_ID string `json:"Config_ID db: "Config_ID""`
 }
 type GlobalOperatorRow struct {
     MCCMNC_ID string `json: MCCMNC_ID`
     Operator_Name string `json: Operator_Name`
     Country_ID string `json: Country_ID`
-    App_Config []App `json:"appConfig"`
+    App_Config_ID string `json:"Config_ID db: "Config_ID""`
 }
 // type App struct {
 //     Config_ID string `json:"Config_ID" db:"Config_ID" `
@@ -170,6 +170,7 @@ func globalView(Data data) ([]byte) {
     checkErr(err)
     log.Println("globalView –\t\t" +  globalViewQuery)
     uniqueAppList := []string{}
+    globalData := GlobalData{}
     for rows.Next() {
         var uniqueApp string
         rows.Scan(&uniqueApp)
@@ -177,7 +178,11 @@ func globalView(Data data) ([]byte) {
     }
     defer rows.Close()
     for _, uniqueApp := range uniqueAppList {
+        globalDataApp := GlobalDataApp{}
         log.Println("globalView –\t\t" + uniqueApp)
+        globalDataApp.OriginalName = uniqueApp
+        //get all Countries that the app is in, and for loop through each country, checking which operators are selected. If all operators are selected, make the operatorList empty. If only part of them are selected, make operatorList contain only the selected ones.
+        globalData.GlobalDataApps = append(globalData.GlobalDataApps, globalDataApp)
     }
     jsonResponse, err := json.Marshal(uniqueAppList)
     jsonString := string(jsonResponse)
