@@ -217,7 +217,9 @@ func globalView(Data data) ([]byte) {
                 if(differenceCount == 0) { //every operator is mapped
                     globalDataCountry.App_Config_ID = App_Config_ID //sets the single config for the whole country!
                 } else { //every operator IS NOT MAPPED, but there is still only one config
-                    globalViewQuery = `SELECT DISTINCT MCCMNC_ID from ConfigurationMappings WHERE Config_ID = '`+App_Config_ID+`' AND MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
+                    globalViewQuery = `SELECT DISTINCT MCCMNC_ID, operators.Operator_Name from ConfigurationMappings
+                    JOIN     operators USING (MCCMNC_ID)
+                    WHERE Config_ID = '`+App_Config_ID+`' AND MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
                     mappedOperators, err := db.Query(globalViewQuery)
                     checkErr(err)
                     for mappedOperators.Next() {
