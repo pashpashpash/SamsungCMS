@@ -139,12 +139,14 @@ type GlobalData struct {
 type GlobalDataApp struct {
     OriginalName string `json: "originalName" db:"originalName"`
     Countries []GlobalDataCountry `json: "countries"`
+    ConfigNumbers []string `json: "configNumbers"`
 }
 type GlobalDataCountry struct {
     Country_ID string `json:"Country_ID" db:"Country_ID"`
     CountryName string `json:"name" db:"name"`
     OperatorRows []GlobalOperatorRow `json:"operatorRows"`
     App_Config_ID string `json:"Config_ID" db: "Config_ID"`
+    ConfigNumbers []string `json: "configNumbers"`
 }
 type GlobalOperatorRow struct {
     MCCMNC_ID string `json: "MCCMNC_ID"`
@@ -191,9 +193,14 @@ func globalView(Data data) ([]byte) {
             configList, err := db.Query(globalViewQuery)
             checkErr(err)
             ConfigCount := 0
-            for configList.Next() {
+            for configList.Next() { //sets configList for app, counts number of configs
                 ConfigCount++
+                var configNumber string
+                configList.Scan(&configNumber)
+                globalDataApp.ConfigNumbers = append(globalDataApp.ConfigNumbers, configNumber)
+                globalDataCountry.ConfigNumbers = append(globalDataCountry.ConfigNumbers, configNumber)
             }
+            configList.Close()
             configList, err = db.Query(globalViewQuery)
             checkErr(err)
             globalViewQuery = `
@@ -250,6 +257,7 @@ func globalView(Data data) ([]byte) {
             }
             globalDataApp.Countries = append(globalDataApp.Countries, globalDataCountry)
         }
+        globalDataApp.ConfigNumbers = uniqueNonEmptyElementsOf(globalDataApp.ConfigNumbers)
         globalData.GlobalDataApps = append(globalData.GlobalDataApps, globalDataApp)
     }
     jsonResponse, err := json.Marshal(globalData)
