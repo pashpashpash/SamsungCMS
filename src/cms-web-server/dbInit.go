@@ -7,6 +7,14 @@ import ("strings"
 
 var db (*sql.DB)
 
+func checkCount(rows *sql.Rows) (count int) {
+ 	for rows.Next() {
+    	err:= rows.Scan(&count)
+        log.Println("checkCount –\t\tCounting rows..")
+    	checkErr(err)
+    }
+    return count
+}
 
 // DATABASE HELPER FUNCTION
 func initDB(name string) (*sql.DB) {

@@ -143,52 +143,122 @@ type GlobalDataApp struct {
 type GlobalDataCountry struct {
     Country_ID string `json:"Country_ID" db:"Country_ID"`
     CountryName string `json:"name" db:"name"`
-    MCC_ID string `json:"MCC_ID" db:"MCC_ID"`
     OperatorRows []GlobalOperatorRow `json:"operatorRows"`
-    App_Config_ID string `json:"Config_ID db: "Config_ID""`
+    App_Config_ID string `json:"Config_ID" db: "Config_ID"`
 }
 type GlobalOperatorRow struct {
-    MCCMNC_ID string `json: MCCMNC_ID`
-    Operator_Name string `json: Operator_Name`
-    Country_ID string `json: Country_ID`
-    App_Config_ID string `json:"Config_ID db: "Config_ID""`
+    MCCMNC_ID string `json: "MCCMNC_ID"`
+    Operator_Name string `json: "Operator_Name"`
+    App_Config_ID string `json:"Config_ID" db: "Config_ID"`
 }
-// type App struct {
-//     Config_ID string `json:"Config_ID" db:"Config_ID" `
-//     OriginalName string `json: "originalName" db:"originalName" `
-//     ModifiableName string `json: "modifiableName" db:"modifiableName" `
-//     IconUrl string `json: "iconUrl" db:"iconURL" `
-//     HomeUrl string `json:"homeURL" db:"homeURL"`
-//     Rank string `json: "rank" db:"rank" `
-//     FeaturedLocationName string `json:"featuredLocationName" db:"featuredLocationName"`
-// }
 func globalView(Data data) ([]byte) {
     log.Println("globalView –\t\tgetting global data by app from db...")
-
-    globalViewQuery := `SELECT DISTINCT originalName from appConfigs`
-    rows, err := db.Query(globalViewQuery)
+    globalViewQuery := `SELECT DISTINCT originalName from appConfigs ORDER BY rank`
+    appList, err := db.Query(globalViewQuery)
     checkErr(err)
-    log.Println("globalView –\t\t" +  globalViewQuery)
     uniqueAppList := []string{}
     globalData := GlobalData{}
-    for rows.Next() {
+    for appList.Next() {
         var uniqueApp string
-        rows.Scan(&uniqueApp)
+        appList.Scan(&uniqueApp)
         uniqueAppList = append(uniqueAppList, uniqueApp)
     }
-    defer rows.Close()
-    for _, uniqueApp := range uniqueAppList {
+    appList.Close()
+    for _, uniqueApp := range uniqueAppList { //for every ultra app ie 'facebook'
         globalDataApp := GlobalDataApp{}
         log.Println("globalView –\t\t" + uniqueApp)
         globalDataApp.OriginalName = uniqueApp
         //get all Countries that the app is in, and for loop through each country, checking which operators are selected. If all operators are selected, make the operatorList empty. If only part of them are selected, make operatorList contain only the selected ones.
+        globalViewQuery = `SELECT Country_ID, name from countries WHERE Country_ID in (SELECT DISTINCT Country_ID from operators WHERE MCCMNC_ID in
+        (SELECT MCCMNC_ID from configurationMappings WHERE Config_ID in
+        (SELECT Config_ID from AppConfigs WHERE originalName = '`+uniqueApp+`')))`
+        countryList, err := db.Query(globalViewQuery)
+        checkErr(err)
+        for countryList.Next() { //for each country this app exists in, fill the GlobalDataCountry inside GlobalDataApp
+            var Country_ID string
+            var CountryName string
+            var App_Config_ID string //if all operators inside country mapped to the same config
+            countryList.Scan(&Country_ID, &CountryName)
+            globalDataCountry := GlobalDataCountry{}
+            globalDataCountry.Country_ID = Country_ID
+            globalDataCountry.CountryName = CountryName
+
+
+
+            globalViewQuery = `SELECT DISTINCT Config_ID from ConfigurationMappings WHERE Config_ID in
+            (SELECT Config_ID from AppConfigs WHERE originalName = '`+uniqueApp+`')
+            AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
+            configList, err := db.Query(globalViewQuery)
+            checkErr(err)
+            ConfigCount := 0
+            for configList.Next() {
+                ConfigCount++
+            }
+            configList, err = db.Query(globalViewQuery)
+            checkErr(err)
+            globalViewQuery = `
+            SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE Country_ID="`+Country_ID+`")
+            EXCEPT
+            SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE MCCMNC_ID in
+            (SELECT MCCMNC_ID from configurationMappings WHERE Config_ID in
+            (SELECT Config_ID from AppConfigs WHERE originalName = '`+uniqueApp+`')
+            AND MCCMNC_ID in (SELECT MCCMNC_ID from operators where Country_ID = "`+Country_ID+`")));`
+            differenceList, err := db.Query(globalViewQuery)
+            checkErr(err)
+            differenceCount := 0
+            for differenceList.Next() { //gets the amount of unmapped operators within a country
+                differenceCount++
+            }
+
+            if(ConfigCount == 1) { //only one config for whole country
+                for configList.Next() {
+                    configList.Scan(&App_Config_ID)
+                }
+                if(differenceCount == 0) { //every operator is mapped
+                    if(uniqueApp=="slack") {
+                        log.Println("globalView –\t\t" + "slack" + " | " + Country_ID + " | ALL OPERATORS MAPPED | " + App_Config_ID)
+                    }
+                    globalDataCountry.App_Config_ID = App_Config_ID //sets the single config for the whole country!
+                } else { //every operator IS NOT MAPPED, but there is still only one config
+                    if(uniqueApp=="slack") {
+                        log.Println("globalView –\t\t" + "slack" + " | " + Country_ID + " | SOME OPERATORS UNMAPPED, ONE CONFIG | " + App_Config_ID)
+                    }
+                    globalViewQuery = `SELECT DISTINCT MCCMNC_ID from ConfigurationMappings WHERE Config_ID = '`+App_Config_ID+`' AND MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
+                    mappedOperators, err := db.Query(globalViewQuery)
+                    checkErr(err)
+                    for mappedOperators.Next() {
+                        globalOperatorRow := GlobalOperatorRow{}
+                        mappedOperators.Scan(&globalOperatorRow.MCCMNC_ID, &globalOperatorRow.Operator_Name)
+                        globalOperatorRow.App_Config_ID = App_Config_ID
+                        globalDataCountry.OperatorRows = append(globalDataCountry.OperatorRows, globalOperatorRow)
+                    }
+                }
+
+            } else { //multiple App_Config_ID's found for this country
+                for configList.Next() { //for all possible config-id's, find the operator mapped to it, store it in globalOperatorRow
+                    configList.Scan(&App_Config_ID)
+                    globalViewQuery = `SELECT DISTINCT MCCMNC_ID, operators.Operator_Name from ConfigurationMappings
+                    JOIN     operators USING (MCCMNC_ID)
+                    WHERE Config_ID = '`+App_Config_ID+`'
+                    AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
+
+                    operatorRows, err := db.Query(globalViewQuery)
+                    checkErr(err)
+                    for operatorRows.Next() {
+                        globalOperatorRow := GlobalOperatorRow{}
+                        operatorRows.Scan(&globalOperatorRow.MCCMNC_ID, &globalOperatorRow.Operator_Name)
+                        globalOperatorRow.App_Config_ID = App_Config_ID
+                        globalDataCountry.OperatorRows = append(globalDataCountry.OperatorRows, globalOperatorRow)
+                    }
+                }
+            }
+            globalDataApp.Countries = append(globalDataApp.Countries, globalDataCountry)
+        }
         globalData.GlobalDataApps = append(globalData.GlobalDataApps, globalDataApp)
     }
-    jsonResponse, err := json.Marshal(uniqueAppList)
-    jsonString := string(jsonResponse)
+    jsonResponse, err := json.Marshal(globalData)
     checkErr(err)
-    log.Println("globalView –\t\tReturning the following JSON string:")
-    log.Println(jsonString)
+    log.Println("globalView –\t\tReturning JSON string...")
     return jsonResponse
 }
 
@@ -209,7 +279,8 @@ func addNewConfig(Config data) ([]byte) {
 
     for _, country := range Config.AppConfigurationMappings.Countries {
         for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, (SELECT MCCMNC_ID FROM operators WHERE Country_ID = '`+country+`'), "`+location+`")`)
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName)
+            SELECT `+New_App_Config_ID_string+`, MCCMNC_ID, "`+location+`"  FROM operators WHERE Country_ID = '`+country+`';`)
             log.Println("addNewConfig –\t"+mappingstatement)
             res, err = db.Exec(mappingstatement)
             checkErr(err)
@@ -218,7 +289,7 @@ func addNewConfig(Config data) ([]byte) {
     for _, operator := range Config.AppConfigurationMappings.Operators {
         for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
             log.Println("addNewConfig –\t\t" +operator +" | "+ location)
-            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, (SELECT MCCMNC_ID FROM operators WHERE MCCMNC_ID = '`+operator+`'), "`+location+`")`)
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, "`+operator+`", "`+location+`")`)
             log.Println("addNewConfig –\t\t"+mappingstatement)
             res, err = db.Exec(mappingstatement)
             checkErr(err)
@@ -226,7 +297,8 @@ func addNewConfig(Config data) ([]byte) {
     }
     if(Config.AppExistsEverywhere) {
         for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, (SELECT MCCMNC_ID FROM operators), "`+location+`")`)
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName)
+            SELECT `+New_App_Config_ID_string+`, MCCMNC_ID, "`+location+`"  FROM operators`)
             log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
             res, err = db.Exec(mappingstatement)
             checkErr(err)
