@@ -215,14 +215,8 @@ func globalView(Data data) ([]byte) {
                     configList.Scan(&App_Config_ID)
                 }
                 if(differenceCount == 0) { //every operator is mapped
-                    if(uniqueApp=="slack") {
-                        log.Println("globalView –\t\t" + "slack" + " | " + Country_ID + " | ALL OPERATORS MAPPED | " + App_Config_ID)
-                    }
                     globalDataCountry.App_Config_ID = App_Config_ID //sets the single config for the whole country!
                 } else { //every operator IS NOT MAPPED, but there is still only one config
-                    if(uniqueApp=="slack") {
-                        log.Println("globalView –\t\t" + "slack" + " | " + Country_ID + " | SOME OPERATORS UNMAPPED, ONE CONFIG | " + App_Config_ID)
-                    }
                     globalViewQuery = `SELECT DISTINCT MCCMNC_ID from ConfigurationMappings WHERE Config_ID = '`+App_Config_ID+`' AND MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
                     mappedOperators, err := db.Query(globalViewQuery)
                     checkErr(err)
