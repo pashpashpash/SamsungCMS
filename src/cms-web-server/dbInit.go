@@ -221,7 +221,7 @@ func loadConfigTables(db *sql.DB) {
     // =============================== Amazon [android_go] ==================================//
     newAppConfig(db, "10", "[android_go]", "maxGo", "amazon", "Amazon", "ultra_apps/ic_amazon.png","https://amazon.in", "11" , "3.1")
     // =============================== DailyHunt [android_go] ==================================//
-    newAppConfig(db, "11", "[android_go]", "maxGo", "DailyHunt", "Dailyhunt", "ultra_apps/ic_dailyhunt.png","https://m.dailyhunt.in", "12" , "3.1")
+    newAppConfig(db, "11", "[android_go]", "maxGo", "dailyhunt", "Dailyhunt", "ultra_apps/ic_dailyhunt.png","https://m.dailyhunt.in", "12" , "3.1")
     // =============================== Paytm Mall [android_go] ==================================//
     newAppConfig(db, "12", "[android_go]", "maxGo", "paytmall", "Paytm Mall", "ultra_apps/ic_paytmmall_ultra.png","https://paytmmall.com", "13" , "3.1")
     // =============================== Nitro StreetRun 2 [android_go] ==================================//

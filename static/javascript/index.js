@@ -6,7 +6,7 @@ var appTray = document.getElementById("allicons");
 var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 var globalViewButton = document.getElementById('globalViewButton');
-
+var globalViewDataJSON = null;
 
 window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.keyIdentifier=='Enter'||e.keyCode==13){if(e.target.nodeName=='INPUT'&&e.target.type=='text'){
     e.preventDefault();
@@ -95,130 +95,35 @@ function searchApplyFilters(searchValue)
 //input an app container + a json of webapps, and this func will display them in the container with proper nesting
 function showWebapps(appTray, webapps) {
     var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
-    webAppsHTML += ("<div class = 'locationCategory' id = 'maxGO'>"); //MAXGO
-        for(var o= 0; o < webapps.length; o++){
-            if(webapps[o].featuredLocationName==="maxGo") {
-                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
-                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-                    webAppsHTML += ("<div id='deleteIcon' ");
-                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += ("></div>");
-                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += (" />");
+    for(var o= 0; o < webapps.length; o++){
+        console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
+        webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
+            webAppsHTML += ("<div id='deleteIcon' ");
+            webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+            webAppsHTML += ("></div>");
+            webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+            webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
+            webAppsHTML += (" />");
 
-                    webAppsHTML += ("<div id='iconText'>");
-                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
-                    webAppsHTML += ("</div>");
-                webAppsHTML += ("</div>");
-            }
-        }
-        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
-        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
-        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
-        webAppsHTML += (" />");
-        webAppsHTML += '<div class="addAppPopup">'
-            webAppsHTML += '<div class= "contents">'
-            webAppsHTML += '</div>';
+            webAppsHTML += ("<div id='iconText'>");
+                webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+            webAppsHTML += ("</div>");
+        webAppsHTML += ("</div>");
+    }
+    webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+    webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
+    webAppsHTML += (" onclick=\"showAddAppPopup()\"");
+    webAppsHTML += (" />");
+    webAppsHTML += '<div class="addAppPopup">'
+        webAppsHTML += '<div class= "contents">'
         webAppsHTML += '</div>';
-        webAppsHTML += ("<div id='iconText'>");
-        webAppsHTML += ("Create new Ultra App");
-        webAppsHTML += ("</div>");
-        webAppsHTML += ("</div>");
+    webAppsHTML += '</div>';
+    webAppsHTML += ("<div id='iconText'>");
+    webAppsHTML += ("Create new Ultra App");
     webAppsHTML += ("</div>");
-    webAppsHTML += "<div class = 'locationCategory'  id = 'homescreen'>" //HOMESCREEN
-        for(var o= 0; o < webapps.length; o++){
-            if(webapps[o].featuredLocationName==="homescreen") {
-                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | HOMESCREEN");
-                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-                    webAppsHTML += ("<div id='deleteIcon' ");
-                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += ("></div>");
-                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += (" />");
+    webAppsHTML += ("</div>");
 
-                    webAppsHTML += ("<div id='iconText'>");
-                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
-                    webAppsHTML += ("</div>");
-                webAppsHTML += ("</div>");
-            }
-        }
-        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
-        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
-        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
-        webAppsHTML += (" />");
-        webAppsHTML += '<div class="addAppPopup">'
-            webAppsHTML += '<div class= "contents">'
-            webAppsHTML += '</div>';
-        webAppsHTML += '</div>';
-        webAppsHTML += ("<div id='iconText'>");
-        webAppsHTML += ("Create new Ultra App");
-        webAppsHTML += ("</div>");
-        webAppsHTML += ("</div>");
-    webAppsHTML += ("</div>");
-    webAppsHTML += ("<div class = 'locationCategory'  id = 'folder'>"); //FOLDER
-        for(var o= 0; o < webapps.length; o++){
-            if(webapps[o].featuredLocationName==="folder") {
-                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | FOLDER");
-                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-                    webAppsHTML += ("<div id='deleteIcon' ");
-                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += ("></div>");
-                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += (" />");
 
-                    webAppsHTML += ("<div id='iconText'>");
-                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
-                    webAppsHTML += ("</div>");
-                webAppsHTML += ("</div>");
-            }
-        }
-        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
-        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
-        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
-        webAppsHTML += (" />");
-        webAppsHTML += '<div class="addAppPopup">'
-            webAppsHTML += '<div class= "contents">'
-            webAppsHTML += '</div>';
-        webAppsHTML += '</div>';
-        webAppsHTML += ("<div id='iconText'>");
-        webAppsHTML += ("Create new Ultra App");
-        webAppsHTML += ("</div>");
-        webAppsHTML += ("</div>");
-    webAppsHTML += ("</div>");
-    webAppsHTML += ("<div class = 'locationCategory'  id = 'max'>"); //MAX
-        for(var o= 0; o < webapps.length; o++){
-            if(webapps[o].featuredLocationName==="max") {
-                console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAX");
-                webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-                    webAppsHTML += ("<div id='deleteIcon' ");
-                    webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += ("></div>");
-                    webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-                    webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-                    webAppsHTML += (" />");
-
-                    webAppsHTML += ("<div id='iconText'>");
-                        webAppsHTML += (webapps[o].ModifiableName + " Ultra");
-                    webAppsHTML += ("</div>");
-                webAppsHTML += ("</div>");
-            }
-        }
-        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
-        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
-        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
-        webAppsHTML += (" />");
-        webAppsHTML += '<div class="addAppPopup">'
-            webAppsHTML += '<div class= "contents">'
-            webAppsHTML += '</div>';
-        webAppsHTML += '</div>';
-        webAppsHTML += ("<div id='iconText'>");
-        webAppsHTML += ("Create new Ultra App");
-        webAppsHTML += ("</div>");
-        webAppsHTML += ("</div>");
-    webAppsHTML += ("</div>");
 
     appTray.innerHTML = (webAppsHTML);
 }
@@ -231,22 +136,154 @@ function toggleGlobalView(){
         swapinHTML += "";
         console.log("toggleGlobalView – Global view turned on, requesting globalData from server...");
         var postRequestJSON = JSON.parse('{"functionToCall" : "globalView", "data" : {}}');
-        server_post.post(post_url, postRequestJSON, function(globalData) {
-            console.log("toggleGlobalView – Success! Server returned:");
-            console.log(globalData);
-            swapOutContainer.innerHTML = swapinHTML;
-        });
-
-
-
-
+        swapOutContainer.innerHTML = swapinHTML;
+        if(globalViewDataJSON === null){
+            server_post.post(post_url, postRequestJSON, function(globalData) {
+                console.log("toggleGlobalView – Success! Server returned:");
+                console.log(globalData);
+                generateGlobalViewHTML(globalData);
+            });
+        } else {
+            generateGlobalViewHTML(globalViewDataJSON);
+        }
     } else {
         swapOutContainer.innerHTML = '<main><div id ="appTray"></div></main>';
         swapOutContainer.children[0].children[0].appendChild(appTray);
         applyFilters();
     }
 }
+function generateGlobalViewHTML(globalData){
+    globalViewDataJSON = globalData;
+    var globalView = document.createElement('div');
+    globalView.className = 'globalView';
+    swapOutContainer.appendChild(globalView);
+    for(var i = 0; i < globalViewDataJSON.GlobalDataApps.length; i++){
+        var app = document.createElement('div');
+        app.className = 'globalViewApp';
+        app.classList.add('collapsed');
+        var appTitle = document.createElement('div');
+        appTitle.className = 'description';
+        var downArrow = document.createElement('div');
+        downArrow.innerHTML = '<div onclick="toggleGlobalApp(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div>'
+        downArrow = downArrow.children[0];
+        downArrow.className = "rowImage";
+        var appContents = document.createElement('div');
+        appContents.className = 'globalViewAppContents';
+        appTitle.innerText = globalViewDataJSON.GlobalDataApps[i].OriginalName;
+        var appConfigs = document.createElement('div');
+        appConfigs.className = "globalViewAppConfigs";
+        for(var o = 0; o < globalViewDataJSON.GlobalDataApps[i].ConfigNumbers.length; o++){
+            var appConfig = document.createElement('div');
+            appConfig.className = "globalViewAppConfig";
 
+            appConfig.innerText = (globalViewDataJSON.GlobalDataApps[i].ConfigNumbers[o]);
+            appConfigs.appendChild(appConfig);
+        }
+
+        app.appendChild(appTitle);
+        app.appendChild(downArrow);
+        app.appendChild(appConfigs);
+        app.appendChild(appContents);
+        globalView.appendChild(app);
+    }
+}
+
+function toggleGlobalApp(appElement) {
+    console.log("toggleGlobalApp – \t\tElement clicked is");
+    console.log(appElement);
+    var appOriginalName = appElement.children[0].innerText;
+    appElement.classList.toggle('collapsed');
+    if(appElement.classList.contains('collapsed')){ //collapse app
+        appElement.children[3].innerHTML="";
+    } else { //expand app
+        var appData = findGlobalViewApp(appOriginalName);
+        for(var i = 0; i < appData.Countries.length; i++) {
+            var country = document.createElement('div');
+            country.className = 'globalViewCountry';
+            country.classList.add('collapsed');
+            var countryTitle = document.createElement('div');
+            countryTitle.className = 'description';
+            countryTitle.innerText = appData.Countries[i].name;
+            var downArrow = document.createElement('div');
+            downArrow.innerHTML = '<div onclick="toggleGlobalCountry(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div>'
+            downArrow = downArrow.children[0];
+            downArrow.className = "rowImage";
+            var countryContents = document.createElement('div');
+            var appConfigs = document.createElement('div');
+            appConfigs.className = "globalViewAppConfigs";
+            for(var o = 0; o < appData.Countries[i].ConfigNumbers.length; o++){
+                var appConfig = document.createElement('div');
+                appConfig.className = "globalViewAppConfig";
+
+                appConfig.innerText = (appData.Countries[i].ConfigNumbers[o]);
+                appConfigs.appendChild(appConfig);
+            }
+            country.appendChild(countryTitle);
+            country.appendChild(appConfigs);
+            if(appData.Countries[i].operatorRows != null) {
+                country.appendChild(downArrow);
+            }
+            country.appendChild(countryContents);
+            appElement.children[3].appendChild(country);
+        }
+    }
+}
+function toggleGlobalCountry(countryElement) {
+    console.log("toggleGlobalCountry – \t\tElement clicked is");
+    console.log(countryElement);
+    var countryName = countryElement.children[0].innerText;
+    console.log(countryElement.parentElement.children[0].children[0]);
+    var appName = countryElement.parentElement.parentElement.children[0].innerText;
+    countryElement.classList.toggle('collapsed');
+    if(countryElement.classList.contains('collapsed')) {
+        countryElement.children[3].innerHTML = "";
+    } else {
+        var countryData = findGlobalViewCountry(appName, countryName);
+        console.log("toggleGlobalCountry – \t\tFound country data:")
+        console.log(countryData);
+        debugger;
+        for(var i = 0; i < countryData.operatorRows.length; i++){
+            console.log(countryData.operatorRows[i]);
+            var operator = document.createElement('div');
+            operator.className = 'globalViewOperator';
+            var operatorTitle = document.createElement('div');
+            operatorTitle.className = 'description';
+            operatorTitle.innerText = countryData.operatorRows[i].Operator_Name;
+            var operatorConfigs = document.createElement('div');
+            operatorConfigs.className = "globalViewAppConfigs";
+
+            var operatorConfig = document.createElement('div');
+            operatorConfig.className = "globalViewAppConfig";
+
+            operatorConfig.innerText = countryData.operatorRows[i].Config_ID;
+            operatorConfigs.appendChild(operatorConfig);
+
+            operator.appendChild(operatorTitle);
+            operator.appendChild(operatorConfigs);
+            countryElement.children[3].appendChild(operator);
+        }
+    }
+}
+function findGlobalViewApp(appName){
+    for(var i = 0; i < globalViewDataJSON.GlobalDataApps.length; i++) {
+        if (globalViewDataJSON.GlobalDataApps[i].OriginalName === appName) {
+            return globalViewDataJSON.GlobalDataApps[i];
+        }
+    }
+    return null;
+}
+function findGlobalViewCountry(appName, countryName){
+    console.log("findGlobalViewCountry – \t\tSearching for country: " + appName + " | " + countryName);
+    var appData = findGlobalViewApp(appName);
+    console.log("findGlobalViewCountry – \t\tFound app with name  " + appName + ": ");
+    console.log(appData);
+    for(var i = 0; i<appData.Countries.length; i++){
+        if(appData.Countries[i].name === countryName){
+            return appData.Countries[i];
+        }
+    }
+    return null;
+}
 function swapOut(appID)
 {
     console.log("SWAPOUT – Swapping out app tray for single ultra app view...");
@@ -316,7 +353,6 @@ function addUltraApp(form)
         existsEverywhere = true;
     }
     else {
-        debugger;
         for(var i = 0; i < configMappings.children.length; i++) { //iterates through all bubbles
             var allOperatorsChecked = true;
 

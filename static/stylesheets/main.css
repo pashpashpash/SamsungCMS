@@ -16,6 +16,77 @@ body {
     height:100%;
     overflow:hidden !important;
 }
+
+/* =====================GLOBAL VIEW SECTION=========================== */
+.globalView {
+    margin: auto;
+    width: 68%;
+}
+.globalViewCountry {
+    margin-top: 14px;
+}
+.globalViewApp {
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightyellow;
+}
+.globalViewCountry {
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background:white;
+    background: lightsalmon;
+}
+.globalViewOperator{
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightcoral;
+    display: inline-block;
+    margin-top:14px;
+}
+.collapsed {
+    display: inline-block;
+}
+.globalView .rowImage{
+    margin-left: 14px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: -7px;
+    float:right;
+}
+.globalView .description {
+    display: inline-block;
+}
+.globalViewAppConfig, .globalViewAppConfigs {
+    display: inline-block;
+}
+.globalViewAppContents {
+    display: block;
+}
+.globalViewAppConfig {
+    font-size: 12px;
+        border-radius: 8px;
+        border: 1px solid black;
+        width: 18px;
+        height: 16px;
+        margin-left: 4px;
+        text-align: center;
+        line-height: 21px;
+        padding-left: 4px;
+        padding-right: 4px;
+        padding-bottom: 4px;
+}
 /* =====================APP DETAILS SECTION=========================== */
 .center{
     margin: auto;
