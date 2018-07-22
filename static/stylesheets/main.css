@@ -238,6 +238,10 @@ hr{
     width: 64px;
     height: 64px;
 }
+.globalViewAppConfig:hover{
+    background:white;
+    border: 1px solid white;
+}
 /* =====================HEADERS AND FILTERS=========================== */
 #header{
     display: flex;
