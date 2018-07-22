@@ -76,7 +76,7 @@ type data struct {
     App_name string `json:App_name, string, omitempty`
     Country_Name string `json:name, string, omitempty`
     Country_ID string `json:Country_ID, string, omitempty`
-
+    Config_ID string `json:"Config_ID"`
     AppModifiableName        string `json:"App_ModifiableName"`
     AppOriginalName          string `json:"App_OriginalName"`
     AppRank                  string `json:"App_Rank"`
@@ -130,6 +130,14 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
     } else if (requestData.FunctionToCall=="globalView") {
         log.Println("postHandler –\t\tglobalView method request detected")
         jsonResponse := globalView(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getAllAppConfigs") {
+        log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
+        jsonResponse := getAllAppConfigs(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getFeaturedLocationsForConfig") {
+        log.Println("postHandler –\t\tgetFeaturedLocationsForConfig method request detected")
+        jsonResponse := getFeaturedLocationsForConfig(requestData.Data)
         w.Write([]byte(jsonResponse))
     }
 }
@@ -348,6 +356,38 @@ func getOperatorsByCountryID(Country data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
+type AppConfigs struct {
+    AppConfigs []AppConfig `json:"appConfigs, omitempty"`
+}
+type AppConfig struct {
+    Config_ID string `json: "Config_ID" db:"Config_ID"`
+    OriginalName string `json: "OriginalName" db:"originalName"`
+    ModifiableName string `json: "ModifiableName" db:"modifiableName"`
+    IconURL string `json: "IconURL" db:"iconURL"`
+    HomeURL string `json: "HomeURL" db:"homeURL"`
+    Rank string `json: "Rank" db:"rank"`
+    VersionNumber string `json: "VersionNumber" db:"versionNumber"`
+}
+func getAllAppConfigs(notUsed data) ([]byte) {
+    log.Println("getAllAppConfigs –\tRecieved request to get all app configs")
+    var appConfigs = AppConfigs{}
+
+    full_query := string(`
+    SELECT DISTINCT Config_ID, originalName, modifiableName,iconURL, homeURL, rank, versionNumber  from appConfigs`)
+    allAppConfigs, err := db.Query(full_query)
+    checkErr(err)
+    for allAppConfigs.Next() {
+        var AppConfig = AppConfig{}
+        allAppConfigs.Scan(&AppConfig.Config_ID, &AppConfig.OriginalName, &AppConfig.ModifiableName, &AppConfig.IconURL, &AppConfig.HomeURL, &AppConfig.Rank, &AppConfig.VersionNumber)
+        appConfigs.AppConfigs = append(appConfigs.AppConfigs, AppConfig)
+    }
+    allAppConfigs.Close()
+    log.Println("getAllAppConfigs –\tResponding with the following config:")
+    log.Println(appConfigs)
+    jsonResponse, err := json.Marshal(appConfigs)
+    checkErr(err)
+    return jsonResponse
+}
 type CountryRow struct {
     Country_ID string `json:"Country_ID" db:"Country_ID"`
     CountryName string `json:"name" db:"name"`
@@ -370,6 +410,29 @@ func getCountryByName(Country data) ([]byte) {
     rows.Close()
 
     jsonResponse, err := json.Marshal(countryRow)
+    checkErr(err)
+    return jsonResponse
+}
+
+func getFeaturedLocationsForConfig(Config data) ([]byte) {
+    log.Println("getFeaturedLocationsForConfig –\t\tRecieved request to get featured locations for " + Config.Config_ID)
+
+    var featuredLocations = []string{}
+    full_query := string(`
+    SELECT DISTINCT FeaturedLocationName from configurationMappings
+    WHERE Config_ID="`+Config.Config_ID+`"
+    `)
+    log.Println("getFeaturedLocationsForConfig –\t\tQuery: " + full_query)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    for rows.Next() {
+        featuredLocation := ""
+        rows.Scan(&featuredLocation)
+        featuredLocations = append(featuredLocations, featuredLocation)
+    }
+    rows.Close()
+
+    jsonResponse, err := json.Marshal(featuredLocations)
     checkErr(err)
     return jsonResponse
 }

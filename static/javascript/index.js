@@ -8,6 +8,9 @@ var swapOutContainer = document.getElementById("swapOutContainer");
 var globalViewButton = document.getElementById('globalViewButton');
 var globalViewDataJSON = null;
 
+//each int in array is mapped to corresponding appConfig
+var globalConfigArray = [];
+
 window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.keyIdentifier=='Enter'||e.keyCode==13){if(e.target.nodeName=='INPUT'&&e.target.type=='text'){
     e.preventDefault();
     if(e.srcElement===document.getElementById('countrySearch'))
@@ -21,7 +24,7 @@ window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.ke
     return false;
 }}},true);
 
-
+//initialization with server post requests
 var post_url = "/post/";
 var site_loaded = false;
 var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
@@ -41,9 +44,29 @@ server_post.post(post_url, postRequestJSON, function(appsToLoad) {
     applyFilters();
 });
 
+
+
 updateFilterValues();
+updateGlobalConfigArray();
 
-
+function updateGlobalConfigArray(){
+    console.log("updateGlobalConfigArray – Getting all apps from server")
+    var postRequestJSON = JSON.parse('{"functionToCall" : "getAllAppConfigs", "data" : {}}');
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(allAppConfigs) {
+        console.log("updateGlobalConfigArray – Server Response:");
+        console.log(allAppConfigs);
+        globalConfigArray = [];
+        var dummyConfig = {"dummy" : "dummy"};
+        globalConfigArray.push(dummyConfig);
+        for(var i = 0; i < allAppConfigs.appConfigs.length; i++){
+            var appConfig = allAppConfigs.appConfigs[i];
+            globalConfigArray.push(appConfig);
+        }
+        console.log("updateGlobalConfigArray – updated array:");
+        console.log(globalConfigArray);
+    });
+}
 
 
 function applyFilters()
@@ -67,6 +90,7 @@ function applyFilters()
     });
 
 }
+
 function searchApplyFilters(searchValue)
 {
     var post_url = "/post/";
@@ -132,6 +156,7 @@ function toggleGlobalView(){
     globalViewButton.classList.toggle('globalViewON');
     filters.classList.toggle("hidden");
     if(globalViewButton.classList.contains('globalViewON')){ //GLOBAL VIEW IS ON
+        updateGlobalConfigArray();
         var swapinHTML =  "<hr>";
         swapinHTML += "";
         console.log("toggleGlobalView – Global view turned on, requesting globalData from server...");
@@ -153,6 +178,7 @@ function toggleGlobalView(){
     }
 }
 function generateGlobalViewHTML(globalData){
+
     globalViewDataJSON = globalData;
     var globalView = document.createElement('div');
     globalView.className = 'globalView';
@@ -174,9 +200,11 @@ function generateGlobalViewHTML(globalData){
         appConfigs.className = "globalViewAppConfigs";
         for(var o = 0; o < globalViewDataJSON.GlobalDataApps[i].ConfigNumbers.length; o++){
             var appConfig = document.createElement('div');
-            appConfig.className = "globalViewAppConfig";
+            var configNumber = globalViewDataJSON.GlobalDataApps[i].ConfigNumbers[o];
 
-            appConfig.innerText = (globalViewDataJSON.GlobalDataApps[i].ConfigNumbers[o]);
+            appConfig.innerText = (configNumber);
+            appConfig.className = "globalViewAppConfig";
+            setConfigHover(appConfig, configNumber);
             appConfigs.appendChild(appConfig);
         }
 
@@ -186,6 +214,64 @@ function generateGlobalViewHTML(globalData){
         app.appendChild(appContents);
         globalView.appendChild(app);
     }
+}
+function setConfigHover(appConfig, configNumber){
+    appConfig.onmouseover =  function() {showAppConfigOnHover(this, configNumber)};
+    appConfig.onmouseout = function() {hideAppConfigOnHover(this, configNumber)};
+}
+function showAppConfigOnHover(appConfig, configNumber) {
+    console.log(appConfig);
+    var appConfigHoverContents = document.createElement('div');
+    appConfigHoverContents.className = 'appConfigHoverContent';
+    appConfigHoverContents.innerText = generateAppConfigHoverContents(configNumber);
+    console.log("showAppConfigOnHover – hoverContents innerHTML = " + appConfigHoverContents.innerText);
+    var configFeaturedLocs = document.createElement('div');
+    configFeaturedLocs.className = 'configFeaturedLocations';
+    configFeaturedLocs.innerHTML = '<div class=\'loading\'></div>';
+    configFeaturedLocs = configFeaturedLocs.children[0];
+    appConfigHoverContents.appendChild(configFeaturedLocs);
+
+    console.log("showAppConfigOnHover – Getting featuredLocations for config " + configNumber)
+    var postRequestText = '{"functionToCall" : "getFeaturedLocationsForConfig", "data" : {'
+        + ' "Config_ID" : "'+ configNumber + '"'
+        +'}}';
+    var postRequestJSON = JSON.parse(postRequestText);
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(featuredLocations) {
+        console.log("showAppConfigOnHover – server responded with:");
+        console.log(featuredLocations);
+        var newHTML = 'Featured Locations : ';
+        for(i in featuredLocations) {
+            newHTML += (featuredLocations[i] + ", ");
+        }
+        var parent = configFeaturedLocs.parentElement;
+        document.getElementsByClassName('loading')[0].remove();
+        parent.innerHTML+= newHTML;
+    });
+
+
+    appConfigHoverContents.classList.toggle('hidden');
+    if(appConfig.children[0] != null){
+        appConfig.children[0].remove();
+    }
+
+    appConfig.prepend(appConfigHoverContents);
+    appConfig.children[0].classList.toggle('hidden');
+}
+
+
+function hideAppConfigOnHover(appConfig) {
+    appConfig.children[0].classList.toggle('hidden');
+}
+function generateAppConfigHoverContents(configNumber){
+    console.log("generateAppConfigHoverContents – Setting appconfig contents for config #" + configNumber);
+    var appConfig = globalConfigArray[configNumber];
+    var returnString = "";
+    for (var element in appConfig) {
+        var val = appConfig[element];
+        returnString+=(element + " : " + val + "\n");
+    }
+    return returnString;
 }
 
 function toggleGlobalApp(appElement) {
@@ -212,10 +298,12 @@ function toggleGlobalApp(appElement) {
             var appConfigs = document.createElement('div');
             appConfigs.className = "globalViewAppConfigs";
             for(var o = 0; o < appData.Countries[i].ConfigNumbers.length; o++){
+                var configNumber = appData.Countries[i].ConfigNumbers[o];
                 var appConfig = document.createElement('div');
                 appConfig.className = "globalViewAppConfig";
-
                 appConfig.innerText = (appData.Countries[i].ConfigNumbers[o]);
+                setConfigHover(appConfig, configNumber);
+
                 appConfigs.appendChild(appConfig);
             }
             country.appendChild(countryTitle);
@@ -241,8 +329,8 @@ function toggleGlobalCountry(countryElement) {
         var countryData = findGlobalViewCountry(appName, countryName);
         console.log("toggleGlobalCountry – \t\tFound country data:")
         console.log(countryData);
-        debugger;
         for(var i = 0; i < countryData.operatorRows.length; i++){
+            var configNumber = countryData.operatorRows[i].Config_ID;
             console.log(countryData.operatorRows[i]);
             var operator = document.createElement('div');
             operator.className = 'globalViewOperator';
@@ -254,8 +342,8 @@ function toggleGlobalCountry(countryElement) {
 
             var operatorConfig = document.createElement('div');
             operatorConfig.className = "globalViewAppConfig";
-
-            operatorConfig.innerText = countryData.operatorRows[i].Config_ID;
+            operatorConfig.innerText = configNumber;
+            setConfigHover(operatorConfig, configNumber);
             operatorConfigs.appendChild(operatorConfig);
 
             operator.appendChild(operatorTitle);

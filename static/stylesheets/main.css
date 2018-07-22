@@ -221,7 +221,23 @@ hr{
 .hidden{
     display:none;
 }
-
+.appConfigHoverContent{
+    width: 312px;
+    background-color: white;
+    margin-left: 48px;
+    padding: 14px;
+    position: absolute;
+    z-index: 1;
+    text-align: left;
+    overflow: scroll;
+}
+.loading {
+    background-image: url("/images/loading.gif");
+    background-repeat: no-repeat;
+    background-size:100%;
+    width: 64px;
+    height: 64px;
+}
 /* =====================HEADERS AND FILTERS=========================== */
 #header{
     display: flex;
