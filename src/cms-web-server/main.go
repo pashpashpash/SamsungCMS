@@ -135,9 +135,9 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
         jsonResponse := getAllAppConfigs(requestData.Data)
         w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getFeaturedLocationsForConfig") {
-        log.Println("postHandler –\t\tgetFeaturedLocationsForConfig method request detected")
-        jsonResponse := getFeaturedLocationsForConfig(requestData.Data)
+    } else if (requestData.FunctionToCall=="getFeaturedLocations") {
+        log.Println("postHandler –\t\tgetFeaturedLocations method request detected")
+        jsonResponse := getFeaturedLocations(requestData.Data)
         w.Write([]byte(jsonResponse))
     }
 }
@@ -382,8 +382,6 @@ func getAllAppConfigs(notUsed data) ([]byte) {
         appConfigs.AppConfigs = append(appConfigs.AppConfigs, AppConfig)
     }
     allAppConfigs.Close()
-    log.Println("getAllAppConfigs –\tResponding with the following config:")
-    log.Println(appConfigs)
     jsonResponse, err := json.Marshal(appConfigs)
     checkErr(err)
     return jsonResponse
@@ -414,15 +412,14 @@ func getCountryByName(Country data) ([]byte) {
     return jsonResponse
 }
 
-func getFeaturedLocationsForConfig(Config data) ([]byte) {
-    log.Println("getFeaturedLocationsForConfig –\t\tRecieved request to get featured locations for " + Config.Config_ID)
+func getFeaturedLocations(Config data) ([]byte) {
+    log.Println("getFeaturedLocations –\tRecieved request to get featured locations for " + Config.Config_ID)
 
     var featuredLocations = []string{}
     full_query := string(`
     SELECT DISTINCT FeaturedLocationName from configurationMappings
     WHERE Config_ID="`+Config.Config_ID+`"
     `)
-    log.Println("getFeaturedLocationsForConfig –\t\tQuery: " + full_query)
     rows, err := db.Query(full_query)
     checkErr(err)
     for rows.Next() {

@@ -232,7 +232,7 @@ function showAppConfigOnHover(appConfig, configNumber) {
     appConfigHoverContents.appendChild(configFeaturedLocs);
 
     console.log("showAppConfigOnHover – Getting featuredLocations for config " + configNumber)
-    var postRequestText = '{"functionToCall" : "getFeaturedLocationsForConfig", "data" : {'
+    var postRequestText = '{"functionToCall" : "getFeaturedLocations", "data" : {'
         + ' "Config_ID" : "'+ configNumber + '"'
         +'}}';
     var postRequestJSON = JSON.parse(postRequestText);
@@ -245,7 +245,9 @@ function showAppConfigOnHover(appConfig, configNumber) {
             newHTML += (featuredLocations[i] + ", ");
         }
         var parent = configFeaturedLocs.parentElement;
-        document.getElementsByClassName('loading')[0].remove();
+        if(document.getElementsByClassName('loading')[0]!=null){
+            document.getElementsByClassName('loading')[0].remove();
+        }
         parent.innerHTML+= newHTML;
     });
 
