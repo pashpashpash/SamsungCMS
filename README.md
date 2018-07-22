@@ -17,10 +17,8 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [ ] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
 - [ ] Write a translator in go that translates ultra app configs to config.ini sections
      -  [ ] Blocked atm: Once Michal gets back he will make a simplified version of the config (2 weeks?).
-     -  [ ] While building translator, tweak db schema, initialization, addNewApp, queries. BIG refactor project...
+     -  [ ] While building translator, change db schema to include countrymappings, build new dbinitialization on top of that, addNewApp, queries. BIG refactoring project...
 - [ ] Write logic that pushes go-generated config.ini's to production (dev cluster)
--  Maybe figure out country mappings instead of just operators...
-     -  [ ] Talk to Sergey about this.
 ##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
