@@ -18,6 +18,7 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 - [ ] Write a translator in go that translates ultra app configs to config.ini sections
      -  [ ] Blocked atm: Once Michal gets back he will make a simplified version of the config (2 weeks?).
      -  [ ] While building translator, change db schema to include countrymappings, build new dbinitialization on top of that, addNewApp, queries. BIG refactoring project...
+- [ ] Make export button for the translator on site to be able to export config.ini files.
 - [ ] Write logic that pushes go-generated config.ini's to production (dev cluster)
 ##
 

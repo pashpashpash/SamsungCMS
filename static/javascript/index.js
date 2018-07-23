@@ -178,7 +178,6 @@ function toggleGlobalView(){
     }
 }
 function generateGlobalViewHTML(globalData){
-
     globalViewDataJSON = globalData;
     var globalView = document.createElement('div');
     globalView.className = 'globalView';
