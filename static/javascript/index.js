@@ -158,19 +158,14 @@ function toggleGlobalView(){
     if(globalViewButton.classList.contains('globalViewON')){ //GLOBAL VIEW IS ON
         updateGlobalConfigArray();
         var swapinHTML =  "<hr>";
-        swapinHTML += "";
         console.log("toggleGlobalView – Global view turned on, requesting globalData from server...");
         var postRequestJSON = JSON.parse('{"functionToCall" : "globalView", "data" : {}}');
         swapOutContainer.innerHTML = swapinHTML;
-        if(globalViewDataJSON === null){
-            server_post.post(post_url, postRequestJSON, function(globalData) {
-                console.log("toggleGlobalView – Success! Server returned:");
-                console.log(globalData);
-                generateGlobalViewHTML(globalData);
-            });
-        } else {
-            generateGlobalViewHTML(globalViewDataJSON);
-        }
+        server_post.post(post_url, postRequestJSON, function(globalData) {
+            console.log("toggleGlobalView – Success! Server returned:");
+            console.log(globalData);
+            generateGlobalViewHTML(globalData);
+        });
     } else {
         swapOutContainer.innerHTML = '<main><div id ="appTray"></div></main>';
         swapOutContainer.children[0].children[0].appendChild(appTray);
@@ -283,87 +278,103 @@ function toggleGlobalApp(appElement) {
     if(appElement.classList.contains('collapsed')){ //collapse app
         appElement.children[3].innerHTML="";
     } else { //expand app
-        var appData = findGlobalViewApp(appOriginalName);
-        for(var i = 0; i < appData.Countries.length; i++) {
-            var country = document.createElement('div');
-            country.className = 'globalViewCountry';
-            country.classList.add('collapsed');
-            var countryTitle = document.createElement('div');
-            countryTitle.className = 'description';
-            countryTitle.innerText = appData.Countries[i].name;
-            var downArrow = document.createElement('div');
-            downArrow.innerHTML = '<div onclick="toggleGlobalCountry(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div>'
-            downArrow = downArrow.children[0];
-            downArrow.className = "rowImage";
-            var countryContents = document.createElement('div');
-            var appConfigs = document.createElement('div');
-            appConfigs.className = "globalViewAppConfigs";
-            for(var o = 0; o < appData.Countries[i].ConfigNumbers.length; o++){
-                var configNumber = appData.Countries[i].ConfigNumbers[o];
-                var appConfig = document.createElement('div');
-                appConfig.className = "globalViewAppConfig";
-                appConfig.innerText = (appData.Countries[i].ConfigNumbers[o]);
-                setConfigHover(appConfig, configNumber);
+        var loading = document.createElement('div');
+        loading.className = 'loading';
+        appElement.children[3].prepend(loading);
+        var postRequestJSON = JSON.parse('{"functionToCall" : "globalView", "data" : {'
+        + ' "App_OriginalName" : "'+ appOriginalName + '"'
+        +'}}');
+        server_post.post(post_url, postRequestJSON, function(appData) {
+            console.log("toggleGlobalView – Success! Server returned:");
+            console.log(appData);
+            appElement.children[3].children[0].remove(); //removes loading;
+            for(var i = 0; i < appData.GlobalDataCountries.length; i++) {
+                var country = document.createElement('div');
+                country.className = 'globalViewCountry';
+                country.classList.add('collapsed');
+                var countryTitle = document.createElement('div');
+                countryTitle.className = 'description';
+                countryTitle.innerText = appData.GlobalDataCountries[i].name;
+                countryTitle.setAttribute("id", appData.GlobalDataCountries[i].Country_ID);
+                var downArrow = document.createElement('div');
+                downArrow.innerHTML = '<div onclick="toggleGlobalCountry(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div>'
+                downArrow = downArrow.children[0];
+                downArrow.className = "rowImage";
+                var countryContents = document.createElement('div');
+                var appConfigs = document.createElement('div');
+                appConfigs.className = "globalViewAppConfigs";
+                for(var o = 0; o < appData.GlobalDataCountries[i].ConfigNumbers.length; o++){
+                    var configNumber = appData.GlobalDataCountries[i].ConfigNumbers[o];
+                    var appConfig = document.createElement('div');
+                    appConfig.className = "globalViewAppConfig";
+                    appConfig.innerText = (appData.GlobalDataCountries[i].ConfigNumbers[o]);
+                    setConfigHover(appConfig, configNumber);
 
-                appConfigs.appendChild(appConfig);
+                    appConfigs.appendChild(appConfig);
+                }
+                country.appendChild(countryTitle);
+                country.appendChild(appConfigs);
+                if(appData.GlobalDataCountries[i].operatorRows != null) {
+                    country.appendChild(downArrow);
+                }
+                country.appendChild(countryContents);
+                appElement.children[3].appendChild(country);
             }
-            country.appendChild(countryTitle);
-            country.appendChild(appConfigs);
-            if(appData.Countries[i].operatorRows != null) {
-                country.appendChild(downArrow);
-            }
-            country.appendChild(countryContents);
-            appElement.children[3].appendChild(country);
-        }
+        });
     }
 }
 function toggleGlobalCountry(countryElement) {
     console.log("toggleGlobalCountry – \t\tElement clicked is");
     console.log(countryElement);
     var countryName = countryElement.children[0].innerText;
-    console.log(countryElement.parentElement.children[0].children[0]);
     var appName = countryElement.parentElement.parentElement.children[0].innerText;
+    var country_ID = countryElement.children[0].id;
     countryElement.classList.toggle('collapsed');
     if(countryElement.classList.contains('collapsed')) {
         countryElement.children[3].innerHTML = "";
     } else {
-        var countryData = findGlobalViewCountry(appName, countryName);
-        console.log("toggleGlobalCountry – \t\tFound country data:")
-        console.log(countryData);
-        for(var i = 0; i < countryData.operatorRows.length; i++){
-            var configNumber = countryData.operatorRows[i].Config_ID;
-            console.log(countryData.operatorRows[i]);
-            var operator = document.createElement('div');
-            operator.className = 'globalViewOperator';
-            var operatorTitle = document.createElement('div');
-            operatorTitle.className = 'description';
-            operatorTitle.innerText = countryData.operatorRows[i].Operator_Name;
-            var operatorConfigs = document.createElement('div');
-            operatorConfigs.className = "globalViewAppConfigs";
+        var loading = document.createElement('div');
+        loading.className = 'loading';
+        countryElement.children[3].prepend(loading);
+        var postRequestJSON = JSON.parse('{"functionToCall" : "globalView", "data" : {'
+        + ' "App_OriginalName" : "'+ appName + '",'
+        + ' "Country_ID" : "'+ country_ID + '"'
+        +'}}');
+        console.log(postRequestJSON);
+        server_post.post(post_url, postRequestJSON, function(countryData) {
+            console.log("toggleGlobalCountry – \t\tFound country data:")
+            countryElement.children[3].children[0].remove();
+            console.log(countryData);
+            for(var i = 0; i < countryData.operatorRows.length; i++){
+                console.log(countryData.operatorRows[i]);
+                var operator = document.createElement('div');
+                operator.className = 'globalViewOperator';
+                var operatorTitle = document.createElement('div');
+                operatorTitle.className = 'description';
+                operatorTitle.innerText = "(" + countryData.operatorRows[i].MCCMNC_ID + ") ";
+                operatorTitle.innerText += countryData.operatorRows[i].Operator_Name;
+                var operatorConfigs = document.createElement('div');
+                operatorConfigs.className = "globalViewAppConfigs";
 
-            var operatorConfig = document.createElement('div');
-            operatorConfig.className = "globalViewAppConfig";
-            operatorConfig.innerText = configNumber;
-            setConfigHover(operatorConfig, configNumber);
-            operatorConfigs.appendChild(operatorConfig);
+                for(var o =0; o <countryData.operatorRows[i].ConfigNumbers.length; o++) {
+                    var operatorConfig = document.createElement('div');
+                    operatorConfig.className = "globalViewAppConfig";
+                    operatorConfig.innerText = countryData.operatorRows[i].ConfigNumbers[o];
+                    setConfigHover(operatorConfig, countryData.operatorRows[i].ConfigNumbers[o]);
+                    operatorConfigs.appendChild(operatorConfig);
+                }
 
-            operator.appendChild(operatorTitle);
-            operator.appendChild(operatorConfigs);
-            countryElement.children[3].appendChild(operator);
-        }
+
+                operator.appendChild(operatorTitle);
+                operator.appendChild(operatorConfigs);
+                countryElement.children[3].appendChild(operator);
+            }
+        });
     }
-}
-function findGlobalViewApp(appName){
-    for(var i = 0; i < globalViewDataJSON.GlobalDataApps.length; i++) {
-        if (globalViewDataJSON.GlobalDataApps[i].OriginalName === appName) {
-            return globalViewDataJSON.GlobalDataApps[i];
-        }
-    }
-    return null;
 }
 function findGlobalViewCountry(appName, countryName){
     console.log("findGlobalViewCountry – \t\tSearching for country: " + appName + " | " + countryName);
-    var appData = findGlobalViewApp(appName);
+    var appData = {};//findGlobalViewApp(appName);
     console.log("findGlobalViewCountry – \t\tFound app with name  " + appName + ": ");
     console.log(appData);
     for(var i = 0; i<appData.Countries.length; i++){

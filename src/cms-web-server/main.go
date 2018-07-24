@@ -142,137 +142,217 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 type GlobalData struct {
-    GlobalDataApps []GlobalDataApp `json: "globalDataApps"`
+    GlobalDataApps []GlobalDataApp `json: "globalDataApps" `
+    GlobalDataCountries []GlobalDataCountry `json: "globalDataCountries" `
+    OperatorRows []GlobalOperatorRow `json:"operatorRows"`
 }
 type GlobalDataApp struct {
     OriginalName string `json: "originalName" db:"originalName"`
-    Countries []GlobalDataCountry `json: "countries"`
     ConfigNumbers []string `json: "configNumbers"`
 }
 type GlobalDataCountry struct {
     Country_ID string `json:"Country_ID" db:"Country_ID"`
     CountryName string `json:"name" db:"name"`
-    OperatorRows []GlobalOperatorRow `json:"operatorRows"`
     App_Config_ID string `json:"Config_ID" db: "Config_ID"`
     ConfigNumbers []string `json: "configNumbers"`
+    OperatorRows []GlobalOperatorRow `json:"operatorRows", omitempty`
 }
 type GlobalOperatorRow struct {
     MCCMNC_ID string `json: "MCCMNC_ID"`
     Operator_Name string `json: "Operator_Name"`
     App_Config_ID string `json:"Config_ID" db: "Config_ID"`
+    ConfigNumbers []string `json: "configNumbers"`
 }
 func globalView(Data data) ([]byte) {
-    log.Println("globalView –\t\tgetting global data by app from db...")
-    globalViewQuery := `SELECT DISTINCT originalName from appConfigs ORDER BY rank`
-    appList, err := db.Query(globalViewQuery)
-    checkErr(err)
-    uniqueAppList := []string{}
-    globalData := GlobalData{}
-    for appList.Next() {
-        var uniqueApp string
-        appList.Scan(&uniqueApp)
-        uniqueAppList = append(uniqueAppList, uniqueApp)
-    }
-    appList.Close()
-    for _, uniqueApp := range uniqueAppList { //for every ultra app ie 'facebook'
-        globalDataApp := GlobalDataApp{}
-        log.Println("globalView –\t\t" + uniqueApp)
-        globalDataApp.OriginalName = uniqueApp
-        //get all Countries that the app is in, and for loop through each country, checking which operators are selected. If all operators are selected, make the operatorList empty. If only part of them are selected, make operatorList contain only the selected ones.
-        globalViewQuery = `SELECT Country_ID, name from countries WHERE Country_ID in (SELECT DISTINCT Country_ID from operators WHERE MCCMNC_ID in
-        (SELECT MCCMNC_ID from configurationMappings WHERE Config_ID in
-        (SELECT Config_ID from AppConfigs WHERE originalName = '`+uniqueApp+`')))`
-        countryList, err := db.Query(globalViewQuery)
-        checkErr(err)
-        for countryList.Next() { //for each country this app exists in, fill the GlobalDataCountry inside GlobalDataApp
-            var Country_ID string
-            var CountryName string
-            var App_Config_ID string //if all operators inside country mapped to the same config
-            countryList.Scan(&Country_ID, &CountryName)
-            globalDataCountry := GlobalDataCountry{}
-            globalDataCountry.Country_ID = Country_ID
-            globalDataCountry.CountryName = CountryName
-
-
-
-            globalViewQuery = `SELECT DISTINCT Config_ID from ConfigurationMappings WHERE Config_ID in
-            (SELECT Config_ID from AppConfigs WHERE originalName = '`+uniqueApp+`')
-            AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
-            configList, err := db.Query(globalViewQuery)
+    if(Data.AppOriginalName != ""){
+        if(Data.Country_ID != "") { //appName and country specified, show operators + configs
+            log.Println("globalView –\t\tGlobalView | Operator Level")
+            globalViewQuery := `SELECT DISTINCT operators.MCCMNC_ID, operators.Operator_Name, appConfigs.Config_ID
+            from operators
+            INNER JOIN configurationMappings ON operators.MCCMNC_ID = configurationMappings.MCCMNC_ID
+            INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
+            INNER JOIN countries ON operators.Country_ID = countries.Country_ID
+            WHERE appConfigs.originalName ='`+Data.AppOriginalName+`'
+            AND countries.Country_ID = '`+Data.Country_ID+`'
+            ORDER BY operators.MCCMNC_ID`
+            log.Println("globalView –\t\tQuery = " + globalViewQuery)
+            operatorList, err := db.Query(globalViewQuery)
             checkErr(err)
-            ConfigCount := 0
-            for configList.Next() { //sets configList for app, counts number of configs
-                ConfigCount++
-                var configNumber string
-                configList.Scan(&configNumber)
-                globalDataApp.ConfigNumbers = append(globalDataApp.ConfigNumbers, configNumber)
-                globalDataCountry.ConfigNumbers = append(globalDataCountry.ConfigNumbers, configNumber)
+            globalData := GlobalData{}
+            oldMCCMNC_ID := ""
+            operator := GlobalOperatorRow{}
+            for(operatorList.Next()){
+                var newMCCMNC_ID string
+                var newOperator_Name string
+                var newConfig_ID string
+                operatorList.Scan(&newMCCMNC_ID, &newOperator_Name, &newConfig_ID)
+                if(oldMCCMNC_ID == "") { //beginning of the list
+                    operator = GlobalOperatorRow{} //initialize new operator
+                    oldMCCMNC_ID = newMCCMNC_ID
+                    operator.MCCMNC_ID = newMCCMNC_ID
+                    operator.Operator_Name = newOperator_Name
+                    operator.ConfigNumbers = append (operator.ConfigNumbers, newConfig_ID) //add configs to configList
+                } else if(newMCCMNC_ID != oldMCCMNC_ID) { //newApp
+                    globalData.OperatorRows = append(globalData.OperatorRows, operator) //add the previous operator
+                    operator = GlobalOperatorRow{} //initialize new operator
+                    operator.MCCMNC_ID = newMCCMNC_ID
+                    operator.Operator_Name = newOperator_Name
+                    operator.ConfigNumbers = append (operator.ConfigNumbers, newConfig_ID) //add configs to configList
+                    oldMCCMNC_ID = operator.MCCMNC_ID //set oldMCCMNC_ID to new operator MCCMNC_ID
+                } else if (newMCCMNC_ID == oldMCCMNC_ID){ //same operator
+                    operator.ConfigNumbers = append (operator.ConfigNumbers, newConfig_ID) //add configs to configList
+                }
             }
-            configList.Close()
-            configList, err = db.Query(globalViewQuery)
+            globalData.OperatorRows = append(globalData.OperatorRows, operator) //add the last operator
+            jsonResponse, err := json.Marshal(globalData)
             checkErr(err)
-            globalViewQuery = `
-            SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE Country_ID="`+Country_ID+`")
-            EXCEPT
-            SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE MCCMNC_ID in
+            log.Println("globalView –\t\tReturning JSON string...")
+            return jsonResponse
+        } else { //only appName specified, show countries + configs
+            //get all Countries that the app is in, and for loop through each country, checking which operators are selected. If all operators are selected, make the operatorList empty. If only part of them are selected, make operatorList contain only the selected ones.
+            globalData := GlobalData{}
+            log.Println("globalView –\t\tGlobalView | Country Level")
+            globalViewQuery := `SELECT Country_ID, name from countries WHERE Country_ID in (SELECT DISTINCT Country_ID from operators WHERE MCCMNC_ID in
             (SELECT MCCMNC_ID from configurationMappings WHERE Config_ID in
-            (SELECT Config_ID from AppConfigs WHERE originalName = '`+uniqueApp+`')
-            AND MCCMNC_ID in (SELECT MCCMNC_ID from operators where Country_ID = "`+Country_ID+`")));`
-            differenceList, err := db.Query(globalViewQuery)
+            (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')))`
+            countryList, err := db.Query(globalViewQuery)
             checkErr(err)
-            differenceCount := 0
-            for differenceList.Next() { //gets the amount of unmapped operators within a country
-                differenceCount++
-            }
+            for countryList.Next() { //for each country this app exists in, fill the GlobalDataCountry inside GlobalDataApp
+                var Country_ID string
+                var CountryName string
+                var App_Config_ID string //if all operators inside country mapped to the same config
+                countryList.Scan(&Country_ID, &CountryName)
+                globalDataCountry := GlobalDataCountry{}
+                globalDataCountry.Country_ID = Country_ID
+                globalDataCountry.CountryName = CountryName
 
-            if(ConfigCount == 1) { //only one config for whole country
-                for configList.Next() {
-                    configList.Scan(&App_Config_ID)
+
+
+                globalViewQuery = `SELECT DISTINCT Config_ID from ConfigurationMappings WHERE Config_ID in
+                (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
+                AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`')`
+                configList, err := db.Query(globalViewQuery)
+                checkErr(err)
+                ConfigCount := 0
+                for configList.Next() { //sets configList for app, counts number of configs
+                    ConfigCount++
+                    var configNumber string
+                    configList.Scan(&configNumber)
+                    globalDataCountry.ConfigNumbers = append(globalDataCountry.ConfigNumbers, configNumber)
                 }
-                if(differenceCount == 0) { //every operator is mapped
-                    globalDataCountry.App_Config_ID = App_Config_ID //sets the single config for the whole country!
-                } else { //every operator IS NOT MAPPED, but there is still only one config
-                    globalViewQuery = `SELECT DISTINCT MCCMNC_ID, operators.Operator_Name from ConfigurationMappings
-                    JOIN     operators USING (MCCMNC_ID)
-                    WHERE Config_ID = '`+App_Config_ID+`' AND MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
-                    mappedOperators, err := db.Query(globalViewQuery)
-                    checkErr(err)
-                    for mappedOperators.Next() {
-                        globalOperatorRow := GlobalOperatorRow{}
-                        mappedOperators.Scan(&globalOperatorRow.MCCMNC_ID, &globalOperatorRow.Operator_Name)
-                        globalOperatorRow.App_Config_ID = App_Config_ID
-                        globalDataCountry.OperatorRows = append(globalDataCountry.OperatorRows, globalOperatorRow)
+                configList.Close()
+                configList, err = db.Query(globalViewQuery)
+                checkErr(err)
+                globalViewQuery = `
+                SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE Country_ID="`+Country_ID+`")
+                EXCEPT
+                SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE MCCMNC_ID in
+                (SELECT MCCMNC_ID from configurationMappings WHERE Config_ID in
+                (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
+                AND MCCMNC_ID in (SELECT MCCMNC_ID from operators where Country_ID = "`+Country_ID+`")));`
+                differenceList, err := db.Query(globalViewQuery)
+                checkErr(err)
+                differenceCount := 0
+                for differenceList.Next() { //gets the amount of unmapped operators within a country
+                    differenceCount++
+                }
+
+                if(ConfigCount == 1) { //only one config for whole country
+                    for configList.Next() {
+                        configList.Scan(&App_Config_ID)
+                    }
+                    if(differenceCount == 0) { //every operator is mapped
+                        globalDataCountry.App_Config_ID = App_Config_ID //sets the single config for the whole country!
+                    } else { //every operator IS NOT MAPPED, but there is still only one config
+                        globalViewQuery = `SELECT DISTINCT MCCMNC_ID, operators.Operator_Name from ConfigurationMappings
+                        JOIN     operators USING (MCCMNC_ID)
+                        WHERE Config_ID = '`+App_Config_ID+`' AND MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
+                        mappedOperators, err := db.Query(globalViewQuery)
+                        checkErr(err)
+                        for mappedOperators.Next() {
+                            globalOperatorRow := GlobalOperatorRow{}
+                            mappedOperators.Scan(&globalOperatorRow.MCCMNC_ID, &globalOperatorRow.Operator_Name)
+                            globalOperatorRow.App_Config_ID = App_Config_ID
+                            globalDataCountry.OperatorRows = append(globalDataCountry.OperatorRows, globalOperatorRow)
+                        }
+                    }
+
+                } else { //multiple App_Config_ID's found for this country
+                    for configList.Next() { //for all possible config-id's, find the operator mapped to it, store it in globalOperatorRow
+                        configList.Scan(&App_Config_ID)
+                        globalViewQuery = `SELECT DISTINCT MCCMNC_ID, operators.Operator_Name from ConfigurationMappings
+                        JOIN     operators USING (MCCMNC_ID)
+                        WHERE Config_ID = '`+App_Config_ID+`'
+                        AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
+
+                        operatorRows, err := db.Query(globalViewQuery)
+                        checkErr(err)
+                        for operatorRows.Next() {
+                            globalOperatorRow := GlobalOperatorRow{}
+                            operatorRows.Scan(&globalOperatorRow.MCCMNC_ID, &globalOperatorRow.Operator_Name)
+                            globalOperatorRow.App_Config_ID = App_Config_ID
+                            globalDataCountry.OperatorRows = append(globalDataCountry.OperatorRows, globalOperatorRow)
+                        }
                     }
                 }
-
-            } else { //multiple App_Config_ID's found for this country
-                for configList.Next() { //for all possible config-id's, find the operator mapped to it, store it in globalOperatorRow
-                    configList.Scan(&App_Config_ID)
-                    globalViewQuery = `SELECT DISTINCT MCCMNC_ID, operators.Operator_Name from ConfigurationMappings
-                    JOIN     operators USING (MCCMNC_ID)
-                    WHERE Config_ID = '`+App_Config_ID+`'
-                    AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`');`
-
-                    operatorRows, err := db.Query(globalViewQuery)
-                    checkErr(err)
-                    for operatorRows.Next() {
-                        globalOperatorRow := GlobalOperatorRow{}
-                        operatorRows.Scan(&globalOperatorRow.MCCMNC_ID, &globalOperatorRow.Operator_Name)
-                        globalOperatorRow.App_Config_ID = App_Config_ID
-                        globalDataCountry.OperatorRows = append(globalDataCountry.OperatorRows, globalOperatorRow)
-                    }
-                }
+                globalData.GlobalDataCountries = append(globalData.GlobalDataCountries, globalDataCountry)
             }
-            globalDataApp.Countries = append(globalDataApp.Countries, globalDataCountry)
+
+            jsonResponse, err := json.Marshal(globalData)
+            checkErr(err)
+            log.Println("globalView –\t\tReturning JSON string...")
+            return jsonResponse
         }
-        globalDataApp.ConfigNumbers = uniqueNonEmptyElementsOf(globalDataApp.ConfigNumbers)
-        globalData.GlobalDataApps = append(globalData.GlobalDataApps, globalDataApp)
+    } else { //appName null, show all appNames + configs
+        globalViewQuery := `SELECT DISTINCT Config_ID, AppConfigs.originalName from configurationMappings
+        JOIN AppConfigs USING (Config_ID)
+        WHERE Config_ID in (SELECT DISTINCT Config_ID from AppConfigs)
+    	ORDER BY AppConfigs.rank;`
+        log.Println("globalView –\t\tGlobalView | App/Index Level")
+        appListWithRedundancies, err := db.Query(globalViewQuery)
+        checkErr(err)
+
+
+
+        globalData := GlobalData{}
+        app := GlobalDataApp{}
+        oldAppName := ""
+
+        for appListWithRedundancies.Next() {
+            var newAppName string
+            var newConfig_ID string
+
+            appListWithRedundancies.Scan(&newConfig_ID, &newAppName)
+            log.Println("globalView –\t\tAppList | " + newAppName + " | " +newConfig_ID)
+            if(oldAppName == "") { //beginning of the list
+                oldAppName = newAppName //set oldAppName
+                app = GlobalDataApp{} //initialize new app
+                app.OriginalName = newAppName
+                app.ConfigNumbers = append(app.ConfigNumbers, newConfig_ID) //add configs to configList
+            } else if(newAppName != oldAppName) { //newApp
+                globalData.GlobalDataApps = append(globalData.GlobalDataApps, app) //add the previous app object to array
+                oldAppName = newAppName //set old app name to newAppName
+                app = GlobalDataApp{} //initialize new app
+                app.OriginalName = newAppName
+                app.ConfigNumbers = append (app.ConfigNumbers, newConfig_ID) //add configs to configList
+            } else if (app.OriginalName == oldAppName){ //same App
+                app.ConfigNumbers = append (app.ConfigNumbers, newConfig_ID) //add configs to configList
+            }
+        }
+        appListWithRedundancies.Close()
+        globalData.GlobalDataApps = append(globalData.GlobalDataApps, app) //add the last app object to array
+
+        jsonResponse, err := json.Marshal(globalData)
+        checkErr(err)
+        log.Println("globalView –\t\tReturning JSON string...")
+        return jsonResponse
     }
-    jsonResponse, err := json.Marshal(globalData)
-    checkErr(err)
-    log.Println("globalView –\t\tReturning JSON string...")
-    return jsonResponse
+    return nil
 }
+
+
+
+
 
 func addNewConfig(Config data) ([]byte) {
     log.Println(Config.AppConfigurationMappings.Countries)
