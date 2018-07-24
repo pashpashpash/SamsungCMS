@@ -254,6 +254,7 @@ hr{
     width: 68.35%;
     cursor: pointer;
 }
+
 #headerIcon{
     background-image: url("/images/favicon.ico");
     background-repeat: no-repeat;

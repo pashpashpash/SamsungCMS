@@ -596,10 +596,7 @@ func updateFilterValues(Filters data) ([]byte) {
         }
         rows.Close()
     }
-    if(Filters.Selected_version != "star") {
-        var versionNumberRow = VersionNumberRow{"3.1"}
-        filterRows.VersionNumberRows = append(filterRows.VersionNumberRows, versionNumberRow)
-    }
+
 
     jsonResponse, err := json.Marshal(filterRows)
     checkErr(err)
