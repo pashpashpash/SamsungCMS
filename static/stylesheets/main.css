@@ -230,6 +230,7 @@ hr{
     z-index: 1;
     text-align: left;
     overflow: scroll;
+    border: 1px solid black;
 }
 .loading {
     background-image: url("/images/loading.gif");

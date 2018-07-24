@@ -6,7 +6,6 @@ var appTray = document.getElementById("allicons");
 var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 var globalViewButton = document.getElementById('globalViewButton');
-var globalViewDataJSON = null;
 
 //each int in array is mapped to corresponding appConfig
 var globalConfigArray = [];
@@ -239,25 +238,26 @@ function showAppConfigOnHover(appConfig, configNumber) {
             newHTML += (featuredLocations[i] + ", ");
         }
         var parent = configFeaturedLocs.parentElement;
-        if(document.getElementsByClassName('loading')[0]!=null){
-            document.getElementsByClassName('loading')[0].remove();
+        if(appConfig.children[0]!=null){
+            console.log(appConfig.children[0].lastChild);
+            appConfig.children[0].lastChild.remove();
         }
         parent.innerHTML+= newHTML;
     });
 
 
-    appConfigHoverContents.classList.toggle('hidden');
+    appConfigHoverContents.classList.remove('hidden');
     if(appConfig.children[0] != null){
         appConfig.children[0].remove();
     }
 
     appConfig.prepend(appConfigHoverContents);
-    appConfig.children[0].classList.toggle('hidden');
+    appConfig.children[0].classList.remove('hidden');
 }
 
 
 function hideAppConfigOnHover(appConfig) {
-    appConfig.children[0].classList.toggle('hidden');
+    appConfig.children[0].classList.add('hidden');
 }
 function generateAppConfigHoverContents(configNumber){
     console.log("generateAppConfigHoverContents – Setting appconfig contents for config #" + configNumber);
@@ -371,18 +371,6 @@ function toggleGlobalCountry(countryElement) {
             }
         });
     }
-}
-function findGlobalViewCountry(appName, countryName){
-    console.log("findGlobalViewCountry – \t\tSearching for country: " + appName + " | " + countryName);
-    var appData = {};//findGlobalViewApp(appName);
-    console.log("findGlobalViewCountry – \t\tFound app with name  " + appName + ": ");
-    console.log(appData);
-    for(var i = 0; i<appData.Countries.length; i++){
-        if(appData.Countries[i].name === countryName){
-            return appData.Countries[i];
-        }
-    }
-    return null;
 }
 function swapOut(appID)
 {

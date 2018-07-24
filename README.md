@@ -11,8 +11,6 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-- [ ] Optimize globalview query to bring down load time from 7 seconds
-     -  globalView function in main.go
 - [ ] Add login functionality + server validation
 - [ ] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
 - [ ] Write a translator in go that translates ultra app configs to config.ini sections
@@ -55,3 +53,5 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 -  [x] Reuse finished "Add Ultra App" view components to create a new "ultraApps global view" which shows a breakdown of all apps and their states (different from "ultraApps appTray view")
 -  [x] Generate configHTML for hover popups on Global View Page on site load.
      -  Query all unique app configs (with distinct originalNames), and generate a map of html elements to the app config number.
+- [x] Optimize globalview query to bring down load time from 7 seconds
+     -  globalView function in main.go
