@@ -53,12 +53,8 @@ function loadFilters(filterData){
     }
     if(filterData.versionNumberRows != null)
     {
-        console.log(filterData.versionNumberRows);
         if(filterData.versionNumberRows.length != (filterParams[0][2].options.length-1))
         {
-            console.log("VERSION FILTER NUMBER OF ROWS HIGHER");
-            console.log(filterData.versionNumberRows.length + " vs. " + filterParams[0][2].options.length);
-            console.log(filterData.versionNumberRows);
             filterParams[0][2].options.length = 0;
             filterParams[0][2].options.add(new Option("🔯", "star", true, true));
             for (var i = 0; i < filterData.versionNumberRows.length; i++) {

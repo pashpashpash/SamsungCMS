@@ -1,3 +1,34 @@
+COUNTRIES
+
+[United States]
+order = AUTO_INCREMENT
+filter = ([
+    country : us
+])
+
+
+[Poland]
+order = AUTO_INCREMENT
+filter = ([
+    country : us
+
+])
+webapps = ({
+    facebook
+})
+
+OPERATORS
+filter = ([
+    operator : 666666
+
+])
+webapps = ({
+    facebook
+})
+
+
+[777777]
+
 ; ========================  Android GO  ======================================
 [android_go_with_freebasic]
 order = 11
