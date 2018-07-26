@@ -1,0 +1,204 @@
+{ 
+    "webapps" : [
+        {
+            "id": "dailyhunt",
+            "rank": 0,
+            "name": "Dailyhunt",
+            "homeUrl": "https://samsung.dailyhunt.in/news/india/english?utm_source=Samsung&utm_medium=Android%20Go&utm_campaign=Phase%201&mode=pwa&s=Samsung&ss=AndroidGo",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+            ],
+            "hiddenUI" : [
+                "splash",
+            ],
+            "iconUrl": "ultra_apps/ic_dailyhunt_lite.png"
+        },
+        {
+            "id": "facebook",
+            "rank": 1,
+            "name": "Facebook",
+            "homeUrl": "https://m.facebook.com/?ref=s_max_bookmark",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenUI" : [
+                "folder"
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+            ],
+            "nativeApps": [
+                "com.facebook.katana"
+            ],
+            "iconUrl": "ultra_apps/facebook_ultra_color.png"
+        },
+        {
+            "id": "instagram",
+            "rank": 2,
+            "name": "Instagram",
+            "homeUrl": "https://www.instagram.com/?utm_source=samsung_max_sd",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "com.instagram.android"
+            ],
+            "iconUrl": "ultra_apps/instagram_ultra.png"
+        },
+        {
+            "id": "twitter",
+            "rank": 3,
+            "name": "Twitter",
+            "homeUrl": "https://mobile.twitter.com",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenUI" : [
+                "fab",
+                "folder"
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "privacy"
+            ],
+            "nativeApps": [
+                "com.twitter.android"
+            ],
+            "iconUrl": "ultra_apps/twitter_ultra.png"
+        },
+        {
+            "id": "wikipedia",
+            "rank": 7,
+            "name": "Wikipedia",
+            "homeUrl": "https://www.wikipedia.org",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "org.wikipedia"
+            ],
+            "iconUrl": "ultra_apps/ic_wikipedia_ultra.png"
+        },
+        {
+            "id": "nitrostreet",
+            "rank": 20,
+            "name": "Nitro StreetRun 2",
+            "homeUrl": "http://play.ludigames.com/games/nitroStreetRun2Free/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "noImages"
+            ],
+            "hiddenUI" : [
+                "fab",
+                "splash",
+            ],
+            "category" : "games",
+            "iconUrl": "ultra_apps/ic_nitrostreet_ultra.png"
+        },
+        {
+            "id": "puzzlepets",
+            "rank": 21,
+            "name": "Puzzle Pets Pairs",
+            "homeUrl": "http://play.ludigames.com/games/puzzlePetsPairsFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "noImages"
+            ],
+            "hiddenUI" : [
+                "fab",
+                "splash",
+            ],
+            "category" : "games",
+            "iconUrl": "ultra_apps/ic_puzzlepets_ultra.png"
+        },
+        {
+            "id": "paperflight",
+            "rank": 22,
+            "name": "Paper Flight",
+            "homeUrl": "http://play.ludigames.com/games/paperFlightFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "noImages"
+            ],
+            "hiddenUI" : [
+                "fab",
+                "splash",
+            ],
+            "category" : "games",
+            "iconUrl": "ultra_apps/ic_paperflight_ultra.png"
+        },
+        {
+            "id": "ludibubbles",
+            "rank": 23,
+            "name": "Ludibubbles",
+            "homeUrl": "http://play.ludigames.com/games/ludibubblesFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "noImages"
+            ],
+            "hiddenUI" : [
+                "fab",
+                "splash",
+            ],
+            "category" : "games",
+            "iconUrl": "ultra_apps/ic_ludibubbles_ultra.png"
+        },
+        {
+            "id": "moregames",
+            "rank": 24,
+            "name": "More games",
+            "homeUrl": "http://play.ludigames.com/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "noImages",
+            ],
+            "hiddenUI" : [
+                "fab",
+                "splash",
+            ],
+            "category" : "games",
+            "iconUrl": "ultra_apps/ic_more_games.png"
+        },
+        {
+            "id": "worldreader",
+            "rank": 25,
+            "name": "Worldreader",
+            "homeUrl": "https://www.worldreader.org",
+            "defaultEnabledFeatures": [
+                "savings",
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+                "noImages",
+            ],
+            "hiddenUI" : [
+                "fab"
+            ],
+            "iconUrl": "ultra_apps/ic_worldreader_ultra.png"
+        },
+    ]
+}

@@ -1,0 +1,88 @@
+; Configuration for client side testing
+
+[global]
+known filters = ({
+    "country",
+    "os_version",
+    "device_model"
+})
+
+; ========================  Android GO (India)  ======================================
+[android_go_with_freebasic_india]
+order = 111
+filter = ([
+    "product": "com.samsung.max.go",
+    "country": "in",
+    "operator": ({
+        "viettel",
+        "digicel-pa",
+        "telcel",
+        "tigo-co",
+        "viva-bo",
+        "mobifone",
+        "freebasics",
+    }),
+])
+json file = "ultra_apps_json/android_go_with_freebasic_india.json"
+
+[android_go_india]
+order = 110
+filter = ([
+    "product": "com.samsung.max.go",
+    "country": "in",
+])
+json file = "ultra_apps_json/android_go_india.json"
+
+; ========================  Android GO  ======================================
+
+[android_go_with_freebasic]
+order = 11
+filter = ([
+    "product": "com.samsung.max.go",
+    "operator": ({
+        "viettel",
+        "digicel-pa",
+        "telcel",
+        "tigo-co",
+        "viva-bo",
+        "mobifone",
+        "freebasics",
+    }),
+])
+json file = "ultra_apps_json/android_go_with_freebasic.json"
+
+[android_go]
+order = 10
+filter = ([
+    "product": "com.samsung.max.go"
+])
+json file = "ultra_apps_json/android_go.json"
+
+; ========================  Other  ======================================
+
+[global_and_preloaded_with_freebasic]
+order = 6
+filter = ([
+    "~product": "com.samsung.max.go",
+    "operator": ({
+        "viettel",
+        "digicel-pa",
+        "telcel",
+        "tigo-co",
+        "viva-bo",
+        "mobifone",
+        "freebasics",
+    }),
+])
+json file = "ultra_apps_json/global_and_preloaded_with_freebasic.json"
+
+[global_and_preloaded]
+order = 5
+filter = ([
+    "~product": "com.samsung.max.go"
+])
+json file = "ultra_apps_json/global_and_preloaded.json"
+
+[default]
+order = 0
+json file = "ultra_apps_json/default.json"

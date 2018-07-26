@@ -1,0 +1,115 @@
+{
+    "webapps" : [ 
+        {
+            "id": "facebook",
+            "rank": 1,
+            "name": "Facebook",
+            "homeUrl": "https://m.facebook.com/?ref=s_max_bookmark",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenUI" : [
+                "folder"
+            ],
+            "hiddenFeatures": [
+                "adBlock",
+            ],
+            "nativeApps": [
+                "com.facebook.katana"
+            ],
+            "iconUrl": "ultra_apps/facebook_ultra_color.png"
+        },
+        {
+            "id": "instagram",
+            "rank": 2,
+            "name": "Instagram",
+            "homeUrl": "https://www.instagram.com/?utm_source=samsung_max_sd",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "com.instagram.android"
+            ],
+            "iconUrl": "ultra_apps/instagram_ultra.png"
+        },
+        {
+            "filter" : {
+                "~country" : "in",
+            },
+            "id": "vk",
+            "rank": 4,
+            "name": "VK",
+            "homeUrl": "https://vk.com",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "com.vkontakte.android"
+            ],
+            "iconUrl": "ultra_apps/vkontakte_ultra.png"
+        },
+        {
+            "filter" : {
+                "~product": "com.samsung.max.go"
+            },
+            "id": "cricbuzz",
+            "rank": 5,
+            "name": "Cricbuzz",
+            "homeUrl": "http://m.cricbuzz.com",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "com.cricbuzz.android",
+                "com.cricbuzz.android.vernacular"
+            ],
+            "iconUrl": "ultra_apps/cricbuzz_ultra.png"
+        },
+        {
+            "id": "freebasics",
+            "rank": 6,
+            "name": "Free Basics",
+            "homeUrl": "https://freebasics.com/?ref=s_max_bookmark",
+            "hiddenFeatures": [
+                "savings",
+                "privacy",
+                "adBlock",
+                "noImages"
+            ],
+            "hiddenUI": [
+                "splash"
+            ],
+            "iconUrl": "ultra_apps/ic_free_basics.png"
+        },
+        {
+            "id": "wikipedia",
+            "rank": 7,
+            "name": "Wikipedia",
+            "homeUrl": "https://www.wikipedia.org",
+            "defaultEnabledFeatures": [
+                "savings",
+                "privacy"
+            ],
+            "hiddenFeatures": [
+                "adBlock"
+            ],
+            "nativeApps": [
+                "org.wikipedia"
+            ],
+            "iconUrl": "ultra_apps/ic_wikipedia_ultra.png"
+        },
+    ]
+}

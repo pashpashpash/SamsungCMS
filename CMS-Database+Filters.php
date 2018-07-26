@@ -1,23 +1,16 @@
-COUNTRIES
-
-[United States]
-order = AUTO_INCREMENT
+AB GROUPS
+[Nik-United States]
+order = 3
 filter = ([
     country : us
-])
-
-
-[Poland]
-order = AUTO_INCREMENT
-filter = ([
-    country : us
-
+    ab-group: nik
 ])
 webapps = ({
     facebook
 })
 
 OPERATORS
+order = 2
 filter = ([
     operator : 666666
 
@@ -25,6 +18,30 @@ filter = ([
 webapps = ({
     facebook
 })
+
+
+COUNTRIES
+
+[United States]
+order = 1
+filter = ([
+    country : us
+])
+webapps = ({
+
+})
+
+
+[Poland]
+order = 0
+filter = ([
+    country : pl
+])
+webapps = ({
+    facebook
+})
+
+
 
 
 [777777]
@@ -38,6 +55,8 @@ inherit = ({
 })
 filter = ([
     "product": "com.samsung.max.go"
+    "operator" : "abc"
+
 ])
 webapps = ({
     ([
@@ -483,7 +502,7 @@ filter = ([
     "operator": ({
         "viettel",
         "digicel-pa",
-        "telcel",
+        "telcel" :6666666 777777,
         "tigo-co",
         "viva-bo",
         "mobifone",
