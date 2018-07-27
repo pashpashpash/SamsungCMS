@@ -50,6 +50,9 @@ function loadFilters(filterData){
             filterData.operatorFilterRows[i];
             filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
         }
+    } else {
+        filterParams[0][1].options.length = 0;
+        filterParams[0][1].options.add(new Option("🔯", "star", true, true));
     }
     if(filterData.versionNumberRows != null)
     {

@@ -29,7 +29,7 @@
                 "savings",
                 "privacy"
             ],
-            "hiddenFeatures": [
+            "hiddenFeatures": [ 
                 "adBlock"
             ],
             "nativeApps": [

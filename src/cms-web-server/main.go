@@ -212,9 +212,18 @@ func globalView(Data data) ([]byte) {
             //get all Countries that the app is in, and for loop through each country, checking which operators are selected. If all operators are selected, make the operatorList empty. If only part of them are selected, make operatorList contain only the selected ones.
             globalData := GlobalData{}
             log.Println("globalView –\t\tGlobalView | Country Level")
-            globalViewQuery := `SELECT Country_ID, name from countries WHERE Country_ID in (SELECT DISTINCT Country_ID from operators WHERE MCCMNC_ID in
-            (SELECT MCCMNC_ID from configurationMappings WHERE Config_ID in
-            (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')))`
+            globalViewQuery := `SELECT DISTINCT Country_ID, name from countries
+            WHERE Country_ID in (SELECT DISTINCT Country_ID
+            from configurationMappings WHERE Config_ID in
+            (SELECT Config_ID from appConfigs
+            where originalName = '`+Data.AppOriginalName+`'))
+
+            OR  Country_ID in (SELECT DISTINCT Country_ID
+            from operators WHERE Country_ID in
+            (SELECT Country_ID from configurationMappings
+            WHERE Config_ID in (SELECT Config_ID from appConfigs
+            where originalName = '`+Data.AppOriginalName+`')))`
+
             countryList, err := db.Query(globalViewQuery)
             checkErr(err)
             for countryList.Next() { //for each country this app exists in, fill the GlobalDataCountry inside GlobalDataApp
@@ -230,7 +239,8 @@ func globalView(Data data) ([]byte) {
 
                 globalViewQuery = `SELECT DISTINCT Config_ID from ConfigurationMappings WHERE Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND  MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`')`
+                AND  (MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`') OR Country_ID = '`+Country_ID+`')`
+                log.Println("globalView –\t\tQuery looks like : " + globalViewQuery)
                 configList, err := db.Query(globalViewQuery)
                 checkErr(err)
                 ConfigCount := 0
@@ -661,12 +671,13 @@ func loadAppTray(Filters data) ([]byte) {
     country_code := string("")
     operator_query := string("")
     version_query := string("")
-
+    country_query := string("")
 
     if(Filters.Selected_operator != "star") { //more specific than country
-        operator_query = `AND MCCMNC_ID like "%` + Filters.Selected_operator +`%"`
+        operator_query = `WHERE MCCMNC_ID like "%` + Filters.Selected_operator +`%"`
     } else if (Filters.Selected_country != "star") {
         country_code = Filters.Selected_country
+        country_query = `AND Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%`+country_code+`%") `
     }
     if(Filters.Searchfield_text != ""){ //search field is NOT empty
         searchfield_query = `AND originalName like "%` + Filters.Searchfield_text +`%"`
@@ -679,7 +690,7 @@ func loadAppTray(Filters data) ([]byte) {
     homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
     JOIN     configurationMappings USING (Config_ID)
     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
-    MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%`+country_code+`%"` + operator_query + `)) `+ searchfield_query + " " + version_query + `
+    MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators ` + operator_query + `)) `+ country_query + searchfield_query + " " + version_query + `
     AND originalName like "%`+Filters.Searchfield_text+`%"`+`
     GROUP BY rank
     `)

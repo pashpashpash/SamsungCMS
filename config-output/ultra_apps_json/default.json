@@ -5,7 +5,7 @@
             "rank": 2,
             "name": "Instagram",
             "homeUrl": "https://www.instagram.com/?utm_source=samsung_max_sd",
-            "defaultEnabledFeatures": [
+            "defaultEnabledFeatures": [ 
                 "savings",
                 "privacy"
             ],
@@ -19,7 +19,7 @@
         },
         {
             "filter" : {
-                "~country" : "in", 
+                "~country" : "in",
             },
             "id": "vk",
             "rank": 4,

@@ -2,12 +2,12 @@
     "webapps" : [
         {
             "id": "dailyhunt",
-            "rank": 0, 
+            "rank": 0,
             "name": "Dailyhunt",
             "homeUrl": "https://samsung.dailyhunt.in/news/india/english?utm_source=Samsung&utm_medium=Android%20Go&utm_campaign=Phase%201&mode=pwa&s=Samsung&ss=AndroidGo",
             "defaultEnabledFeatures": [
                 "savings",
-            ],
+            ], 
             "hiddenFeatures": [
                 "adBlock",
             ],

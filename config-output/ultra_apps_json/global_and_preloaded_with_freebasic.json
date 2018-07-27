@@ -1,8 +1,8 @@
 {
-    "webapps" : [ 
+    "webapps" : [
         {
             "id": "facebook",
-            "rank": 1,
+            "rank": 1, 
             "name": "Facebook",
             "homeUrl": "https://m.facebook.com/?ref=s_max_bookmark",
             "defaultEnabledFeatures": [

@@ -117,38 +117,42 @@ function searchApplyFilters(searchValue)
 //================================== APP TRAY PAGE ========================================//
 //input an app container + a json of webapps, and this func will display them in the container with proper nesting
 function showWebapps(appTray, webapps) {
-    var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
-    for(var o= 0; o < webapps.length; o++){
-        console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
-        webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-            webAppsHTML += ("<div id='deleteIcon' ");
-            webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-            webAppsHTML += ("></div>");
-            webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-            webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-            webAppsHTML += (" />");
+    if (webapps != null) {
+        var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
+        for(var o= 0; o < webapps.length; o++){
+            console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
+            webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
+                webAppsHTML += ("<div id='deleteIcon' ");
+                webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+                webAppsHTML += ("></div>");
+                webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
+                webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
+                webAppsHTML += (" />");
 
-            webAppsHTML += ("<div id='iconText'>");
-                webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+                webAppsHTML += ("<div id='iconText'>");
+                    webAppsHTML += (webapps[o].ModifiableName + " Ultra");
+                webAppsHTML += ("</div>");
             webAppsHTML += ("</div>");
-        webAppsHTML += ("</div>");
-    }
-    webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
-    webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
-    webAppsHTML += (" onclick=\"showAddAppPopup()\"");
-    webAppsHTML += (" />");
-    webAppsHTML += '<div class="addAppPopup">'
-        webAppsHTML += '<div class= "contents">'
+        }
+        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+        webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
+        webAppsHTML += (" onclick=\"showAddAppPopup()\"");
+        webAppsHTML += (" />");
+        webAppsHTML += '<div class="addAppPopup">'
+            webAppsHTML += '<div class= "contents">'
+            webAppsHTML += '</div>';
         webAppsHTML += '</div>';
-    webAppsHTML += '</div>';
-    webAppsHTML += ("<div id='iconText'>");
-    webAppsHTML += ("Create new Ultra App");
-    webAppsHTML += ("</div>");
-    webAppsHTML += ("</div>");
+        webAppsHTML += ("<div id='iconText'>");
+        webAppsHTML += ("Create new Ultra App");
+        webAppsHTML += ("</div>");
+        webAppsHTML += ("</div>");
 
 
 
-    appTray.innerHTML = (webAppsHTML);
+        appTray.innerHTML = (webAppsHTML);
+    } else {
+        appTray.innerHTML = "";
+    }
 }
 
 function toggleGlobalView(){
