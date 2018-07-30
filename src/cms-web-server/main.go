@@ -156,12 +156,14 @@ type GlobalDataCountry struct {
     App_Config_ID string `json:"Config_ID" db: "Config_ID"`
     ConfigNumbers []string `json: "configNumbers"`
     OperatorRows []GlobalOperatorRow `json:"operatorRows", omitempty`
+    ActiveConfigs []string `json : "activeConfigs", omitempty`
 }
 type GlobalOperatorRow struct {
     MCCMNC_ID string `json: "MCCMNC_ID"`
     Operator_Name string `json: "Operator_Name"`
     App_Config_ID string `json:"Config_ID" db: "Config_ID"`
     ConfigNumbers []string `json: "configNumbers"`
+    ActiveConfig string `json : "activeConfig", omitempty`
 }
 func globalView(Data data) ([]byte) {
     if(Data.AppOriginalName != ""){
@@ -240,7 +242,6 @@ func globalView(Data data) ([]byte) {
                 globalViewQuery = `SELECT DISTINCT Config_ID from ConfigurationMappings WHERE Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
                 AND  (MCCMNC_ID in (SELECT MCCMNC_ID from operators WHERE Country_ID = '`+Country_ID+`') OR Country_ID = '`+Country_ID+`')`
-                log.Println("globalView –\t\tQuery looks like : " + globalViewQuery)
                 configList, err := db.Query(globalViewQuery)
                 checkErr(err)
                 ConfigCount := 0
@@ -251,6 +252,59 @@ func globalView(Data data) ([]byte) {
                     globalDataCountry.ConfigNumbers = append(globalDataCountry.ConfigNumbers, configNumber)
                 }
                 configList.Close()
+
+                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
+                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "folder" ORDER BY id DESC LIMIT 1`
+                activeConfigs, err := db.Query(globalViewQuery)
+                checkErr(err)
+                for activeConfigs.Next() {
+                    var configNumber string
+                    activeConfigs.Scan(&configNumber)
+                    if(configNumber != "") {
+                        globalDataCountry.ActiveConfigs = AppendIfMissing(globalDataCountry.ActiveConfigs, configNumber)
+                    }
+                }
+                activeConfigs.Close()
+                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
+                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "homescreen" ORDER BY id DESC LIMIT 1`
+                activeConfigs, err = db.Query(globalViewQuery)
+                checkErr(err)
+                for activeConfigs.Next() {
+                    var configNumber string
+                    activeConfigs.Scan(&configNumber)
+                    if(configNumber != "") {
+                        globalDataCountry.ActiveConfigs = AppendIfMissing(globalDataCountry.ActiveConfigs, configNumber)
+                    }
+                }
+                activeConfigs.Close()
+                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
+                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "max" ORDER BY id DESC LIMIT 1`
+                activeConfigs, err = db.Query(globalViewQuery)
+                checkErr(err)
+                for activeConfigs.Next() {
+                    var configNumber string
+                    activeConfigs.Scan(&configNumber)
+                    if(configNumber != "") {
+                        globalDataCountry.ActiveConfigs = AppendIfMissing(globalDataCountry.ActiveConfigs, configNumber)
+                    }
+                }
+                activeConfigs.Close()
+                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
+                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "maxGo" ORDER BY id DESC LIMIT 1`
+                activeConfigs, err = db.Query(globalViewQuery)
+                checkErr(err)
+                for activeConfigs.Next() {
+                    var configNumber string
+                    activeConfigs.Scan(&configNumber)
+                    if(configNumber != "") {
+                        globalDataCountry.ActiveConfigs = AppendIfMissing(globalDataCountry.ActiveConfigs, configNumber)
+                    }
+                }
+                activeConfigs.Close()
                 configList, err = db.Query(globalViewQuery)
                 checkErr(err)
                 globalViewQuery = `
@@ -596,7 +650,7 @@ func updateFilterValues(Filters data) ([]byte) {
         }
         rows.Close()
 
-        full_query = string(`SELECT DISTINCT versionNumber from versions`) //version query -- all distinct versions by value
+        full_query = string(`SELECT DISTINCT versionNumber from appConfigs`) //version query -- all distinct versions by value
         rows, err = db.Query(full_query)
         checkErr(err)
         for rows.Next() {
@@ -687,8 +741,9 @@ func loadAppTray(Filters data) ([]byte) {
     }
     full_query := string(`
     SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
-    homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+    homeUrl, rank, featuredLocations.featuredLocationName FROM appConfigs
     JOIN     configurationMappings USING (Config_ID)
+    JOIN     featuredLocations USING (Config_ID)
     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators ` + operator_query + `)) `+ country_query + searchfield_query + " " + version_query + `
     AND originalName like "%`+Filters.Searchfield_text+`%"`+`
@@ -828,13 +883,13 @@ func GetProjectRoot() string {
 	return root
 }
 
-func AppendIfMissing(slice []Webapp, app Webapp) []Webapp {
+func AppendIfMissing(slice []string, i string) []string {
     for _, ele := range slice {
-        if ele.ID == app.ID {
-  return slice
+        if ele == i {
+            return slice
         }
     }
-    return append(slice, app)
+    return append(slice, i)
 }
 
 func getAllApps() []Webapp {

@@ -87,6 +87,9 @@ body {
         padding-right: 4px;
         padding-bottom: 4px;
 }
+.active {
+    background: lightskyblue;
+}
 /* =====================APP DETAILS SECTION=========================== */
 .center{
     margin: auto;

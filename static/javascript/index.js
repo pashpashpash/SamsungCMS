@@ -307,13 +307,18 @@ function toggleGlobalApp(appElement) {
                 var countryContents = document.createElement('div');
                 var appConfigs = document.createElement('div');
                 appConfigs.className = "globalViewAppConfigs";
+
                 for(var o = 0; o < appData.GlobalDataCountries[i].ConfigNumbers.length; o++){
                     var configNumber = appData.GlobalDataCountries[i].ConfigNumbers[o];
                     var appConfig = document.createElement('div');
                     appConfig.className = "globalViewAppConfig";
                     appConfig.innerText = (appData.GlobalDataCountries[i].ConfigNumbers[o]);
+                    for(var j = 0; j < appData.GlobalDataCountries[i].ActiveConfigs.length; j++){
+                        if(configNumber === appData.GlobalDataCountries[i].ActiveConfigs[j]){
+                            appConfig.classList.add("active");
+                        }
+                    }
                     setConfigHover(appConfig, configNumber);
-
                     appConfigs.appendChild(appConfig);
                 }
                 country.appendChild(countryTitle);
