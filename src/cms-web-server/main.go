@@ -836,7 +836,7 @@ func loadAppTray(Filters data) ([]byte) {
         operator_query = `WHERE MCCMNC_ID like "%` + Filters.Selected_operator +`%"`
     } else if (Filters.Selected_country != "star") {
         country_code = Filters.Selected_country
-        country_query = `OR Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%`+country_code+`%") `
+        country_query = `AND Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%`+country_code+`%") `
     }
     if(Filters.Selected_country =="star") {
         country_query = `OR Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%%")`
