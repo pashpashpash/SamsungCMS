@@ -88,7 +88,6 @@ type data struct {
     AppConfigurationMappings struct {
         Countries           []string `json:"Countries, omitempty"`
         Operators           []string `json:"Operators, omitempty"`
-        FeaturedLocations   []string `json:"FeaturedLocations, omitempty"`
     } `json:"App_ConfigurationMappings"`
     DefaultEnabledFeatures struct {
         Savings           bool `json:"Savings, omitempty"`
@@ -102,6 +101,12 @@ type data struct {
         Adblock           bool `json:"Adblock, omitempty"`
         NoImages          bool `json:"NoImages, omitempty"`
     } `json:"DefaultHiddenFeatures"`
+    FeaturedLocations struct {
+        Homescreen           bool `json:"Homescreen, omitempty"`
+        Folder           bool `json:"Folder, omitempty"`
+        Max           bool `json:"Max, omitempty"`
+        MaxGo          bool `json:"MaxGo, omitempty"`
+    } `json:"FeaturedLocations"`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -439,7 +444,74 @@ func globalView(Data data) ([]byte) {
 
 
 
+func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () {
+        statement := string("")
+        //enabledfeatures
+        if(Config.DefaultEnabledFeatures.Savings ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "savings"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultEnabledFeatures.Privacy ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "privacy"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultEnabledFeatures.Adblock ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "adBlock"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultEnabledFeatures.NoImages ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "noImages"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        //hiddenfeatures
+        if(Config.DefaultHiddenFeatures.Savings ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "savings"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenFeatures.Privacy ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "privacy"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenFeatures.Adblock ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "adBlock"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenFeatures.NoImages ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "noImages"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
 
+        //featuredLocations
+        if(Config.FeaturedLocations.Folder ==true) {
+            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"folder"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.FeaturedLocations.Homescreen ==true) {
+            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"homescreen"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.FeaturedLocations.Max ==true) {
+            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"max"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.FeaturedLocations.MaxGo ==true) {
+            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"maxGo"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+
+}
 
 func addNewConfig(Config data) ([]byte) {
     log.Println(Config.AppConfigurationMappings.Countries)
@@ -447,6 +519,7 @@ func addNewConfig(Config data) ([]byte) {
     log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName)
     log.Println(Config.DefaultEnabledFeatures)
     log.Println(Config.DefaultHiddenFeatures)
+    log.Println(Config.FeaturedLocations)
 
     statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, versionNumber) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppVersionNumber + `"` + `)`)
     res, err := db.Exec(statement)
@@ -457,48 +530,7 @@ func addNewConfig(Config data) ([]byte) {
     var New_App_Config_ID = id
     New_App_Config_ID_string := strconv.Itoa(int(New_App_Config_ID))
 
-    //enabledfeatures
-    if(Config.DefaultEnabledFeatures.Savings ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "savings"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    if(Config.DefaultEnabledFeatures.Privacy ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "privacy"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    if(Config.DefaultEnabledFeatures.Adblock ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "adBlock"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    if(Config.DefaultEnabledFeatures.NoImages ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "noImages"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    //hiddenfeatures
-    if(Config.DefaultHiddenFeatures.Savings ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "savings"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    if(Config.DefaultHiddenFeatures.Privacy ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "privacy"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    if(Config.DefaultHiddenFeatures.Adblock ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "adBlock"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
-    if(Config.DefaultHiddenFeatures.NoImages ==true) {
-        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "noImages"` + `)`)
-        _, err := db.Exec(statement)
-        checkErr(err)
-    }
+    addNewFeaturesAndProducts(Config, New_App_Config_ID_string) //handles featuredLocations Table inserts and featureMappings table inserts
 
     for _, country := range Config.AppConfigurationMappings.Countries {
         mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
@@ -506,13 +538,6 @@ func addNewConfig(Config data) ([]byte) {
         log.Println("addNewConfig –\t"+mappingstatement)
         res, err = db.Exec(mappingstatement)
         checkErr(err)
-        for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-            mappingstatement = string(`INSERT INTO featuredLocations (Config_ID, FeaturedLocationName)
-            VALUES (`+New_App_Config_ID_string+`, "`+location+`")`)
-            log.Println("addNewConfig –\t"+mappingstatement)
-            res, err = db.Exec(mappingstatement)
-            checkErr(err)
-        }
     }
     for _, operator := range Config.AppConfigurationMappings.Operators {
 
@@ -520,14 +545,6 @@ func addNewConfig(Config data) ([]byte) {
         log.Println("addNewConfig –\t\t"+mappingstatement)
         res, err = db.Exec(mappingstatement)
         checkErr(err)
-        for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-            log.Println("addNewConfig –\t\t" +operator +" | "+ location)
-            mappingstatement = string(`INSERT INTO featuredLocations (Config_ID, FeaturedLocationName)
-            VALUES (`+New_App_Config_ID_string+`, "`+location+`")`)
-            log.Println("addNewConfig –\t"+mappingstatement)
-            res, err = db.Exec(mappingstatement)
-            checkErr(err)
-        }
     }
     if(Config.AppExistsEverywhere) {
         mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
@@ -535,14 +552,6 @@ func addNewConfig(Config data) ([]byte) {
         log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
         res, err = db.Exec(mappingstatement)
         checkErr(err)
-        for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-
-            mappingstatement = string(`INSERT INTO featuredLocations (Config_ID, FeaturedLocationName)
-            VALUES (`+New_App_Config_ID_string+`, "`+location+`")`)
-            log.Println("addNewConfig –\t"+mappingstatement)
-            res, err = db.Exec(mappingstatement)
-            checkErr(err)
-        }
     }
 
 

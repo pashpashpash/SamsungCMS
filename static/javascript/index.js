@@ -504,14 +504,18 @@ function addUltraApp(form)
         +'},'
         + ' "App_NativeURL" : "'+ form.children[0].children[5].value + '",'
         + ' "App_IconURL" : "'+ form.children[0].children[6].value + '",'
+        + ' "FeaturedLocations" : { '
+            + ' "Homescreen" : '+form.children[0].children[7].children[0].children[0].checked+','
+            + ' "Folder" : '+form.children[0].children[7].children[1].children[0].checked+','
+            + ' "Max" : '+form.children[0].children[7].children[2].children[0].checked+','
+            + ' "MaxGo" : '+form.children[0].children[7].children[3].children[0].checked+''
+        +'},'
         + ' "App_ExistsEverywhere" : '+ existsEverywhere + ','
         + ' "App_ConfigurationMappings" : { '
             + ' "Countries" : ['
                 + countriesList
             + '], "Operators" : ['
                 + operatorsList
-            + '], "FeaturedLocations" : ['
-                + '"maxGo", "homescreen", "max", "folder"'
             + ']'
         +'}'
     +'}}');
@@ -712,6 +716,27 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '</div>';
     addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
     addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
+
+    addAppViewHTML += '<div id ="featuredLocations">';
+        addAppViewHTML += 'Featured Locations';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="homescreen" checked />';
+            addAppViewHTML += '<label for="homescreen">Homescreen</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="folder" checked />';
+            addAppViewHTML += '<label for="folder">Folder</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="max" checked />';
+            addAppViewHTML += '<label for="max">Max</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="maxGo" checked />';
+            addAppViewHTML += '<label for="maxGo">MaxGo</label>';
+        addAppViewHTML += '</div>';
+    addAppViewHTML += '</div>';
+
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id="configurationMapping">';
         addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search..">'

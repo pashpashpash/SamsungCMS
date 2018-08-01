@@ -551,7 +551,7 @@ img#icon {
 .addAppPopup .closeButton:hover {
     background-color: #F1F1F1;
 }
-#addAppEnabledFeatures, #addAppHiddenFeatures{
+#addAppEnabledFeatures, #addAppHiddenFeatures, #featuredLocations{
     margin-left: 18px;
     margin-right: 18px;
 }
