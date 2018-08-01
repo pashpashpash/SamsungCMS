@@ -90,6 +90,18 @@ type data struct {
         Operators           []string `json:"Operators, omitempty"`
         FeaturedLocations   []string `json:"FeaturedLocations, omitempty"`
     } `json:"App_ConfigurationMappings"`
+    DefaultEnabledFeatures struct {
+        Savings           bool `json:"Savings, omitempty"`
+        Privacy           bool `json:"Privacy, omitempty"`
+        Adblock           bool `json:"Adblock, omitempty"`
+        NoImages          bool `json:"NoImages, omitempty"`
+    } `json:"DefaultEnabledFeatures"`
+    DefaultHiddenFeatures struct {
+        Savings           bool `json:"Savings, omitempty"`
+        Privacy           bool `json:"Privacy, omitempty"`
+        Adblock           bool `json:"Adblock, omitempty"`
+        NoImages          bool `json:"NoImages, omitempty"`
+    } `json:"DefaultHiddenFeatures"`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -221,11 +233,11 @@ func globalView(Data data) ([]byte) {
             where originalName = '`+Data.AppOriginalName+`'))
 
             OR  Country_ID in (SELECT DISTINCT Country_ID
-            from operators WHERE Country_ID in
-            (SELECT Country_ID from configurationMappings
+            from operators WHERE MCCMNC_ID in
+            (SELECT MCCMNC_ID from configurationMappings
             WHERE Config_ID in (SELECT Config_ID from appConfigs
             where originalName = '`+Data.AppOriginalName+`')))`
-
+            log.Println("globalView –\t\tQuery looks like...\n" + globalViewQuery)
             countryList, err := db.Query(globalViewQuery)
             checkErr(err)
             for countryList.Next() { //for each country this app exists in, fill the GlobalDataCountry inside GlobalDataApp
@@ -253,9 +265,12 @@ func globalView(Data data) ([]byte) {
                 }
                 configList.Close()
 
-                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
+                INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
+                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "folder" ORDER BY id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "homescreen" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err := db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -266,9 +281,12 @@ func globalView(Data data) ([]byte) {
                     }
                 }
                 activeConfigs.Close()
-                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
+                INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
+                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "homescreen" ORDER BY id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "folder" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err = db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -279,9 +297,12 @@ func globalView(Data data) ([]byte) {
                     }
                 }
                 activeConfigs.Close()
-                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
+                INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
+                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "max" ORDER BY id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "max" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err = db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -292,9 +313,12 @@ func globalView(Data data) ([]byte) {
                     }
                 }
                 activeConfigs.Close()
-                globalViewQuery = `SELECT Config_ID from ConfigurationMappings WHERE Config_ID in
+                globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
+                INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
+                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND FeaturedLocationName = "maxGo" ORDER BY id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "maxGo" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err = db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -305,8 +329,7 @@ func globalView(Data data) ([]byte) {
                     }
                 }
                 activeConfigs.Close()
-                configList, err = db.Query(globalViewQuery)
-                checkErr(err)
+
                 globalViewQuery = `
                 SELECT * FROM (SELECT DISTINCT MCCMNC_ID from operators WHERE Country_ID="`+Country_ID+`")
                 EXCEPT
@@ -422,6 +445,8 @@ func addNewConfig(Config data) ([]byte) {
     log.Println(Config.AppConfigurationMappings.Countries)
     log.Println(Config.AppConfigurationMappings.Operators)
     log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName)
+    log.Println(Config.DefaultEnabledFeatures)
+    log.Println(Config.DefaultHiddenFeatures)
 
     statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, versionNumber) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppVersionNumber + `"` + `)`)
     res, err := db.Exec(statement)
@@ -432,30 +457,89 @@ func addNewConfig(Config data) ([]byte) {
     var New_App_Config_ID = id
     New_App_Config_ID_string := strconv.Itoa(int(New_App_Config_ID))
 
+    //enabledfeatures
+    if(Config.DefaultEnabledFeatures.Savings ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "savings"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    if(Config.DefaultEnabledFeatures.Privacy ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "privacy"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    if(Config.DefaultEnabledFeatures.Adblock ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "adBlock"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    if(Config.DefaultEnabledFeatures.NoImages ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "noImages"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    //hiddenfeatures
+    if(Config.DefaultHiddenFeatures.Savings ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "savings"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    if(Config.DefaultHiddenFeatures.Privacy ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "privacy"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    if(Config.DefaultHiddenFeatures.Adblock ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "adBlock"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+    if(Config.DefaultHiddenFeatures.NoImages ==true) {
+        statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "noImages"` + `)`)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
 
     for _, country := range Config.AppConfigurationMappings.Countries {
+        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
+        VALUES (`+New_App_Config_ID_string+`, '`+country+`')`)
+        log.Println("addNewConfig –\t"+mappingstatement)
+        res, err = db.Exec(mappingstatement)
+        checkErr(err)
         for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName)
-            SELECT `+New_App_Config_ID_string+`, MCCMNC_ID, "`+location+`"  FROM operators WHERE Country_ID = '`+country+`';`)
+            mappingstatement = string(`INSERT INTO featuredLocations (Config_ID, FeaturedLocationName)
+            VALUES (`+New_App_Config_ID_string+`, "`+location+`")`)
             log.Println("addNewConfig –\t"+mappingstatement)
             res, err = db.Exec(mappingstatement)
             checkErr(err)
         }
     }
     for _, operator := range Config.AppConfigurationMappings.Operators {
+
+        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID) VALUES (`+New_App_Config_ID_string+`, "`+operator+`")`)
+        log.Println("addNewConfig –\t\t"+mappingstatement)
+        res, err = db.Exec(mappingstatement)
+        checkErr(err)
         for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
             log.Println("addNewConfig –\t\t" +operator +" | "+ location)
-            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName) VALUES (`+New_App_Config_ID_string+`, "`+operator+`", "`+location+`")`)
-            log.Println("addNewConfig –\t\t"+mappingstatement)
+            mappingstatement = string(`INSERT INTO featuredLocations (Config_ID, FeaturedLocationName)
+            VALUES (`+New_App_Config_ID_string+`, "`+location+`")`)
+            log.Println("addNewConfig –\t"+mappingstatement)
             res, err = db.Exec(mappingstatement)
             checkErr(err)
         }
     }
     if(Config.AppExistsEverywhere) {
+        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
+        SELECT `+New_App_Config_ID_string+`, Country_ID  FROM countries`)
+        log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
+        res, err = db.Exec(mappingstatement)
+        checkErr(err)
         for _, location := range Config.AppConfigurationMappings.FeaturedLocations {
-            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID, FeaturedLocationName)
-            SELECT `+New_App_Config_ID_string+`, MCCMNC_ID, "`+location+`"  FROM operators`)
-            log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
+
+            mappingstatement = string(`INSERT INTO featuredLocations (Config_ID, FeaturedLocationName)
+            VALUES (`+New_App_Config_ID_string+`, "`+location+`")`)
+            log.Println("addNewConfig –\t"+mappingstatement)
             res, err = db.Exec(mappingstatement)
             checkErr(err)
         }
@@ -561,7 +645,7 @@ func getFeaturedLocations(Config data) ([]byte) {
 
     var featuredLocations = []string{}
     full_query := string(`
-    SELECT DISTINCT FeaturedLocationName from configurationMappings
+    SELECT DISTINCT FeaturedLocationName from featuredLocations
     WHERE Config_ID="`+Config.Config_ID+`"
     `)
     rows, err := db.Query(full_query)
@@ -600,19 +684,40 @@ func updateFilterValues(Filters data) ([]byte) {
     var filterRows = FilterRows{}
 
     if(Filters.Selected_operator != "star") { //if operator is not star, I don't need to update country dropdown
+
         full_query := string(`
         SELECT countries.Country_ID, countries.name from operators
         JOIN     countries USING (Country_ID)
-        WHERE MCCMNC_ID="`+Filters.Selected_operator+`"
+        WHERE MCCMNC_ID="`+Filters.Selected_operator+`" LIMIT 1
         `)
         rows, err := db.Query(full_query)
         checkErr(err)
+        country_ID := string("")
         for rows.Next() {
             var countryFilterRow = CountryFilterRow{}
             rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
-            filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
+            country_ID = countryFilterRow.Value
+            if(Filters.Selected_country == "star") {
+                filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
+            }
         }
         rows.Close()
+
+        full_query = string(`
+            SELECT MCCMNC_ID, Operator_Name from operators
+            WHERE Country_ID = "`+country_ID+`"
+        `)
+        rows, err = db.Query(full_query)
+        checkErr(err)
+
+        //operator query here, returns rows
+        for rows.Next() {
+            var operatorFilterRow = OperatorFilterRow{}
+            rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
+            filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
+        }
+        rows.Close()
+
     } else if (Filters.Selected_country != "star") { //operator IS star, country is NOT star. Thus we need to update operator dropdown
         full_query := string(`
             SELECT MCCMNC_ID, Operator_Name from operators
@@ -731,7 +836,10 @@ func loadAppTray(Filters data) ([]byte) {
         operator_query = `WHERE MCCMNC_ID like "%` + Filters.Selected_operator +`%"`
     } else if (Filters.Selected_country != "star") {
         country_code = Filters.Selected_country
-        country_query = `AND Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%`+country_code+`%") `
+        country_query = `OR Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%`+country_code+`%") `
+    }
+    if(Filters.Selected_country =="star") {
+        country_query = `OR Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%%")`
     }
     if(Filters.Searchfield_text != ""){ //search field is NOT empty
         searchfield_query = `AND originalName like "%` + Filters.Searchfield_text +`%"`

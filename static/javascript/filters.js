@@ -3,12 +3,15 @@ var selects = document.getElementsByTagName('select');
 var searchField = document.getElementsByClassName('search')[0];
 var filters = document.getElementById('filters');
 //time to initialize (load in filter values)
-
+var last_operator;
+var last_country;
 
 function updateFilterValues() {
     var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
     var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
+    var last_operator = selected_operator;
+    var last_country = selected_country;
     var postRequestJSON = JSON.parse('{"functionToCall" : "updateFilterValues", "data" : {'
     + ' "Selected_country" : "'+ selected_country + '",'
     + ' "Selected_operator" : "'+ selected_operator + '",'
@@ -44,12 +47,32 @@ function loadFilters(filterData){
     }
     if(filterData.operatorFilterRows != null)
     {
-        filterParams[0][1].options.length = 0;
-        filterParams[0][1].options.add(new Option("🔯", "star", true, true));
-        for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
-            filterData.operatorFilterRows[i];
-            filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+        if(filterData.countryFilterRows===null){
+            filterParams[0][1].options.length = 0;
+            filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+            for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
+                filterData.operatorFilterRows[i];
+                filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+            }
+        } else { //if country also not null, that means operator was pressed first, so just update operator list while keeping same selection
+            if(filterData.countryFilterRows.length===1) {
+                filterParams[0][1].options.length = 0;
+                for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
+                    filterData.operatorFilterRows[i];
+                    filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                }
+                filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+            } else {
+                filterParams[0][1].options.length = 0;
+                filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
+                    filterData.operatorFilterRows[i];
+                    filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                }
+            }
         }
+
+
     } else {
         filterParams[0][1].options.length = 0;
         filterParams[0][1].options.add(new Option("🔯", "star", true, true));

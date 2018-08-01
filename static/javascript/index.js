@@ -313,9 +313,11 @@ function toggleGlobalApp(appElement) {
                     var appConfig = document.createElement('div');
                     appConfig.className = "globalViewAppConfig";
                     appConfig.innerText = (appData.GlobalDataCountries[i].ConfigNumbers[o]);
-                    for(var j = 0; j < appData.GlobalDataCountries[i].ActiveConfigs.length; j++){
-                        if(configNumber === appData.GlobalDataCountries[i].ActiveConfigs[j]){
-                            appConfig.classList.add("active");
+                    if(appData.GlobalDataCountries[i].ActiveConfigs != null) {
+                        for(var j = 0; j < appData.GlobalDataCountries[i].ActiveConfigs.length; j++){
+                            if(configNumber === appData.GlobalDataCountries[i].ActiveConfigs[j]){
+                                appConfig.classList.add("active");
+                            }
                         }
                     }
                     setConfigHover(appConfig, configNumber);
@@ -323,7 +325,9 @@ function toggleGlobalApp(appElement) {
                 }
                 country.appendChild(countryTitle);
                 country.appendChild(appConfigs);
-                if(appData.GlobalDataCountries[i].operatorRows != null) {
+                if(appData.GlobalDataCountries[i].ActiveConfigs === null ) {
+                    country.appendChild(downArrow);
+                } else if(appData.GlobalDataCountries[i].ActiveConfigs.length != appData.GlobalDataCountries[i].ConfigNumbers.length) {
                     country.appendChild(downArrow);
                 }
                 country.appendChild(countryContents);
@@ -479,11 +483,25 @@ function addUltraApp(form)
     }
     countriesList = countriesList.replace(/,\s*$/, "");
     operatorsList = operatorsList.replace(/,\s*$/, "");
+    console.log(form.children[0].children[3]);
+    console.log(form.children[0].children[4]);
     var json = ('{"functionToCall" : "addNewConfig", "data" : {'
         + ' "App_ModifiableName" : "'+ form.children[0].children[0].value+ '",'
         + ' "App_OriginalName" : "'+ form.children[0].children[0].value.toLowerCase() + '",'
         + ' "App_Rank" : "'+ form.children[0].children[1].value + '",'
         + ' "App_HomeURL" : "'+ form.children[0].children[2].value + '",'
+        + ' "DefaultEnabledFeatures" : { '
+            + ' "Savings" : '+form.children[0].children[3].children[0].children[0].checked+','
+            + ' "Privacy" : '+form.children[0].children[3].children[1].children[0].checked+','
+            + ' "Adblock" : '+form.children[0].children[3].children[2].children[0].checked+','
+            + ' "NoImages" : '+form.children[0].children[3].children[3].children[0].checked+''
+        +'},'
+        + ' "DefaultHiddenFeatures" : { '
+            + ' "Savings" : '+form.children[0].children[4].children[0].children[0].checked+','
+            + ' "Privacy" : '+form.children[0].children[4].children[1].children[0].checked+','
+            + ' "Adblock" : '+form.children[0].children[4].children[2].children[0].checked+','
+            + ' "NoImages" : '+form.children[0].children[4].children[3].children[0].checked+''
+        +'},'
         + ' "App_NativeURL" : "'+ form.children[0].children[5].value + '",'
         + ' "App_IconURL" : "'+ form.children[0].children[6].value + '",'
         + ' "App_ExistsEverywhere" : '+ existsEverywhere + ','
