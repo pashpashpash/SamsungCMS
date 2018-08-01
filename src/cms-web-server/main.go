@@ -842,7 +842,7 @@ func loadAppTray(Filters data) ([]byte) {
         country_query = `OR Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%%")`
     }
     if(Filters.Searchfield_text != ""){ //search field is NOT empty
-        searchfield_query = `AND originalName like "%` + Filters.Searchfield_text +`%"`
+        searchfield_query = ` AND originalName like "%` + Filters.Searchfield_text +`%"`
     }
     if(Filters.Selected_version != "star") {
         version_query = `AND versionNumber >= ` + Filters.Selected_version +``
@@ -852,9 +852,8 @@ func loadAppTray(Filters data) ([]byte) {
     homeUrl, rank, featuredLocations.featuredLocationName FROM appConfigs
     JOIN     configurationMappings USING (Config_ID)
     JOIN     featuredLocations USING (Config_ID)
-    WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
-    MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators ` + operator_query + `)) `+ country_query + searchfield_query + " " + version_query + `
-    AND originalName like "%`+Filters.Searchfield_text+`%"`+`
+    WHERE ((Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
+    MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators ` + operator_query + `))) `+ country_query + ")" + searchfield_query + " " + version_query + `
     GROUP BY rank
     `)
     log.Println("loadAppTray –\t\tQuery looks like : " + full_query)
