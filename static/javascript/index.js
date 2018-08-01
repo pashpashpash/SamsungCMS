@@ -19,6 +19,9 @@ window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.ke
     } else if(e.srcElement===document.getElementsByClassName('search')[0]) {
         console.log("searchForApp");
         applyFilters();
+    } else if (e.srcElement===document.getElementById('operatorSearch')) {
+        console.log("searchForOperator");
+        displayOperatorSearchResults(document.getElementById('operatorSearch').value);
     }
     return false;
 }}},true);
@@ -446,45 +449,52 @@ function addUltraApp(form)
     console.log("addUltraApp – Adding " + form.children[0].children[0].value + " Ultra for the current filter configuration. (Not implemented yet...)");
     var countriesList= "";
     var operatorsList = "";
-    // console.log(configMappings.children[0].textContent);
-    var configMappings = form.children[1].children[1];
+    var operatorGroupList = "";
+    var configMappings = form.children[1].children[0].children[1];
+    var operatorGroupMappings = form.children[1].children[1].children[1];
     var existsEverywhere = false;
-    if(configMappings.children[0].textContent === "ALL COUNTRIES"){ //insert app globally
-        console.log("addUltraApp – ALL COUNTRIES DETECTED");
-        existsEverywhere = true;
-    }
-    else {
-        for(var i = 0; i < configMappings.children.length; i++) { //iterates through all bubbles
-            var allOperatorsChecked = true;
-
-            if(configMappings.children[i].children.length > 2) { //operators specified
-                for(var o = 0; o < configMappings.children[i].children[2].children.length; o++){ //iterates through all operators, looking 4 unchecked
-                    if(!configMappings.children[i].children[2].children[o].classList.contains("checked")) {
-                        console.log(configMappings.children[i].children[2].children[o].textContent);
-                        allOperatorsChecked = false;
-                        console.log("addUltraApp – Not all operators in " + configMappings.children[i].children[2].children[o].textContent +" are checked, adding specified operators to operatorList." )
-                    }
-                }
-            }
-            if(allOperatorsChecked) {
-                console.log("addUltraApp – Adding " + configMappings.children[i].children[0].textContent + "to list of countries");
-                countriesList += ("\""+configMappings.children[i].id+"\"" + ", ");
-            } else {
-                for(var o = 0; o < configMappings.children[i].children[2].children.length; o++){ //iterates through all operators,
-                    if(configMappings.children[i].children[2].children[o].classList.contains("checked")) {
-                        console.log("addUltraApp – " + configMappings.children[i].children[2].children[o].textContent);
-                        operatorsList += ("\""+configMappings.children[i].children[2].children[o].id+"\"" + ", ");
-                    }
-                }
-            }
+    if(configMappings.children[0]!=null) { //stuff exists inside of countrySearchResults
+        if(configMappings.children[0].textContent === "ALL COUNTRIES"){ //insert app globally
+            console.log("addUltraApp – ALL COUNTRIES DETECTED");
+            existsEverywhere = true;
         }
+        else {
+            for(var i = 0; i < configMappings.children.length; i++) { //iterates through all bubbles
+                var allOperatorsChecked = true;
 
-        console.log("addUltraApp – Countries List: " + countriesList + " | Operators List: " + operatorsList );
+                if(configMappings.children[i].children.length > 2) { //operators specified
+                    for(var o = 0; o < configMappings.children[i].children[2].children.length; o++){ //iterates through all operators, looking 4 unchecked
+                        if(!configMappings.children[i].children[2].children[o].classList.contains("checked")) {
+                            console.log(configMappings.children[i].children[2].children[o].textContent);
+                            allOperatorsChecked = false;
+                            console.log("addUltraApp – Not all operators in " + configMappings.children[i].children[2].children[o].textContent +" are checked, adding specified operators to operatorList." )
+                        }
+                    }
+                }
+                if(allOperatorsChecked) {
+                    console.log("addUltraApp – Adding " + configMappings.children[i].children[0].textContent + "to list of countries");
+                    countriesList += ("\""+configMappings.children[i].id+"\"" + ", ");
+                } else {
+                    for(var o = 0; o < configMappings.children[i].children[2].children.length; o++){ //iterates through all operators,
+                        if(configMappings.children[i].children[2].children[o].classList.contains("checked")) {
+                            console.log("addUltraApp – " + configMappings.children[i].children[2].children[o].textContent);
+                            operatorsList += ("\""+configMappings.children[i].children[2].children[o].id+"\"" + ", ");
+                        }
+                    }
+                }
+            }
+
+
+            console.log("addUltraApp – Countries List: " + countriesList + " | Operators List: " + operatorsList );
+        }
     }
+    for(var i = 0; i < operatorGroupMappings.children.length; i++) {
+        operatorGroupList += ("\""+operatorGroupMappings.children[i].children[0].innerText+"\"" + ", ")
+    }
+
     countriesList = countriesList.replace(/,\s*$/, "");
     operatorsList = operatorsList.replace(/,\s*$/, "");
-    console.log(form.children[0].children[3]);
-    console.log(form.children[0].children[4]);
+    operatorGroupList = operatorGroupList.replace(/,\s*$/, "");
     var json = ('{"functionToCall" : "addNewConfig", "data" : {'
         + ' "App_ModifiableName" : "'+ form.children[0].children[0].value+ '",'
         + ' "App_OriginalName" : "'+ form.children[0].children[0].value.toLowerCase() + '",'
@@ -516,6 +526,8 @@ function addUltraApp(form)
                 + countriesList
             + '], "Operators" : ['
                 + operatorsList
+            + '], "OperatorGroups" : ['
+                + operatorGroupList
             + ']'
         +'}'
     +'}}');
@@ -739,8 +751,14 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
 
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id="configurationMapping">';
-        addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search..">'
-        addAppViewHTML += '<div class="countrySearchResults"><div class="rowValue">ALL COUNTRIES</div></div>'
+        addAppViewHTML += '<div id="countryMapping">';
+            addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search for Country...">'
+            addAppViewHTML += '<div class="countrySearchResults"><div class="rowValue">ALL COUNTRIES</div></div>'
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="operatorMapping">';
+            addAppViewHTML += '<input class="search" id="operatorSearch" type="text" placeholder="Search for Operator Group..">'
+            addAppViewHTML += '<div class="operatorSearchResults"></div>'
+        addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
     addAppViewHTML += '<input type="submit" value="Submit"></form>';
     return addAppViewHTML;
@@ -763,15 +781,16 @@ function displayCountrySearchResults(countrySearchFieldText){
             console.log("displayCountrySearchResults – GOT COUNTRY");
             if(country.name != "")//only want to do things if real country
             {
-                if(countrySearchResults.children[0].textContent === "ALL COUNTRIES")
-                {
-                    console.log("displayCountrySearchResults – 'All countries' bubble detected, deleting it")
-                    console.log("displayCountrySearchResults – Country returned from search is not null, adding bubble")
-                    countrySearchResults.innerHTML = ""; //get rid of all countries if valid country
-                    console.log("Contents:");
-                    console.log(country);
+                if(countrySearchResults.children[0]!=null){
+                    if(countrySearchResults.children[0].textContent === "ALL COUNTRIES")
+                    {
+                        console.log("displayCountrySearchResults – 'All countries' bubble detected, deleting it")
+                        console.log("displayCountrySearchResults – Country returned from search is not null, adding bubble")
+                        countrySearchResults.innerHTML = ""; //get rid of all countries if valid country
+                        console.log("Contents:");
+                        console.log(country);
+                    }
                 }
-
                 var countryBubbleHTML = getCountryBubbleHTML(country);
 
                 console.log("displayCountrySearchResults – Adding to the countrySearchResults html the following bubble:");
@@ -781,10 +800,54 @@ function displayCountrySearchResults(countrySearchFieldText){
         });
     }
 }
+function displayOperatorSearchResults(operatorSearchFieldText){
+    console.log("displayOperatorSearchResults – User input: " + operatorSearchFieldText);
+    var operatorSearchResults = document.getElementsByClassName("operatorSearchResults")[0];
+    var countrySearchResults = document.getElementsByClassName("countrySearchResults")[0];
+    operatorBubbleExists = false;
+    for(var i = 0; i < operatorSearchResults.children.length; i++) {
+        if(operatorSearchResults.children[i].textContent===operatorSearchFieldText) {
+            operatorBubbleExists = true;
+            console.log("displayOperatorSearchResults – Operator bubble for " +operatorSearchFieldText +" already exits!");
+            break;
+        }
+    }
+    if(operatorSearchFieldText != ""  && !operatorBubbleExists)//only want to do things if textfield isn't empty, and bubble doens't already exist
+    {
+        console.log("displayOperatorSearchResults – getting operator by GroupName: "+ operatorSearchFieldText);
+        getOperatorGroupByName(operatorSearchFieldText, function(operatorRows){
+            var operator_group;
+
+            if(operatorRows.operatorRows!=null) {
+                console.log("displayOperatorSearchResults – GOT Operators");
+                console.log(operatorRows);
+                console.log(operatorRows);
+                operator_group = operatorRows.operatorRows[0].Operator_Group_Name;
+            }
+            if(operator_group != "") {
+                var operatorBubbleHTML = getOperatorBubbleHTML(operator_group);
+
+                console.log("displayOperatorSearchResults – Adding to the operatorSearchResults html the following bubble:");
+                console.log(operatorBubbleHTML);
+                operatorSearchResults.innerHTML += operatorBubbleHTML;
+                countrySearchResults.innerHTML = "";
+            }
+        });
+    }
+}
+
 function getCountryBubbleHTML(country){
     var returnHTML = "";
     returnHTML += '<div class="rowValue" id="'+country.Country_ID+'"><div class="countryBubbleTitle">'+country.name+'</div><div class="rowImage" onClick="toggleCountryBubble(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div>'
     return returnHTML;
+}
+function getOperatorBubbleHTML(operator_group) {
+    var returnHTML = "";
+    returnHTML += '<div class="rowValue" id="'+operator_group+'"><div class="operatorBubbleTitle">'+operator_group+'</div><div class="rowImage" onClick="toggleOperatorBubble(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div></div>'
+    return returnHTML;
+}
+function toggleOperatorBubble(operatorBubble) {
+    console.log("toggleOperatorBubble – NOT IMPLEMENTED YET");
 }
 function toggleCountryBubble(countryBubble) {
     console.log("toggleCountryBubble – BUBBLE CLICKED:");
@@ -799,8 +862,9 @@ function toggleCountryBubble(countryBubble) {
               break;
             }
         }
-        operatorElement.remove();
-
+        if(operatorElement != null) {
+            operatorElement.remove();
+        }
     }
     else { //now Expanded
         var postRequestJSON = JSON.parse('{"functionToCall" : "getOperatorsByCountryID", "data" : {'
@@ -810,13 +874,16 @@ function toggleCountryBubble(countryBubble) {
         server_post.post(post_url, postRequestJSON, function(operators) {
             console.log("toggleCountryBubble – Recieved the following JSON: ");
             console.log(operators);
+
                 var html = "";
                 html+= ("<div class = 'operators'>");
-                for(var i = 0; i < operators.operatorRows.length; i++){
-                    var operator = operators.operatorRows[i];
-                    // if(operator.Operator_Name!=""){ //should probably get rid of this check, and get rid of null entries in DB
-                        html+= ("<div value='"+operator.Operator_Name+"' id ='"+operator.MCCMNC_ID+"' class='operator checked' onClick='toggleOperator(this);'>"+operator.Operator_Name + " (" +operator.MCCMNC_ID+")</div>");
-                    // }
+                if(operators.operatorRows != null) {
+                    for(var i = 0; i < operators.operatorRows.length; i++){
+                        var operator = operators.operatorRows[i];
+                        // if(operator.Operator_Name!=""){ //should probably get rid of this check, and get rid of null entries in DB
+                            html+= ("<div value='"+operator.Operator_Name+"' id ='"+operator.MCCMNC_ID+"' class='operator checked' onClick='toggleOperator(this);'>"+operator.Operator_Name + " (" +operator.MCCMNC_ID+") </div>");
+                        // }
+                    }
                 }
                 html+= ("</div>");
                 countryBubble.innerHTML += html;
@@ -838,6 +905,19 @@ function getCountryByName(countryName, functionUsingCountry){
         console.log("getCountryByName – Recieved the following JSON: ");
         console.log(countryRow);
         functionUsingCountry(countryRow);
+    });
+}
+function getOperatorGroupByName(operatorName, functionUsingOperator){
+    var operator = {"hi" : "hello"};
+
+    var postRequestJSON = JSON.parse('{"functionToCall" : "getOperatorGroupByName", "data" : {'
+    + ' "Operator_Group_Name" : "'+ operatorName + '"'
+    +'}}');
+
+    server_post.post(post_url, postRequestJSON, function(operatorRows) {
+        console.log("getOperatorGroupByName – Recieved the following JSON: ");
+        console.log(operatorRows);
+        functionUsingOperator(operatorRows);
     });
 }
 

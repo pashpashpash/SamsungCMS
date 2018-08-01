@@ -40,7 +40,29 @@ func initDB(name string) (*sql.DB) {
 
     // should be changed to initialize only OUR list of operators
     log.Println("initDB –\t\tInitializing operators table with temporary MCC table data...")
-    _, err = db.Exec(`INSERT or IGNORE  INTO operators (MCCMNC_ID, Operator_Name, Country_ID, Group_Name) SELECT CAST(mytable.MCCMNC_ID AS TEXT), Operator_Name, Country_ID, mytable2.Group_Name FROM mytable INNER JOIN mytable2 ON mytable.MCCMNC_ID = mytable2.MCCMNC_ID`)
+    _, err = db.Exec(`INSERT or IGNORE  INTO operators (MCCMNC_ID, Operator_Name, Country_ID, Operator_Group_Name) SELECT CAST(mytable.MCCMNC_ID AS TEXT), Operator_Name, Country_ID, mytable2.Operator_Group_Name FROM mytable INNER JOIN mytable2 ON mytable.MCCMNC_ID = mytable2.MCCMNC_ID`)
+    checkErr(err)
+
+    log.Println("initDB –\t\tExtracting Group_Name column from operators table and respective MCCMNC_ID and putting into operatorGroups table")
+    _, err = db.Exec(`INSERT or IGNORE  INTO operatorGroups (Operator_Group_Name, MCCMNC_ID) SELECT operators.Operator_Group_Name, MCCMNC_ID FROM operators`)
+    checkErr(err)
+
+    log.Println("initDB –\t\tDeleting Operator_Group_Name column from operators table")
+    _, err = db.Exec(`BEGIN TRANSACTION`)
+    checkErr(err)
+    _, err = db.Exec(`CREATE TEMPORARY TABLE operators_backup(MCCMNC_ID, Operator_Name, Country_ID)`)
+    checkErr(err)
+    _, err = db.Exec(`INSERT INTO operators_backup SELECT MCCMNC_ID, Operator_Name, Country_ID FROM operators`)
+    checkErr(err)
+    _, err = db.Exec(`DROP TABLE operators`)
+    checkErr(err)
+    _, err = db.Exec(`CREATE TABLE operators(MCCMNC_ID, Operator_Name, Country_ID)`)
+    checkErr(err)
+    _, err = db.Exec(`INSERT INTO operators SELECT MCCMNC_ID, Operator_Name, Country_ID FROM operators_backup;`)
+    checkErr(err)
+    _, err = db.Exec(`DROP TABLE operators_backup;`)
+    checkErr(err)
+    _, err = db.Exec(`COMMIT;`)
     checkErr(err)
 
     log.Println("initDB –\t\tInitializing countries table with temporary MCC table data...")
@@ -270,46 +292,46 @@ func loadConfigTables(db *sql.DB) {
 
 
     // =============================== (Config_ID = 5) Facebook [global_and_preloaded_with_freebasic] ==================================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
 
     // ========================== (Config_ID = 1) Instagram [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
     // ========================== (Config_ID = 2) vKontakte [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID != "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID != "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID != "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 3) Cricbuzz [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
     // ========================== (Config_ID* = 6) Free Basics [global_and_preloaded_with_freebasic] =============================//
@@ -317,29 +339,29 @@ func loadConfigTables(db *sql.DB) {
     _, err = statement.Exec("freebasics", "Free Basics", "ultra_apps/ic_free_basics.png","https://freebasics.com/?ref=s_max_bookmark", "6" , "3.1")
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
     _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
     _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
     _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
     checkErr(err)
 
     // ========================== (Config_ID = 4) Wikipedia [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
     // ========================== (Config_ID* = 7) Facebook [android_go] =============================//
@@ -403,39 +425,39 @@ func loadConfigTables(db *sql.DB) {
     checkErr(err)
 
     // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
     // ========================== (Config_ID = 8) Instagram [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
     // ========================== (Config_ID = 9) Twitter [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") `)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     checkErr(err)
 
     // ========================== (Config_ID = 10) vKontakte [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 10, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics" ) AND Country_ID != "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 10, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics" )) AND Country_ID != "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 7) Freebasics [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics")`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
     checkErr(err)
 
     // ========================== (Config_ID = 6) Freebasics [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics")`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
     checkErr(err)
 
     // ========================== (Config_ID = 11) Wikipedia [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics")`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
     checkErr(err)
 
     // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics")`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
     checkErr(err)
 
     // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics")`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
     checkErr(err)
 
     // ========================== (Config_ID* = 13) DailyHunt [android_go_india] =============================//
@@ -519,51 +541,51 @@ func loadConfigTables(db *sql.DB) {
     checkErr(err)
 
     // ========================== (Config_ID = 13) DailyHunt [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 13, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 13, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 8) Instagram [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 9) Twitter [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 6) Free Basics [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 11) Wikipedia [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 14) Nitrostreet [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 14, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 14, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 15) PuzzlePets [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 15, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 15, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 16) PaperFlight [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 16, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 16, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 17) Ludibubbles [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 17, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 17, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 18) Moregames [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 18, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 18, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 
     // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE (Group_Name = "freebasics" OR Group_Name = "viettel" OR Group_Name = "digicel-pa" OR Group_Name = "telcel" OR Group_Name = "tigo-co" OR Group_Name = "viva-bo" OR Group_Name = "mobifone" OR Group_Name = "freebasics") AND Country_ID = "in"`)
+    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
     checkErr(err)
 }
 
@@ -584,12 +606,17 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("DROP TABLE IF EXISTS operators")
 
     log.Println( "createTables –\tCreating operators table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS operators ( MCCMNC_ID TEXT PRIMARY KEY, Operator_Name TEXT, Group_Name TEXT, Country_ID TEXT, FOREIGN KEY(Country_ID) REFERENCES countries(Country_ID) )")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS operators ( MCCMNC_ID TEXT PRIMARY KEY, Operator_Name TEXT, Operator_Group_Name TEXT, Country_ID TEXT,  FOREIGN KEY(Country_ID) REFERENCES countries(Country_ID) )")
     _, err = stmt.Exec()
     checkErr(err)
 
-    log.Println("createTables –\tDropping versions table if exists (NEED TO GET RID OF IT ONCE, delete line of code later)...")
-    _, err = db.Exec("DROP TABLE IF EXISTS versions")
+    log.Println("createTables –\tDropping operatorGroups table if exists...")
+    _, err = db.Exec("DROP TABLE IF EXISTS operatorGroups")
+
+    log.Println( "createTables –\tCreating operatorGroups table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS operatorGroups ( id INTEGER PRIMARY KEY AUTOINCREMENT, Operator_Group_Name TEXT, MCCMNC_ID TEXT, FOREIGN KEY(MCCMNC_ID) REFERENCES operators(MCCMNC_ID) )")
+    _, err = stmt.Exec()
+    checkErr(err)
 
     log.Println("createTables –\tDropping appConfigs table if exists...")
     _, err = db.Exec("DROP TABLE IF EXISTS appConfigs")
@@ -644,7 +671,7 @@ func createMobileCountryCodeDB(db *sql.DB){
     checkErr(err)
     stmt, _ = db.Prepare(`CREATE TABLE IF NOT EXISTS mytable2(
         MCCMNC_ID            INTEGER  PRIMARY KEY
-        ,Group_Name      VARCHAR(72)
+        ,Operator_Group_Name      VARCHAR(72)
         )`)
     _, err = stmt.Exec()
     checkErr(err)
@@ -652,7 +679,7 @@ func createMobileCountryCodeDB(db *sql.DB){
     //OUR OPERATORS
     freebasics:=[...]string{"338050","342050","344930","35850","36269","37001","374130","376050","40409","40418","40436","40450","40452","40467","40485","41004","41006","41401","41601","41603","41805","41820","41840","41882","42800","42891","42898","42899","45603","45605","45606","47001","47002","47202","51001","51010","51021","51401","51501","51502","51503","51505","52004","52099","53703","54101","60203","60303","60802","60910","61105","61205","61402","61502","61503","61602","61603","61807","62002","62003","62006","62120","62160","62203","62401","62501","62502","62803","62901","63086","63089","63104","63310","63401","63406","63513","63514","63903","64002","64004","64005", "64301","64501","64502","64503","64602","65001","65010","70402","70602","732001","732130","74603"}
     att_mx:=[...]string{"33401","334010","334050","334090"}
-    stmt, err = db.Prepare(`INSERT OR IGNORE INTO mytable2 (Group_Name, MCCMNC_ID) VALUES (?,?)`)
+    stmt, err = db.Prepare(`INSERT OR IGNORE INTO mytable2 (Operator_Group_Name, MCCMNC_ID) VALUES (?,?)`)
     checkErr(err)
     _, err = stmt.Exec("alegro-ec", "74002")
     checkErr(err)

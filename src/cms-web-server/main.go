@@ -75,6 +75,7 @@ type data struct {
     Searchfield_text string `json:Searchfield_text, string, omitempty`
     App_name string `json:App_name, string, omitempty`
     Country_Name string `json:name, string, omitempty`
+    Operator_Group_Name string `json:Operator_Group_Name, string, omitempty`
     Country_ID string `json:Country_ID, string, omitempty`
     Config_ID string `json:"Config_ID"`
     AppModifiableName        string `json:"App_ModifiableName"`
@@ -88,6 +89,7 @@ type data struct {
     AppConfigurationMappings struct {
         Countries           []string `json:"Countries, omitempty"`
         Operators           []string `json:"Operators, omitempty"`
+        OperatorGroups      []string `json:"OperatorGroups, omitempty"`
     } `json:"App_ConfigurationMappings"`
     DefaultEnabledFeatures struct {
         Savings           bool `json:"Savings, omitempty"`
@@ -155,6 +157,10 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
     } else if (requestData.FunctionToCall=="getFeaturedLocations") {
         log.Println("postHandler –\t\tgetFeaturedLocations method request detected")
         jsonResponse := getFeaturedLocations(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getOperatorGroupByName") {
+        log.Println("postHandler –\t\tgetOperatorGroupByName method request detected")
+        jsonResponse := getOperatorGroupByName(requestData.Data)
         w.Write([]byte(jsonResponse))
     }
 }
@@ -514,9 +520,10 @@ func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () 
 }
 
 func addNewConfig(Config data) ([]byte) {
+    log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName)
     log.Println(Config.AppConfigurationMappings.Countries)
     log.Println(Config.AppConfigurationMappings.Operators)
-    log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName)
+    log.Println(Config.AppConfigurationMappings.OperatorGroups)
     log.Println(Config.DefaultEnabledFeatures)
     log.Println(Config.DefaultHiddenFeatures)
     log.Println(Config.FeaturedLocations)
@@ -553,6 +560,12 @@ func addNewConfig(Config data) ([]byte) {
         res, err = db.Exec(mappingstatement)
         checkErr(err)
     }
+    for _, operatorGroup := range Config.AppConfigurationMappings.OperatorGroups {
+        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT `+New_App_Config_ID_string+`, MCCMNC_ID FROM operatorGroups WHERE Operator_Group_Name = "`+operatorGroup+`"`)
+        log.Println("addNewConfig –\t\t"+mappingstatement)
+        res, err = db.Exec(mappingstatement)
+        checkErr(err)
+    }
 
 
     var returnResult = ResultMessage{"SUCCESS"}
@@ -564,20 +577,13 @@ type ResultMessage struct {
     Result string `json:"result"`
 }
 
-type OperatorRows struct {
-    OperatorRows []OperatorRow `json:"operatorRows"`
-}
-type OperatorRow struct {
-    MCCMNC_ID string `json: MCCMNC_ID`
-    Operator_Name string `json: Operator_Name`
-    Country_ID string `json: Country_ID`
-}
+
 func getOperatorsByCountryID(Country data) ([]byte) {
     log.Println("getOperatorsByCountryID –\tRecieved request to get operators in " + Country.Country_ID)
 
     var operatorRows = OperatorRows{}
     full_query := string(`
-    SELECT MCCMNC_ID, Operator_Name, Country_ID from operators
+    SELECT MCCMNC_ID, Operator_Name, Country_ID,  from operators
     WHERE Country_ID="`+Country.Country_ID+`"
     ORDER BY Operator_Name`)
     rows, err := db.Query(full_query)
@@ -645,6 +651,37 @@ func getCountryByName(Country data) ([]byte) {
     rows.Close()
 
     jsonResponse, err := json.Marshal(countryRow)
+    checkErr(err)
+    return jsonResponse
+}
+type OperatorRows struct {
+    OperatorRows []OperatorRow `json:"operatorRows"`
+}
+type OperatorRow struct {
+    MCCMNC_ID string `json: MCCMNC_ID`
+    Operator_Name string `json: Operator_Name`
+    Country_ID string `json: Country_ID`
+    Operator_Group_Name string `json: "Country_ID, omitempty"`
+}
+func getOperatorGroupByName(Operator data) ([]byte) {
+    log.Println("getOperatorGroupByName –\tRecieved request to get operator by " + Operator.Operator_Group_Name)
+
+    var operatorRows = OperatorRows{}
+    full_query := string(`
+    SELECT MCCMNC_ID, Operator_Name, Country_ID, operatorGroups.Operator_Group_Name from operators
+    JOIN operatorGroups USING (MCCMNC_ID)
+    WHERE operatorGroups.Operator_Group_Name="`+Operator.Operator_Group_Name+`"
+    ORDER BY Operator_Name`)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    for rows.Next() {
+        var operatorRow = OperatorRow{}
+        rows.Scan(&operatorRow.MCCMNC_ID, &operatorRow.Operator_Name, &operatorRow.Country_ID, &operatorRow.Operator_Group_Name)
+        operatorRows.OperatorRows = append(operatorRows.OperatorRows, operatorRow)
+    }
+    rows.Close()
+
+    jsonResponse, err := json.Marshal(operatorRows)
     checkErr(err)
     return jsonResponse
 }
