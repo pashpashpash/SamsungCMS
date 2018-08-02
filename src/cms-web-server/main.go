@@ -75,8 +75,11 @@ type data struct {
     Searchfield_text string `json:Searchfield_text, string, omitempty`
     App_name string `json:App_name, string, omitempty`
     Country_Name string `json:name, string, omitempty`
+    OperatorName string `json:Operator_Name, string, omitempty`
+    MCCMNC_ID string  `json:MCCMNC_ID, string, omitempty`
     Operator_Group_Name string `json:Operator_Group_Name, string, omitempty`
     Country_ID string `json:Country_ID, string, omitempty`
+    Country_MCC string `json:Country_MCC, string, omitempty`
     Config_ID string `json:"Config_ID"`
     AppModifiableName        string `json:"App_ModifiableName"`
     AppOriginalName          string `json:"App_OriginalName"`
@@ -150,6 +153,10 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\tglobalView method request detected")
         jsonResponse := globalView(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="settingsView") {
+        log.Println("postHandler –\t\tsettingsView method request detected")
+        jsonResponse := settingsView(requestData.Data)
+        w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="getAllAppConfigs") {
         log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
         jsonResponse := getAllAppConfigs(requestData.Data)
@@ -161,6 +168,18 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
     } else if (requestData.FunctionToCall=="getOperatorGroupByName") {
         log.Println("postHandler –\t\tgetOperatorGroupByName method request detected")
         jsonResponse := getOperatorGroupByName(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="submitNewOperator") {
+        log.Println("postHandler –\t\tsubmitNewOperator method request detected")
+        jsonResponse := submitNewOperator(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="deleteOperator") {
+        log.Println("postHandler –\t\tdeleteOperator method request detected")
+        jsonResponse := deleteOperator(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="submitNewCountry") {
+        log.Println("postHandler –\t\tsubmitNewCountry method request detected")
+        jsonResponse := submitNewCountry(requestData.Data)
         w.Write([]byte(jsonResponse))
     }
 }
@@ -187,6 +206,67 @@ type GlobalOperatorRow struct {
     App_Config_ID string `json:"Config_ID" db: "Config_ID"`
     ConfigNumbers []string `json: "configNumbers"`
     ActiveConfig string `json : "activeConfig", omitempty`
+}
+type SettingsViewData struct {
+    OperatorGroups []OperatorRows `json:"OperatorGroups"`
+    CountryRows    []CountryRow `json:"Countries"`
+}
+type OperatorRows struct {
+    OperatorRows []OperatorRow `json:"operatorRows"`
+}
+type OperatorRow struct {
+    MCCMNC_ID string `json: MCCMNC_ID`
+    Operator_Name string `json: Operator_Name`
+    Country_ID string `json: Country_ID`
+    Operator_Group_Name string `json: "Country_ID, omitempty"`
+}
+type CountryRow struct {
+    Country_ID string `json:"Country_ID" db:"Country_ID"`
+    CountryName string `json:"name" db:"name"`
+    MCC_ID string `json:"MCC_ID" db:"MCC_ID"`
+}
+func settingsView(Data data) ([]byte) {
+    settingsViewQuery := `SELECT DISTINCT operatorGroups.Operator_Group_Name, operatorGroups.MCCMNC_ID, Operator_Name, Country_ID from operators
+    JOIN operatorGroups USING (MCCMNC_ID) ORDER BY Operator_Group_Name`
+    log.Println("settingsView –\t\tQuery = " + settingsViewQuery)
+    operatorList, err := db.Query(settingsViewQuery)
+    checkErr(err)
+    settingsData := SettingsViewData{}
+    operatorRows := OperatorRows{}
+    oldGroup := string("")
+    newGroup := string("")
+    for(operatorList.Next()){
+        operatorRow := OperatorRow{}
+        operatorList.Scan(&operatorRow.Operator_Group_Name, &operatorRow.MCCMNC_ID, &operatorRow.Operator_Name, &operatorRow.Country_ID)
+        newGroup = operatorRow.Operator_Group_Name
+        if(oldGroup == "") { //start of list, append first entry to operatorRows
+            oldGroup = newGroup
+            operatorRows.OperatorRows = append(operatorRows.OperatorRows, operatorRow)
+        } else if(oldGroup == newGroup) { //same group, add
+            operatorRows.OperatorRows = append(operatorRows.OperatorRows, operatorRow)
+        } else { //end of group, add old group to settingsData, append new row to new group
+            settingsData.OperatorGroups = append(settingsData.OperatorGroups, operatorRows)
+            operatorRows = OperatorRows{}
+            operatorRows.OperatorRows = append(operatorRows.OperatorRows, operatorRow)
+            oldGroup = newGroup
+        }
+    }
+
+    settingsData.OperatorGroups = append(settingsData.OperatorGroups, operatorRows) //adds last group
+
+    settingsViewQuery = `SELECT DISTINCT Country_ID, name, MCC_ID from countries ORDER BY name`
+    log.Println("settingsView –\t\tQuery = " + settingsViewQuery)
+    countryList, err := db.Query(settingsViewQuery)
+    checkErr(err)
+    for(countryList.Next()){
+        countryRow := CountryRow{}
+        countryList.Scan(&countryRow.Country_ID, &countryRow.CountryName, &countryRow.MCC_ID)
+        settingsData.CountryRows = append(settingsData.CountryRows, countryRow)
+    }
+    jsonResponse, err := json.Marshal(settingsData)
+    checkErr(err)
+    log.Println("globalView –\t\tReturning JSON string...")
+    return jsonResponse
 }
 func globalView(Data data) ([]byte) {
     if(Data.AppOriginalName != ""){
@@ -577,6 +657,79 @@ type ResultMessage struct {
     Result string `json:"result"`
 }
 
+func submitNewOperator(Operator data) ([]byte) {
+    log.Println("submitNewOperator –\t\tRecieved request to add operator named " + Operator.OperatorName)
+    statement := string(`SELECT Operator_Name, Country_ID FROM mytable WHERE MCCMNC_ID = "`+Operator.MCCMNC_ID+`"`)
+    operator, err := db.Query(statement)
+    checkErr(err)
+    var operatorExists bool
+    var operatorName string = ""
+    var operatorCountry_ID string = ""
+    for(operator.Next()){
+        operator.Scan(&operatorName, &operatorCountry_ID)
+        operatorExists = true
+    }
+    if(Operator.OperatorName != "") {
+        operatorName = Operator.OperatorName
+    }
+    if(Operator.Country_ID != "") {
+        operatorCountry_ID = Operator.Country_ID
+    }
+    var returnString string = ""
+    if(operatorExists) {
+        addOperatorStatement := string(`INSERT INTO operators (MCCMNC_ID, Operator_Name, Country_ID) VALUES ("`+Operator.MCCMNC_ID+`", "`+operatorName+`", "`+operatorCountry_ID+`")`)
+        log.Println("submitNewOperator –\t\t"+addOperatorStatement)
+        _, err := db.Exec(addOperatorStatement)
+        checkErr(err)
+        addOperatorStatement = string(`INSERT INTO operatorGroups (Operator_Group_Name, MCCMNC_ID) VALUES ("`+Operator.Operator_Group_Name+`", "`+Operator.MCCMNC_ID+`")`)
+        log.Println("submitNewOperator –\t\t"+addOperatorStatement)
+        _, err = db.Exec(addOperatorStatement)
+        checkErr(err)
+        returnString = "success"
+    } else {
+        returnString = "error"
+    }
+
+    jsonResponse, err := json.Marshal(returnString)
+    checkErr(err)
+    return jsonResponse
+}
+func deleteOperator(Operator data) ([]byte) {
+    var returnString string = ""
+    if(Operator.MCCMNC_ID != "") {
+        deleteOperatorStatement := string(`DELETE FROM operators WHERE MCCMNC_ID = "`+Operator.MCCMNC_ID+`"`)
+        log.Println("deleteOperator –\t\t"+deleteOperatorStatement)
+        _, err := db.Exec(deleteOperatorStatement)
+        checkErr(err)
+        deleteOperatorStatement = string(`DELETE FROM operatorGroups WHERE MCCMNC_ID = "`+Operator.MCCMNC_ID+`"`)
+        log.Println("deleteOperator –\t\t"+deleteOperatorStatement)
+        _, err = db.Exec(deleteOperatorStatement)
+        checkErr(err)
+        returnString = "success"
+    } else {
+        returnString = "error"
+    }
+
+    jsonResponse, err := json.Marshal(returnString)
+    checkErr(err)
+    return jsonResponse
+}
+func submitNewCountry(Country data) ([]byte) {
+    var returnString string = ""
+    if(Country.Country_ID != "") {
+        addCountrystatement := string(`INSERT INTO countries (Country_ID, name, MCC_ID) VALUES ("`+Country.MCCMNC_ID+`", "`+Country.Country_Name+`", "`+Country.Country_MCC+`")`)
+        log.Println("submitNewCountry –\t\t"+addCountrystatement)
+        _, err := db.Exec(addCountrystatement)
+        checkErr(err)
+        returnString = "success"
+    } else {
+        returnString = "error"
+    }
+
+    jsonResponse, err := json.Marshal(returnString)
+    checkErr(err)
+    return jsonResponse
+}
 
 func getOperatorsByCountryID(Country data) ([]byte) {
     log.Println("getOperatorsByCountryID –\tRecieved request to get operators in " + Country.Country_ID)
@@ -629,11 +782,6 @@ func getAllAppConfigs(notUsed data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
-type CountryRow struct {
-    Country_ID string `json:"Country_ID" db:"Country_ID"`
-    CountryName string `json:"name" db:"name"`
-    MCC_ID string `json:"MCC_ID" db:"MCC_ID"`
-}
 func getCountryByName(Country data) ([]byte) {
     log.Println("getCountryByName –\t\tRecieved request to get country by " + Country.Country_Name)
 
@@ -654,15 +802,7 @@ func getCountryByName(Country data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
-type OperatorRows struct {
-    OperatorRows []OperatorRow `json:"operatorRows"`
-}
-type OperatorRow struct {
-    MCCMNC_ID string `json: MCCMNC_ID`
-    Operator_Name string `json: Operator_Name`
-    Country_ID string `json: Country_ID`
-    Operator_Group_Name string `json: "Country_ID, omitempty"`
-}
+
 func getOperatorGroupByName(Operator data) ([]byte) {
     log.Println("getOperatorGroupByName –\tRecieved request to get operator by " + Operator.Operator_Group_Name)
 

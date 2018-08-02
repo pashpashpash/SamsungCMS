@@ -6,6 +6,7 @@ var appTray = document.getElementById("allicons");
 var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 var globalViewButton = document.getElementById('globalViewButton');
+var settingsViewButton = document.getElementById('settingsViewButton');
 
 //each int in array is mapped to corresponding appConfig
 var globalConfigArray = [];
@@ -157,6 +158,346 @@ function showWebapps(appTray, webapps) {
         appTray.innerHTML = "";
     }
 }
+function toggleSettingsView(){
+    settingsViewButton.classList.toggle('settingsViewON');
+    filters.classList.toggle("hidden");
+    if(settingsViewButton.classList.contains('settingsViewON')){ //SETTINGS VIEW IS ON
+        var swapinHTML =  "<hr>";
+        console.log("toggleSettingsView – Settings view turned on, requesting settingsData from server...");
+        var postRequestJSON = JSON.parse('{"functionToCall" : "settingsView", "data" : {}}');
+        swapOutContainer.innerHTML = swapinHTML;
+        server_post.post(post_url, postRequestJSON, function(settingsData) {
+            console.log("toggleSettingsView – Success! Server returned:");
+            console.log(settingsData);
+            generateSettingsViewHTML(settingsData);
+        });
+    } else {
+        swapOutContainer.innerHTML = '<main><div id ="appTray"></div></main>';
+        swapOutContainer.children[0].children[0].appendChild(appTray);
+        applyFilters();
+    }
+}
+function generateSettingsViewHTML(settingsData){
+    var settingsView = document.createElement('div');
+    settingsView.className = 'settingsView';
+
+
+    var operatorGroups = settingsData.OperatorGroups;
+    var countries = settingsData.Countries;
+    var operatorSection = document.createElement('div');
+    var countrySection = document.createElement('div');
+    operatorSection.className = "manageOperators"
+    countrySection.className = "addCountry"
+    for(var i = 0; i < operatorGroups.length; i++) {
+        var groupName = operatorGroups[i].operatorRows[0].Operator_Group_Name;
+        var operatorGroup = document.createElement('div');
+        operatorGroup.className = "settingsViewOperatorGroup"
+        operatorGroup.classList.add("collapsed");
+        var downArrow = document.createElement('div');
+        downArrow.innerHTML = '<div onclick="toggleOperatorGroup(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div>'
+        downArrow = downArrow.children[0];
+        downArrow.className = "rowImage";
+        var operatorGroupTitle = document.createElement('div');
+        operatorGroupTitle.className = "description";
+        operatorGroupTitle.innerText = groupName;
+        var operatorGroupContents = document.createElement('div');
+        operatorGroupContents.className = 'settingsViewAppContents';
+        operatorGroupContents.classList.add("hidden");
+        for(var o = 0; o < operatorGroups[i].operatorRows.length; o++) {
+            var operator = document.createElement('div');
+            operator.className = "settingsViewOperator";
+            var operatorDescription = document.createElement('div');
+            operatorDescription.className = "description";
+            operatorDescription.innerText = operatorGroups[i].operatorRows[o].Operator_Name + " | " + operatorGroups[i].operatorRows[o].MCCMNC_ID
+            operator.id = operatorGroups[i].operatorRows[o].MCCMNC_ID;
+            var deleteButton = document.createElement('div');
+            deleteButton.innerHTML = '<div onclick="deleteOperatorFromGroup(this.parentElement)"></div>';
+            deleteButton = deleteButton.children[0];
+            deleteButton.innerText = "-";
+            deleteButton.className = "deleteOperator";
+            operator.appendChild(operatorDescription);
+            operator.appendChild(deleteButton);
+            operatorGroupContents.appendChild(operator);
+        }
+        var addOperatorToGroupBlock = document.createElement('div');
+        addOperatorToGroupBlock.className = "addOperatorToGroup";
+        addOperatorToGroupBlockContents = document.createElement('div');
+        addOperatorToGroupBlockContents.className = "addOperatorToGroupContents";
+        addOperatorToGroupBlockContents.classList.add("hidden");
+        addOperatorToGroupBlock.classList.add("collapsed");
+        var addOperatorToGroupTitle = document.createElement("div");
+        addOperatorToGroupTitle.innerHTML = '<div onclick="addOperatorToGroup(this.parentElement)"></div>';
+        addOperatorToGroupTitle = addOperatorToGroupTitle.children[0];
+        addOperatorToGroupTitle.innerText = "+ Add New Operator";
+        addOperatorToGroupTitle.className = "addOperatorToGroupTitle";
+        addOperatorToGroupBlock.appendChild(addOperatorToGroupTitle);
+        //insert contents here
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "addOperatorName"; // set the CSS class
+        input.placeholder = "Operator Name";
+        addOperatorToGroupBlockContents.appendChild(input);
+        input = document.createElement("input");
+        input.type = "text";
+        input.className = "addMCCMNC"; // set the CSS class
+        input.placeholder = "MCCMNC";
+        addOperatorToGroupBlockContents.appendChild(input);
+        input = document.createElement("input");
+        input.type = "text";
+        input.className = "addCountryID"; // set the CSS class
+        input.placeholder = "Country ID (two character ID, should exist in [countries] table)";
+        addOperatorToGroupBlockContents.appendChild(input);
+        input = document.createElement("div");
+        input.innerHTML = '<input type="submit" onclick="submitNewOperator(this.parentElement);" />';
+        input = input.children[0];
+        input.className = "addOperatorSubmit"; // set the CSS class
+        addOperatorToGroupBlockContents.appendChild(input);
+        //
+
+        addOperatorToGroupBlock.appendChild(addOperatorToGroupBlockContents);
+        operatorGroupContents.appendChild(addOperatorToGroupBlock);
+
+        operatorGroup.appendChild(operatorGroupTitle);
+        operatorGroup.appendChild(downArrow);
+        operatorGroup.appendChild(operatorGroupContents);
+        operatorSection.appendChild(operatorGroup);
+    }
+    var addOperatorBlock = document.createElement('div');
+    addOperatorBlock.className = "addOperatorGroup";
+
+    var addOperatorBlockTitle = document.createElement('div');
+    addOperatorBlockTitle.innerHTML = '<div onclick="addOperatorGroup(this.parentElement)"></div>';
+    addOperatorBlockTitle = addOperatorBlockTitle.children[0];
+    addOperatorBlockTitle.className = "addOperatorGroupTitle";
+    addOperatorBlockTitle.innerText = "+ Add New Group";
+    addOperatorBlock.appendChild(addOperatorBlockTitle);
+
+    addOperatorBlockContents = document.createElement('div');
+    addOperatorBlockContents.className = "addOperatorToGroupContents";
+    addOperatorBlockContents.classList.add("hidden");
+    addOperatorBlock.classList.add("collapsed");
+    //insert contents here
+    var input = document.createElement("input");
+    input.type = "text";
+    input.className = "addOperatorGroupName"; // set the CSS class
+    input.placeholder = "Operator Group Name";
+    addOperatorBlockContents.appendChild(input);
+    input = document.createElement("input");
+    input.type = "text";
+    input.className = "addOperatorGroupMCCMNC_ID"; // set the CSS class
+    input.placeholder = "MCCMNC (need at least one operator in group)";
+    addOperatorBlockContents.appendChild(input);
+    input = document.createElement("input");
+    input.type = "text";
+    input.className = "addOperatorGroupOperator_Name"; // set the CSS class
+    input.placeholder = "Operator Name (need at least one operator in group)";
+    addOperatorBlockContents.appendChild(input);
+    input = document.createElement("input");
+    input.type = "text";
+    input.className = "addOperatorGroupCountry_ID"; // set the CSS class
+    input.placeholder = "Country ID (need at least one operator in group)";
+    addOperatorBlockContents.appendChild(input);
+    input = document.createElement("div");
+    input.innerHTML = '<input type="submit" onclick="submitNewOperatorGroup(this.parentElement);" />';
+    input = input.children[0];
+    input.className = "addOperatorGroupSubmit"; // set the CSS class
+    addOperatorBlockContents.appendChild(input);
+    //
+    addOperatorBlock.appendChild(addOperatorBlockContents);
+    operatorSection.appendChild(addOperatorBlock);
+
+
+    var allCountries = document.createElement('div');
+    allCountries.className = "settingsViewCountry";
+    var allCountriesText = document.createElement('div');
+    allCountriesText.className = "description";
+    allCountriesText.innerText = "All Countries";
+    var downArrow = document.createElement('div');
+    downArrow.innerHTML = '<div onclick="toggleAllCountries(this.parentElement)" style="background-image: url(\'/images/arrow_drop_down.svg\'); background-repeat: no-repeat; background-size:100%;"></div>'
+    downArrow = downArrow.children[0];
+    downArrow.className = "rowImage";
+    var allCountriesContents = document.createElement('div');
+
+
+    for(var i = 0; i<countries.length; i++){
+        var countryName = countries[i].name;
+        var country = document.createElement('div');
+        country.className = "settingsViewCountry";
+        country.innerText = countryName;
+        country.id = countries[i].Country_ID;
+        allCountriesContents.appendChild(country);
+    }
+    allCountriesContents.className = "allCountriesContents";
+    allCountriesContents.classList.add("hidden");
+    allCountries.appendChild(allCountriesText);
+    allCountries.appendChild(downArrow);
+    allCountries.appendChild(allCountriesContents);
+    countrySection.appendChild(allCountries);
+
+    var addCountry = document.createElement('div');
+    addCountry.className = "settingsViewAddCountry";
+    var addCountryText = document.createElement('div');
+    addCountryText.className = "description";
+    addCountryText.innerText = "Add Country";
+    downArrow = document.createElement('div');
+    downArrow.innerHTML = '<div onclick="toggleAddCountry(this.parentElement)">+</div>'
+    downArrow = downArrow.children[0];
+    downArrow.className = "rowImage";
+    var addCountryContents = document.createElement('div');
+    addCountryContents.className = "addCountryContents";
+    addCountryContents.classList.add("hidden");
+    addCountry.classList.add("collapsed");
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.className = "addCountryName"; // set the CSS class
+    input.placeholder = "Country Name";
+    addCountryContents.appendChild(input);
+    input = document.createElement("input");
+    input.type = "text";
+    input.className = "addCountryID"; // set the CSS class
+    input.placeholder = "Country ID";
+    addCountryContents.appendChild(input);
+    input = document.createElement("input");
+    input.type = "text";
+    input.className = "addCountryMCC"; // set the CSS class
+    input.placeholder = "Country MCC";
+    addCountryContents.appendChild(input);
+    input = document.createElement("div");
+    input.innerHTML = '<input type="submit" onclick="submitNewCountry(this.parentElement);" />';
+    input = input.children[0];
+    input.className = "addCountrySubmit"; // set the CSS class
+    addCountryContents.appendChild(input);
+
+    addCountry.appendChild(addCountryText);
+    addCountry.appendChild(downArrow);
+    addCountry.appendChild(addCountryContents);
+    countrySection.appendChild(addCountry);
+
+    settingsView.appendChild(operatorSection);
+    settingsView.appendChild(countrySection);
+    swapOutContainer.appendChild(settingsView);
+}
+
+function toggleAllCountries(allCountriesContainer) {
+    allCountriesContainer.children[2].classList.toggle("hidden");
+}
+function toggleAddCountry(addCountryContainer) {
+    addCountryContainer.children[2].classList.toggle("hidden");
+    addCountryContainer.classList.toggle("collapsed");
+}
+function toggleOperatorGroup(operatorGroup){
+    console.log("toggleOperatorGroup – operator group clicked:");
+    console.log(operatorGroup);
+    var operatorGroupName = operatorGroup.children[0].innerText;
+    operatorGroup.classList.toggle('collapsed');
+    if(operatorGroup.classList.contains('collapsed')){ //collapse app
+        operatorGroup.children[2].classList.add("hidden");
+    } else { //expand app
+        operatorGroup.children[2].classList.remove("hidden");
+    }
+}
+
+//finish these
+function submitNewCountry(form){
+    console.log("submitNewcountry – submitting new Country:");
+    var countryName = form.children[0].value;
+    var countryID = form.children[1].value;
+    var countryMCC = form.children[2].value;
+    console.log("submitNewcountry – " + countryName + " | " + countryID + " | " + countryMCC);
+    var postRequestJSON = JSON.parse('{"functionToCall" : "submitNewCountry", "data" : {'
+    + ' "Country_ID" : "'+ countryID + '",'
+    + ' "Country_Name" : "'+ countryName + '",'
+    + ' "Country_MCC" : "'+ countryMCC + '"'
+    +'}}');
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(misc) {
+        console.log("submitNewCountry – " + misc);
+        if(misc === "success") {
+            toggleSettingsView();
+            toggleSettingsView();
+        }
+    });
+}
+function addOperatorToGroup(operator) {
+    console.log("addOperatorToGroup – adding operator to group")
+    var addOperatorContents = operator.children[1];
+    addOperatorContents.classList.toggle("hidden");
+    operator.classList.toggle("collapsed");
+}
+function submitNewOperator(operator) {
+    var groupName = operator.parentElement.parentElement.parentElement.children[0].innerText;
+    console.log(groupName);
+    console.log("submitNewOperator – submitting operator to group " + groupName);
+
+    var OperatorName = operator.children[0].value;
+    var MCCMNC_ID =  operator.children[1].value;
+    var Country_ID =  operator.children[2].value;
+    console.log("submitNewOperator – " + OperatorName + " | "+ MCCMNC_ID + " | " + Country_ID);
+
+    var postRequestJSON = JSON.parse('{"functionToCall" : "submitNewOperator", "data" : {'
+    + ' "OperatorName" : "'+ OperatorName + '",'
+    + ' "MCCMNC_ID" : "'+ MCCMNC_ID + '",'
+    + ' "Country_ID" : "'+ Country_ID + '",'
+    + ' "Operator_Group_Name" : "'+ groupName + '"'
+    +'}}');
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(misc) {
+        console.log("submitNewOperator – " + misc);
+        if(misc === "success") {
+            toggleSettingsView();
+            toggleSettingsView();
+        }
+    });
+}
+function addOperatorGroup(operatorGroup) {
+    console.log("addOperatorGroup – adding operator group")
+    console.log(operatorGroup);
+    var operatorGroupContents = operatorGroup.children[1];
+    operatorGroupContents.classList.toggle("hidden");
+    operatorGroup.classList.toggle("collapsed");
+}
+function submitNewOperatorGroup(form) {
+    console.log("submitNewOperatorGroup – submitting operator group")
+    console.log(form);
+    var groupName = form.children[0].value;
+    var MCCMNC_ID = form.children[1].value;
+    var Operator_Name = form.children[2].value;
+    var Country_ID = form.children[3].value;
+
+    var postRequestJSON = JSON.parse('{"functionToCall" : "submitNewOperator", "data" : {'
+    + ' "OperatorName" : "'+ Operator_Name + '",'
+    + ' "MCCMNC_ID" : "'+ MCCMNC_ID + '",'
+    + ' "Country_ID" : "'+ Country_ID + '",'
+    + ' "Operator_Group_Name" : "'+ groupName + '"'
+    +'}}');
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(misc) {
+        console.log("submitNewOperatorGroup – " + misc);
+        if(misc === "success") {
+            toggleSettingsView();
+            toggleSettingsView();
+        }
+    });
+}
+
+function deleteOperatorFromGroup(operator) {
+    console.log("deleteOperatorFromGroup – deleteing operator from operatorgroups and operators")
+    console.log(operator);
+    var MCCMNC_ID =operator.id;
+    var postRequestJSON = JSON.parse('{"functionToCall" : "deleteOperator", "data" : {'
+    + ' "MCCMNC_ID" : "'+ MCCMNC_ID + '"'
+    +'}}');
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(misc) {
+        console.log("deleteOperatorFromGroup – " + misc);
+        if(misc === "success") {
+            toggleSettingsView();
+            toggleSettingsView();
+        }
+    });
+}
+
 
 function toggleGlobalView(){
     globalViewButton.classList.toggle('globalViewON');

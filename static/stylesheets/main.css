@@ -17,6 +17,86 @@ body {
     overflow:hidden !important;
 }
 
+/* =====================SETTINGS VIEW SECTION=========================== */
+.settingsView{
+    margin: auto;
+    width: 68%;
+}
+.settingsView .rowImage{
+    margin-left: 14px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: -7px;
+    float:right;
+}
+.settingsView .description {
+    display: inline-block;
+}
+.settingsViewOperatorGroup {
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightyellow;
+}
+.addOperatorGroup {
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightgrey;
+}
+.settingsViewOperatorGroupContents{
+    display: block;
+}
+.settingsViewOperator, .settingsViewCountry {
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightcoral;
+    display: inline-block;
+    margin-top:14px;
+}
+.deleteOperator{
+    display: inline-block;
+    margin-left: 6px;
+    color: lightgrey;
+}
+.addOperatorToGroup{
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightgrey;
+}
+.settingsViewAddCountry{
+    padding: 1em;
+    border: 1px solid black;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background: lightgrey;
+}
+.settingsViewAddCountry .collapsed {
+    display: inline-block;
+}
+.addCountryName, .addCountryID, .addCountryMCC {
+    padding: 10px;
+    display: inline-block;
+    margin-top: 14px;
+}
+
+.addCountrySubmit input[type=submit],  .addCountrySubmit button[type=submit]{
+    padding: 10px !important;
+}
 /* =====================GLOBAL VIEW SECTION=========================== */
 .globalView {
     margin: auto;
@@ -252,7 +332,18 @@ hr{
     margin-top: 4px;
     color: #ebebeb;
 }
+#settingsViewButton{
+    font-size: 16px;
+    font-weight: 400;
+    margin-left: 6px;
+    margin-top: 4px;
+    color: #ebebeb;
+}
 .globalViewON{
+    color:#f953c6 !important;
+    font-weight: 400 !important;
+}
+.settingsViewON{
     color:#f953c6 !important;
     font-weight: 400 !important;
 }
