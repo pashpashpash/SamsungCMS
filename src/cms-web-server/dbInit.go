@@ -622,7 +622,7 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("DROP TABLE IF EXISTS appConfigs")
 
     log.Println( "createTables –\tCreating appConfigs table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, versionNumber FLOAT, FOREIGN KEY(versionNumber) REFERENCES versions(versionNumber))")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, category TEXT, versionNumber FLOAT, FOREIGN KEY(versionNumber) REFERENCES versions(versionNumber))")
     _, err = stmt.Exec()
     checkErr(err)
 

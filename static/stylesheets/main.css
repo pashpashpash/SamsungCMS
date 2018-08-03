@@ -179,6 +179,11 @@ body {
     margin-left: 16%;
     width: 70%;
 }
+.configData, .featuredLocations, .features, .configMappings {
+    margin-left: 30%;
+    width: 40%;
+    margin-bottom: 14px;
+}
 .webApp .row{
     max-height: 46px;
     border-top: 1px solid transparent;
@@ -186,21 +191,118 @@ body {
     padding-top: 14px;
     padding-bottom: 14px;
 }
+.configData .row {
+    max-height: 46px;
+
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
 .webApp .row:hover{
     border-top: 1px solid #ebebeb;
     border-bottom: 1px solid #ebebeb;
 }
+.confiData .row:hover{
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+.deleteConfig {
+    background: rgb(255, 88, 91);
+    color: white;
+    padding: 10px;
+    margin-left: -14px;
+    margin-right: -14px;
+    margin-bottom: -14px;
+    font-size: 8px;
+    text-align: center;
+    margin-top: 14px;
+    cursor: pointer;
+}
+
 
 .webApp .row .rowDescription,.rowValue,.edit, .countrySearchResults{
     display: inline-block;
 }
+.configData .row .rowDescription, .configData .rowValue {
+    display: inline-block;
+}
+
 .webApp .row .rowValue{
     border: 1px solid black;
     border-radius: 8px;
     padding:1em;
     margin-left:14px;
+
     /* margin-bottom: 14px; */
 }
+.mappingsRow div {
+    display: inline-block;
+    margin-right:14px;
+}
+.mappingsRow:hover {
+    background:lightgrey;
+}
+.configData .row .rowValue {
+    margin-left: 14px;
+    margin-bottom: -9px;
+    max-width: 300px;
+    overflow:scroll;
+    word-break: break-all;
+    border: 1px solid black;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 4px;
+    padding-bottom: 3px;
+        max-height: 16px;
+}
+.configMappingsCountries, .configMappingsOperators {
+    border: 1px solid black;
+    border-top: 0px solid transparent;
+    padding: 14px;
+}
+.configMappingsTitle {
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid black;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 14px;
+    border-bottom: 0px;
+    margin-top: 24px;
+}
+.countriesTitle, .operatorsTitle {
+    font-weight: 600;
+    margin-bottom:14px;
+}
+
+#DefaultEnabledFeatures, #DefaultHiddenFeatures {
+        display: inline-block;
+}
+#DefaultEnabledFeatures {
+    border-right: 1px solid black;
+    margin-right: 14px;
+    padding-right: 14px;
+}
+
+.configIconContainer{
+    width: 100px;
+    float: right;
+    display: inline-block;
+    border: 1px solid black;
+    padding: 14px;
+
+}
+.configIcon {
+    width: 100px;
+    height: 100px;
+}
+.configIconURL {
+    width: 100px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    margin-top: 14px;
+}
+
+
 .webApp .row .rowValue .rowImage{
     margin-left: 14px;
     display: inline-block;

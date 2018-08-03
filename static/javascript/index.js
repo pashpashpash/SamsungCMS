@@ -126,9 +126,9 @@ function showWebapps(appTray, webapps) {
         for(var o= 0; o < webapps.length; o++){
             console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
             webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-                webAppsHTML += ("<div id='deleteIcon' ");
-                webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-                webAppsHTML += ("></div>");
+                // webAppsHTML += ("<div id='deleteIcon' ");
+                // webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
+                // webAppsHTML += ("></div>");
                 webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
                 webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
                 webAppsHTML += (" />");
@@ -541,6 +541,8 @@ function generateGlobalViewHTML(globalData){
         appConfigs.className = "globalViewAppConfigs";
         for(var o = 0; o < globalViewDataJSON.GlobalDataApps[i].ConfigNumbers.length; o++){
             var appConfig = document.createElement('div');
+            appConfig.innerHTML = '<div onclick="redirectToConfigurationPage(this)"></div>';
+            appConfig = appConfig.children[0];
             var configNumber = globalViewDataJSON.GlobalDataApps[i].ConfigNumbers[o];
 
             appConfig.innerText = (configNumber);
@@ -579,18 +581,66 @@ function showAppConfigOnHover(appConfig, configNumber) {
     var postRequestJSON = JSON.parse(postRequestText);
     console.log(postRequestJSON);
     server_post.post(post_url, postRequestJSON, function(featuredLocations) {
-        console.log("showAppConfigOnHover – server responded with:");
-        console.log(featuredLocations);
         var newHTML = 'Featured Locations : ';
         for(i in featuredLocations) {
             newHTML += (featuredLocations[i] + ", ");
         }
         var parent = configFeaturedLocs.parentElement;
         if(appConfig.children[0]!=null){
-            console.log(appConfig.children[0].lastChild);
             appConfig.children[0].lastChild.remove();
         }
         parent.innerHTML+= newHTML;
+    });
+    console.log("showAppConfigOnHover – Getting featureMappings for config " + configNumber)
+    var postRequestText = '{"functionToCall" : "getFeatureMappings", "data" : {'
+        + ' "Config_ID" : "'+ configNumber + '"'
+        +'}}';
+    var postRequestJSON = JSON.parse(postRequestText);
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(featureMappings) {
+        console.log("showAppConfigOnHover – server responded with:");
+        console.log(featureMappings);
+        var newHTML = 'Feature Mappings : \n';
+        var oldFeatureType = "";
+        var feature = document.createElement('div');
+        feature.className = "hoverFeature";
+        for(var i = 0; i < featureMappings.length; i++) {
+            console.log(featureMappings[i]);
+            newFeatureType = featureMappings[i].FeatureName;
+            if(oldFeatureType === "") { //beginning of list
+                oldFeatureType = newFeatureType;
+                feature.id = newFeatureType;
+
+                var featureName = document.createElement('div');
+                feature.className = "hoverFeatureName"
+                feature.innerText
+                featureName.innerText = featureMappings[i].FeatureType;
+                feature.appendChild(featureName);
+            } else if(oldFeatureType === newFeatureType) { //same feature as before, just add to feature element
+                var featureName = document.createElement('div');
+                feature.className = "hoverFeatureName"
+                featureName.innerText = featureMappings[i].FeatureType;
+                feature.appendChild(featureName);
+            } else { //new Feature
+                appConfig.children[0].appendChild(feature);
+                oldFeatureType = newFeatureType;
+                feature = document.createElement('div');
+                feature.id = newFeatureType;
+                var featureName = document.createElement('div');
+                feature.className = "hoverFeatureName"
+                featureName.innerText = featureMappings[i].FeatureType;
+                feature.appendChild(featureName);
+            }
+
+        }
+        appConfig.children[0].appendChild(feature);
+
+        // var parent = configFeaturedLocs.parentElement;
+        // if(appConfig.children[0]!=null){
+        //     console.log("showAppConfigOnHover – last child to remove?:");
+        // }
+        // appConfig.children[0].appendChild(feature);
+
     });
 
 
@@ -655,6 +705,8 @@ function toggleGlobalApp(appElement) {
                 for(var o = 0; o < appData.GlobalDataCountries[i].ConfigNumbers.length; o++){
                     var configNumber = appData.GlobalDataCountries[i].ConfigNumbers[o];
                     var appConfig = document.createElement('div');
+                    appConfig.innerHTML = '<div onclick="redirectToConfigurationPage(this)"></div>';
+                    appConfig = appConfig.children[0];
                     appConfig.className = "globalViewAppConfig";
                     appConfig.innerText = (appData.GlobalDataCountries[i].ConfigNumbers[o]);
                     if(appData.GlobalDataCountries[i].ActiveConfigs != null) {
@@ -679,6 +731,16 @@ function toggleGlobalApp(appElement) {
             }
         });
     }
+}
+function redirectToConfigurationPage(configElement) {
+    console.log("redirectToConfigurationPage – \t\tElement clicked is");
+    console.log(configElement);
+    childBackup = configElement.children[0];
+    configElement.children[0].remove();
+    var text = (configElement.innerText)
+    configElement.prepend(childBackup);
+    console.log("/configs/" + text);
+    window.location.href = ("/configs/" + text);
 }
 function toggleGlobalCountry(countryElement) {
     console.log("toggleGlobalCountry – \t\tElement clicked is");
@@ -715,6 +777,8 @@ function toggleGlobalCountry(countryElement) {
 
                 for(var o =0; o <countryData.operatorRows[i].ConfigNumbers.length; o++) {
                     var operatorConfig = document.createElement('div');
+                    operatorConfig.innerHTML = '<div onclick="redirectToConfigurationPage(this)"></div>';
+                    operatorConfig = operatorConfig.children[0];
                     operatorConfig.className = "globalViewAppConfig";
                     operatorConfig.innerText = countryData.operatorRows[i].ConfigNumbers[o];
                     setConfigHover(operatorConfig, countryData.operatorRows[i].ConfigNumbers[o]);

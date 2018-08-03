@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+    // "html/template"
 	"path"
 	"time"
     "fmt"
@@ -51,11 +52,11 @@ func NewServer() *negroni.Negroni {
 	root := GetProjectRoot()
 	mx := mux.NewRouter()
 
-    mx.HandleFunc("/ultra/{appName}", appViewHandler)
     mx.HandleFunc("/rest/ultra/{appName}", restAppViewHandler)      //handles all restAPI GET requests
     mx.HandleFunc("/rest/ultra/", restAppViewDocumentationHandler)
     mx.HandleFunc("/rest/{category}", restHandler)      //handles all restAPI GET requests
     mx.HandleFunc("/rest/", restDocumentationHandler)   //if someone types in /rest/ with no category
+    mx.HandleFunc("/configs/{Config_ID}", configPageHandler)   //if someone types in /rest/ with no category
     mx.HandleFunc("/post/", postHandler)   //handles all post requests
 	mx.PathPrefix("/").Handler(FileServer(http.Dir(root + "/static/")))     //for all other urls, serve from /static/
 
@@ -165,6 +166,14 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\tgetFeaturedLocations method request detected")
         jsonResponse := getFeaturedLocations(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getFeatureMappings") {
+        log.Println("postHandler –\t\tgetFeatureMappings method request detected")
+        jsonResponse := getFeatureMappings(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getConfigurationMappings") {
+        log.Println("postHandler –\t\tgetConfigurationMappings method request detected")
+        jsonResponse := getConfigurationMappings(requestData.Data)
+        w.Write([]byte(jsonResponse))
     } else if (requestData.FunctionToCall=="getOperatorGroupByName") {
         log.Println("postHandler –\t\tgetOperatorGroupByName method request detected")
         jsonResponse := getOperatorGroupByName(requestData.Data)
@@ -181,7 +190,16 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\tsubmitNewCountry method request detected")
         jsonResponse := submitNewCountry(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="getAppConfig") {
+        log.Println("postHandler –\t\tgetAppConfig method request detected")
+        jsonResponse := getAppConfig(requestData.Data)
+        w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="deleteConfiguration") {
+        log.Println("postHandler –\t\tdeleteConfiguration method request detected")
+        jsonResponse := deleteConfiguration(requestData.Data)
+        w.Write([]byte(jsonResponse))
     }
+
 }
 type GlobalData struct {
     GlobalDataApps []GlobalDataApp `json: "globalDataApps" `
@@ -714,6 +732,34 @@ func deleteOperator(Operator data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
+func deleteConfiguration(Data data) ([]byte) {
+    var returnString string = ""
+    if(Data.Config_ID != "") {
+        deleteConfigurationstatement := string(`DELETE FROM appConfigs WHERE Config_ID = "`+Data.Config_ID+`"`)
+        log.Println("deleteOperator –\t\t"+deleteConfigurationstatement)
+        _, err := db.Exec(deleteConfigurationstatement)
+        checkErr(err)
+        deleteConfigurationstatement = string(`DELETE FROM configurationMappings WHERE Config_ID = "`+Data.Config_ID+`"`)
+        log.Println("deleteOperator –\t\t"+deleteConfigurationstatement)
+        _, err = db.Exec(deleteConfigurationstatement)
+        checkErr(err)
+        deleteConfigurationstatement = string(`DELETE FROM featuredLocations WHERE Config_ID = "`+Data.Config_ID+`"`)
+        log.Println("deleteOperator –\t\t"+deleteConfigurationstatement)
+        _, err = db.Exec(deleteConfigurationstatement)
+        checkErr(err)
+        deleteConfigurationstatement = string(`DELETE FROM featureMappings WHERE Config_ID = "`+Data.Config_ID+`"`)
+        log.Println("deleteOperator –\t\t"+deleteConfigurationstatement)
+        _, err = db.Exec(deleteConfigurationstatement)
+        checkErr(err)
+        returnString = "success"
+    } else {
+        returnString = "error"
+    }
+
+    jsonResponse, err := json.Marshal(returnString)
+    checkErr(err)
+    return jsonResponse
+}
 func submitNewCountry(Country data) ([]byte) {
     var returnString string = ""
     if(Country.Country_ID != "") {
@@ -847,6 +893,110 @@ func getFeaturedLocations(Config data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
+type FeatureMapping struct {
+    FeatureType string `json:"FeatureName" db:"featureType"`
+    FeatureName string `json:"FeatureType" db:"featureName"`
+}
+func getFeatureMappings(Config data) ([]byte) {
+    log.Println("getFeatureMappings –\tRecieved request to get featured locations for " + Config.Config_ID)
+
+    var featureMappings = []FeatureMapping{}
+    full_query := string(`
+    SELECT DISTINCT featureType, featureName from featureMappings
+    WHERE Config_ID="`+Config.Config_ID+`"  ORDER BY featureType
+    `)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    log.Println("getFeatureMappings –\t"+full_query)
+    for rows.Next() {
+        featureMapping := FeatureMapping{}
+        rows.Scan(&featureMapping.FeatureType, &featureMapping.FeatureName)
+        featureMappings = append(featureMappings, featureMapping)
+    }
+    rows.Close()
+
+    jsonResponse, err := json.Marshal(featureMappings)
+    checkErr(err)
+    return jsonResponse
+}
+
+type MappingsCountryRow struct {
+    Value string `json:"name" db:"name"`
+    Text string `json:"Country_ID" db:"Country_ID"`
+}
+type MappingsOperatorRow struct {
+    Value string `json:"MCCMNC_ID" db:"MCCMNC_ID" `
+    Text string `json:"Operator_Name" db:"Operator_Name"`
+    Group string `json:"Operator_Group_Name" db:"Operator_Group_Name"`
+}
+type ConfigurationMappingsResult struct{
+    CountryRows []MappingsCountryRow `json:"countryFilterRows"`
+    OperatorRows []MappingsOperatorRow `json:"operatorFilterRows"`
+}
+func getConfigurationMappings(Config data) ([]byte) {
+    log.Println("getConfigurationMappings –\tRecieved request to get configuration mappings for " + Config.Config_ID)
+
+    var result = ConfigurationMappingsResult{}
+    full_query := string(`
+    SELECT Country_ID FROM (SELECT DISTINCT Country_ID FROM countries)
+    EXCEPT
+    SELECT Country_ID FROM(SELECT Country_ID, countries.name from configurationMappings
+    JOIN countries USING (Country_ID)
+    WHERE Config_ID="`+Config.Config_ID+`" AND Country_ID IS NOT NULL)
+    `)
+    rows, err := db.Query(full_query)
+    checkErr(err)
+    log.Println("getConfigurationMappings –\t"+full_query)
+    var allCountriesExist = true
+    for rows.Next() {
+        allCountriesExist = false
+    }
+    rows.Close()
+
+    if(!allCountriesExist)  {
+        var result = ConfigurationMappingsResult{}
+        full_query = string(`
+        SELECT Country_ID, countries.name from configurationMappings
+        JOIN countries USING (Country_ID)
+        WHERE Config_ID="`+Config.Config_ID+`" AND Country_ID IS NOT NULL
+        `)
+        rows, err = db.Query(full_query)
+        checkErr(err)
+        log.Println("getConfigurationMappings –\t"+full_query)
+        for rows.Next() {
+            countryRow := MappingsCountryRow{}
+            rows.Scan(&countryRow.Text, &countryRow.Value)
+            result.CountryRows = append(result.CountryRows, countryRow)
+        }
+        rows.Close()
+    } else {
+        countryRow := MappingsCountryRow{}
+        countryRow.Text = "*"
+        countryRow.Value = "*"
+        result.CountryRows = append(result.CountryRows, countryRow)
+    }
+
+    full_query = string(`
+    SELECT MCCMNC_ID, operators.Operator_Name, operatorGroups.Operator_Group_Name from configurationMappings
+    JOIN operators USING (MCCMNC_ID)
+    JOIN operatorGroups USING (MCCMNC_ID)
+    WHERE Config_ID="`+Config.Config_ID+`" AND MCCMNC_ID IS NOT NULL ORDER BY operatorGroups.Operator_Group_Name
+    `)
+    rows, err = db.Query(full_query)
+    checkErr(err)
+    log.Println("getConfigurationMappings –\t"+full_query)
+    for rows.Next() {
+        operatorRow := MappingsOperatorRow{}
+        rows.Scan(&operatorRow.Value, &operatorRow.Text, &operatorRow.Group)
+        result.OperatorRows = append(result.OperatorRows, operatorRow)
+    }
+    rows.Close()
+
+    jsonResponse, err := json.Marshal(result)
+    checkErr(err)
+    return jsonResponse
+}
+
 
 type CountryFilterRow struct {
     Value string `json:"name" db:"name"`
@@ -963,13 +1113,16 @@ type AppsContainer struct {
 }
 
 type App struct {
-    Config_ID string `json:"Config_ID" db:"Config_ID" `
-    OriginalName string `json: "originalName" db:"originalName" `
-    ModifiableName string `json: "modifiableName" db:"modifiableName" `
-    IconUrl string `json: "iconUrl" db:"iconURL" `
-    HomeUrl string `json:"homeURL" db:"homeURL"`
-    Rank string `json: "rank" db:"rank" `
-    FeaturedLocationName string `json:"featuredLocationName" db:"featuredLocationName"`
+    Config_ID string
+    OriginalName string
+    ModifiableName string
+    IconUrl string
+    HomeUrl string
+    Category string `db: "category, omitempty"`
+    VersionNumber  float64 `db: "versionNumber"`
+    Rank int `db: "rank"`
+    FeaturedLocationName string `json: ", omitempty"`
+
 }
 
 func appView(Data data) ([]byte) {
@@ -997,7 +1150,6 @@ func appView(Data data) ([]byte) {
     for rows.Next() {
 
         rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
-        log.Println("appView –\t\t" + app.Rank + " | " + app.OriginalName + " | " + app.FeaturedLocationName)
     }
     defer rows.Close()
 
@@ -1008,7 +1160,25 @@ func appView(Data data) ([]byte) {
     log.Println(jsonString)
     return jsonResponse
 }
+func getAppConfig(Data data) ([]byte) {
 
+    getAppConfigQuery := `SELECT Config_ID, originalName, modifiableName, iconURL, homeURL, versionNumber, rank, category FROM appConfigs WHERE Config_ID = "`+Data.Config_ID+`"`
+    rows, err := db.Query(getAppConfigQuery)
+    checkErr(err)
+
+    log.Println("getAppConfig –\t\t" +  getAppConfigQuery)
+
+    var app = App{}
+    for (rows.Next()) {
+        rows.Scan(&app.Config_ID, &app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.VersionNumber, &app.Rank, &app.Category)
+    }
+    jsonResponse, err := json.Marshal(app)
+    jsonString := string(jsonResponse)
+    checkErr(err)
+    log.Println("getAppConfig –\t\tReturning the following JSON string:")
+    log.Println(jsonString)
+    return jsonResponse
+}
 func loadAppTray(Filters data) ([]byte) {
     log.Println("loadAppTray –\t\tquerying db")
 
@@ -1067,7 +1237,6 @@ func loadAppTray(Filters data) ([]byte) {
     for rows.Next() {
         var app = App{}
         rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
-        log.Println("loadAppTray –\t\t" + app.Rank + " | " + app.OriginalName + " | " + app.FeaturedLocationName)
         appsContainer.Apps = append(appsContainer.Apps, app)
     }
     defer rows.Close()
@@ -1078,18 +1247,6 @@ func loadAppTray(Filters data) ([]byte) {
     return jsonResponse
 }
 //ALL URL HANDLERS
-func appViewHandler(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    tw := new(tabwriter.Writer)
-    tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
-    log.Println("App View Handler –\tApp Name: ", vars["appName"])
-
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-    myHtml := appViewHTML(vars["appName"])
-    io.WriteString(w, myHtml)
-}
-
 func restAppViewHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     tw := new(tabwriter.Writer)
@@ -1147,6 +1304,19 @@ func restDocumentationHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Add("Content-Type", "text/html")
 
     fmt.Fprint(w, "If you'd like to access the CMS restAPI, please direct all requests in the following format: \n/rest/AllApps")
+}
+func configPageHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    log.Println("Config Page Handler –\tConfig_ID: ", vars["Config_ID"])
+
+    // template := template.Must(template.ParseFiles("templates/index.html"))
+    // checkErr(err)
+    // template.Execute(w, "Hello World!")
+
+    w.Header().Set("Content-Type", "text/html; charset=utf-8")
+    myHtml := configPageHTML(vars["Config_ID"])
+    io.WriteString(w, myHtml)
+
 }
 
 
