@@ -2,7 +2,7 @@ var server_post = new postRequest();
 var post_url = "/post/";
 function downloadConfigurations() {
     console.log("downloadConfigurations – download button pressed!");
-
+    document.getElementsByClassName("exportLoading")[0].classList.toggle("hidden");
 
     var postRequestText = '{"functionToCall" : "updateConfigurationINI", "data" : {'
         +'}}';
@@ -10,6 +10,7 @@ function downloadConfigurations() {
     console.log(postRequestJSON);
     server_post.post(post_url, postRequestJSON, function(result) {
         console.log(result);
+        document.getElementsByClassName("exportLoading")[0].classList.toggle("hidden");
         if(result === "success"){
             var links = [
               '/configuration.ini'
@@ -35,4 +36,3 @@ function downloadAll(urls) {
 
   document.body.removeChild(link);
 }
- 

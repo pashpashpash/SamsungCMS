@@ -13,7 +13,8 @@ configuration +=
 known filters = ({
     "country",
     "os_version",
-    "device_model"
+    "device_model",
+    "operator"
 })
 `
 //Will use these for export

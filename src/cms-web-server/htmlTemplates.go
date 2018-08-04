@@ -34,7 +34,11 @@ func exportPageHTML(Config_ID string) (string){
                 <div id="headerText" onclick="location.reload();location.href='../index.html'"> Ultra Configurations <span id="smallerText">`+`Export`+`</span></div>
             </div>
             <hr>
-            <button id="download" onClick = "downloadConfigurations()">Export Ultra Configurations</button>
+            <div class = "exportPageBody">
+                <div class="description">Pressing this button will export the current state of the CMS into a configuration.ini file. The download may take a couple of seconds to generate. Thanks for waiting :)</div>
+                <div id="download" onClick = "downloadConfigurations()">Export Ultra Configurations</div>
+                <div class="exportLoading hidden"></div>
+            </div>
 
 
             <!-- Javascript Includes -->
