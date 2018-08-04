@@ -15,7 +15,7 @@ import (
      _ "github.com/mattn/go-sqlite3"
     "strconv"
     "encoding/json"
-    // "io/ioutil"
+    "io/ioutil"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 )
@@ -56,7 +56,8 @@ func NewServer() *negroni.Negroni {
     mx.HandleFunc("/rest/ultra/", restAppViewDocumentationHandler)
     mx.HandleFunc("/rest/{category}", restHandler)      //handles all restAPI GET requests
     mx.HandleFunc("/rest/", restDocumentationHandler)   //if someone types in /rest/ with no category
-    mx.HandleFunc("/configs/{Config_ID}", configPageHandler)   //if someone types in /rest/ with no category
+    mx.HandleFunc("/configs/{Config_ID}", configPageHandler)   //for config page
+    mx.HandleFunc("/export", exportPageHandler)
     mx.HandleFunc("/post/", postHandler)   //handles all post requests
 	mx.PathPrefix("/").Handler(FileServer(http.Dir(root + "/static/")))     //for all other urls, serve from /static/
 
@@ -198,7 +199,12 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
         log.Println("postHandler –\t\tdeleteConfiguration method request detected")
         jsonResponse := deleteConfiguration(requestData.Data)
         w.Write([]byte(jsonResponse))
+    } else if (requestData.FunctionToCall=="updateConfigurationINI") {
+        log.Println("postHandler –\t\tupdateConfigurationINI method request detected")
+        jsonResponse := updateConfigurationINI(requestData.Data)
+        w.Write([]byte(jsonResponse))
     }
+
 
 }
 type GlobalData struct {
@@ -760,6 +766,20 @@ func deleteConfiguration(Data data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
+func updateConfigurationINI(Data data) ([]byte) {
+    _, err := ioutil.ReadFile("static/configuration.ini")
+    checkErr(err)
+    log.Println("updateConfigurationINI –\t\tupdating configuration.ini...")
+
+    output := generateConfigurationINI()
+    err = ioutil.WriteFile("static/configuration.ini", []byte(output), 0644)
+    checkErr(err)
+    log.Println("updateConfigurationINI –\t\t wrote to file")
+
+    jsonResponse, err := json.Marshal("success")
+    checkErr(err)
+    return jsonResponse
+}
 func submitNewCountry(Country data) ([]byte) {
     var returnString string = ""
     if(Country.Country_ID != "") {
@@ -1315,6 +1335,18 @@ func configPageHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     myHtml := configPageHTML(vars["Config_ID"])
+    io.WriteString(w, myHtml)
+
+}
+func exportPageHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+
+    // template := template.Must(template.ParseFiles("templates/index.html"))
+    // checkErr(err)
+    // template.Execute(w, "Hello World!")
+
+    w.Header().Set("Content-Type", "text/html; charset=utf-8")
+    myHtml := exportPageHTML(vars["Config_ID"])
     io.WriteString(w, myHtml)
 
 }

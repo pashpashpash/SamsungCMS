@@ -22,3 +22,26 @@ func configPageHTML(Config_ID string) (string){
 
     </body></html>`)
 }
+
+func exportPageHTML(Config_ID string) (string){
+    return (`<!DOCTYPE html><html><head>
+                <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
+        </head>
+
+        <body>
+            <div id="header">
+                <div id="headerIcon" onclick="location.reload();location.href='../index.html'"></div>
+                <div id="headerText" onclick="location.reload();location.href='../index.html'"> Ultra Configurations <span id="smallerText">`+`Export`+`</span></div>
+            </div>
+            <hr>
+            <button id="download" onClick = "downloadConfigurations()">Export Ultra Configurations</button>
+
+
+            <!-- Javascript Includes -->
+
+            <script type="text/javascript" src="../javascript/rest.js"></script>
+            <script type="text/javascript" src="../javascript/post.js"></script>
+            <script type="text/javascript" src="../javascript/export.js"></script>
+
+    </body></html>`)
+}
