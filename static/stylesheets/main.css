@@ -4,6 +4,33 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
 }
+
+/* login screen */
+#name {
+    padding: 14px;
+    border: 0px solid black;
+    width: 200px;
+}
+#password {
+    padding: 14px;
+    border: 0px solid black;
+    width: 200px;
+}
+#login {
+    background-image: url("/images/blur_bg.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    color:white;
+    border: 0px solid white;
+    padding: 14px;
+    width: 228px;
+}
+#loginPage {
+    margin: auto;
+    width: 228px;
+    margin-top: 228px;
+}
 .popupTitle {
     color: white;
     position: absolute;

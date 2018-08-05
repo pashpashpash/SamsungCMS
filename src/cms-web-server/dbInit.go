@@ -38,6 +38,11 @@ func initDB(name string) (*sql.DB) {
     _, err = statement.Exec()
     checkErr(err)
 
+    log.Println("initDB –\t\tInitializing users table with admin username and password...")
+    _, err = db.Exec(`INSERT or IGNORE  INTO users (username, password) VALUES ("admin", "admin")`)
+    checkErr(err)
+
+
     // should be changed to initialize only OUR list of operators
     log.Println("initDB –\t\tInitializing operators table with temporary MCC table data...")
     _, err = db.Exec(`INSERT or IGNORE  INTO operators (MCCMNC_ID, Operator_Name, Country_ID, Operator_Group_Name) SELECT CAST(mytable.MCCMNC_ID AS TEXT), Operator_Name, Country_ID, mytable2.Operator_Group_Name FROM mytable INNER JOIN mytable2 ON mytable.MCCMNC_ID = mytable2.MCCMNC_ID`)
@@ -645,6 +650,19 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("DROP TABLE IF EXISTS featureMappings")
     log.Println( "createTables –\tCreating featureMappings table...")
     _, err = db.Exec("CREATE TABLE IF NOT EXISTS featureMappings (id INTEGER PRIMARY KEY AUTOINCREMENT, featureType TEXT, featureName TEXT, Config_ID INTERGER, FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID))")
+    checkErr(err)
+
+
+    log.Println("createTables –\tDropping users table if exists...")
+    _, err = db.Exec("DROP TABLE IF EXISTS users")
+    log.Println( "createTables –\tCreating users table...")
+    _, err = db.Exec("CREATE TABLE IF NOT EXISTS users (userID INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)")
+    checkErr(err)
+
+    log.Println("createTables –\tDropping userSessions table if exists...")
+    _, err = db.Exec("DROP TABLE IF EXISTS userSessions")
+    log.Println( "createTables –\tCreating userSessions table...")
+    _, err = db.Exec("CREATE TABLE IF NOT EXISTS userSessions (sessionKey TEXT PRIMARY KEY, userID INTEGER, FOREIGN KEY(userID) REFERENCES users(userID) )")
     checkErr(err)
 }
 

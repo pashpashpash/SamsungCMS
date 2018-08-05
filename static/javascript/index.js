@@ -7,9 +7,30 @@ var filterParams = [selects, searchField];
 var swapOutContainer = document.getElementById("swapOutContainer");
 var globalViewButton = document.getElementById('globalViewButton');
 var settingsViewButton = document.getElementById('settingsViewButton');
-
 //each int in array is mapped to corresponding appConfig
 var globalConfigArray = [];
+var post_url = "/post/";
+
+
+var body = document.getElementsByTagName("BODY")[0];
+body.classList.add("hidden");
+checkLoggedIn();
+function checkLoggedIn() {
+    console.log("checking if user logged in..")
+    var postRequestJSON = JSON.parse('{"functionToCall" : "checkIfLoggedIn", "data" : {}}');
+    console.log(postRequestJSON);
+    server_post.post(post_url, postRequestJSON, function(loggedIn) {
+        console.log("checkLoggedIn – " + loggedIn);
+        if(loggedIn === true) {
+            body.classList.remove("hidden");
+        }
+        else {
+            body.innerHTML = '<div id ="loginPage"><form method="post" action="/post/login"><input type="text" id="name" name="name" placeholder="username"><input type="password" id="password" name="password"  placeholder="password"><div><button id = "login" type="submit">Login</button></div></form></div>';
+            body.classList.remove("hidden");
+        }
+    });
+}
+
 
 window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.keyIdentifier=='Enter'||e.keyCode==13){if(e.target.nodeName=='INPUT'&&e.target.type=='text'){
     e.preventDefault();
@@ -28,7 +49,8 @@ window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.ke
 }}},true);
 
 //initialization with server post requests
-var post_url = "/post/";
+
+
 var site_loaded = false;
 var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
 var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;

@@ -9,6 +9,7 @@ import (
     "fmt"
     "io"
     "os"
+    "github.com/gorilla/securecookie"
     "text/tabwriter"
         // "database/sql"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
@@ -22,7 +23,8 @@ import (
 
 const NegroniLogFmt = "{{.StartTime}} | {{.Status}} | {{.Duration}} \n          {{.Method}} {{.Path}}\n"
 const NegroniDateFmt = time.Stamp
-
+var cookieHandler = securecookie.New(securecookie.GenerateRandomKey(64),securecookie.GenerateRandomKey(32))
+var loggedInIndex string
 func main() {
     tw := new(tabwriter.Writer)
     tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
@@ -58,6 +60,7 @@ func NewServer() *negroni.Negroni {
     mx.HandleFunc("/rest/", restDocumentationHandler)   //if someone types in /rest/ with no category
     mx.HandleFunc("/configs/{Config_ID}", configPageHandler)   //for config page
     mx.HandleFunc("/export", exportPageHandler)
+    mx.HandleFunc("/post/login", loginAuthentication)   //handles all post requests
     mx.HandleFunc("/post/", postHandler)   //handles all post requests
 	mx.PathPrefix("/").Handler(FileServer(http.Dir(root + "/static/")))     //for all other urls, serve from /static/
 
@@ -125,88 +128,171 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     w.Header().Set("Content-Type", "application/json")
-
-    if (requestData.FunctionToCall=="loadAppTray") {
-        log.Println("postHandler –\t\tAll apps method request detected – Data: ")
-        log.Println(requestData.Data)
-        jsonResponse := loadAppTray(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="appView") {
-        log.Println("postHandler –\t\tApp view method request detected")
-        jsonResponse := appView(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="updateFilterValues") {
-        log.Println("postHandler –\t\tupdateFilterValues method request detected")
-        jsonResponse := updateFilterValues(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getCountryByName") {
-        log.Println("postHandler –\t\tgetCountryByName method request detected")
-        jsonResponse := getCountryByName(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getOperatorsByCountryID") {
-        log.Println("postHandler –\t\tgetOperatorsByCountryID method request detected")
-        jsonResponse := getOperatorsByCountryID(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="addNewConfig") {
-        log.Println("postHandler –\t\taddNewConfig method request detected")
-        jsonResponse := addNewConfig(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="globalView") {
-        log.Println("postHandler –\t\tglobalView method request detected")
-        jsonResponse := globalView(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="settingsView") {
-        log.Println("postHandler –\t\tsettingsView method request detected")
-        jsonResponse := settingsView(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getAllAppConfigs") {
-        log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
-        jsonResponse := getAllAppConfigs(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getFeaturedLocations") {
-        log.Println("postHandler –\t\tgetFeaturedLocations method request detected")
-        jsonResponse := getFeaturedLocations(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getFeatureMappings") {
-        log.Println("postHandler –\t\tgetFeatureMappings method request detected")
-        jsonResponse := getFeatureMappings(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getConfigurationMappings") {
-        log.Println("postHandler –\t\tgetConfigurationMappings method request detected")
-        jsonResponse := getConfigurationMappings(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getOperatorGroupByName") {
-        log.Println("postHandler –\t\tgetOperatorGroupByName method request detected")
-        jsonResponse := getOperatorGroupByName(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="submitNewOperator") {
-        log.Println("postHandler –\t\tsubmitNewOperator method request detected")
-        jsonResponse := submitNewOperator(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="deleteOperator") {
-        log.Println("postHandler –\t\tdeleteOperator method request detected")
-        jsonResponse := deleteOperator(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="submitNewCountry") {
-        log.Println("postHandler –\t\tsubmitNewCountry method request detected")
-        jsonResponse := submitNewCountry(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="getAppConfig") {
-        log.Println("postHandler –\t\tgetAppConfig method request detected")
-        jsonResponse := getAppConfig(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="deleteConfiguration") {
-        log.Println("postHandler –\t\tdeleteConfiguration method request detected")
-        jsonResponse := deleteConfiguration(requestData.Data)
-        w.Write([]byte(jsonResponse))
-    } else if (requestData.FunctionToCall=="updateConfigurationINI") {
-        log.Println("postHandler –\t\tupdateConfigurationINI method request detected")
-        jsonResponse := updateConfigurationINI(requestData.Data)
-        w.Write([]byte(jsonResponse))
+    username := string("")
+    username = getUserName(r)
+    if(username!= "" || requestData.FunctionToCall=="checkIfLoggedIn") { //user is logged in or post request coming in to check
+        if (requestData.FunctionToCall=="loadAppTray") {
+            log.Println("postHandler –\t\tAll apps method request detected – Data: ")
+            log.Println(requestData.Data)
+            jsonResponse := loadAppTray(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="appView") {
+            log.Println("postHandler –\t\tApp view method request detected")
+            jsonResponse := appView(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="updateFilterValues") {
+            log.Println("postHandler –\t\tupdateFilterValues method request detected")
+            jsonResponse := updateFilterValues(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getCountryByName") {
+            log.Println("postHandler –\t\tgetCountryByName method request detected")
+            jsonResponse := getCountryByName(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getOperatorsByCountryID") {
+            log.Println("postHandler –\t\tgetOperatorsByCountryID method request detected")
+            jsonResponse := getOperatorsByCountryID(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="addNewConfig") {
+            log.Println("postHandler –\t\taddNewConfig method request detected")
+            jsonResponse := addNewConfig(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="globalView") {
+            log.Println("postHandler –\t\tglobalView method request detected")
+            jsonResponse := globalView(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="settingsView") {
+            log.Println("postHandler –\t\tsettingsView method request detected")
+            jsonResponse := settingsView(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getAllAppConfigs") {
+            log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
+            jsonResponse := getAllAppConfigs(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getFeaturedLocations") {
+            log.Println("postHandler –\t\tgetFeaturedLocations method request detected")
+            jsonResponse := getFeaturedLocations(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getFeatureMappings") {
+            log.Println("postHandler –\t\tgetFeatureMappings method request detected")
+            jsonResponse := getFeatureMappings(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getConfigurationMappings") {
+            log.Println("postHandler –\t\tgetConfigurationMappings method request detected")
+            jsonResponse := getConfigurationMappings(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getOperatorGroupByName") {
+            log.Println("postHandler –\t\tgetOperatorGroupByName method request detected")
+            jsonResponse := getOperatorGroupByName(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="submitNewOperator") {
+            log.Println("postHandler –\t\tsubmitNewOperator method request detected")
+            jsonResponse := submitNewOperator(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="deleteOperator") {
+            log.Println("postHandler –\t\tdeleteOperator method request detected")
+            jsonResponse := deleteOperator(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="submitNewCountry") {
+            log.Println("postHandler –\t\tsubmitNewCountry method request detected")
+            jsonResponse := submitNewCountry(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="getAppConfig") {
+            log.Println("postHandler –\t\tgetAppConfig method request detected")
+            jsonResponse := getAppConfig(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="deleteConfiguration") {
+            log.Println("postHandler –\t\tdeleteConfiguration method request detected")
+            jsonResponse := deleteConfiguration(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        } else if (requestData.FunctionToCall=="updateConfigurationINI") {
+            log.Println("postHandler –\t\tupdateConfigurationINI method request detected")
+            jsonResponse := updateConfigurationINI(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        }  else if (requestData.FunctionToCall=="checkIfLoggedIn") {
+            log.Println("postHandler –\t\tcheckIfLoggedIn method request detected")
+            jsonResponse := checkIfLoggedIn(w,r)
+            w.Write([]byte(jsonResponse))
+        }
     }
 
 
 }
+func loginAuthentication(w http.ResponseWriter, r *http.Request) {
+
+    name := r.FormValue("name")
+    pass := r.FormValue("password")
+
+    loginAuthQuery := `SELECT DISTINCT userID from users WHERE username="`+name+`" AND password="`+pass+`"`
+    log.Println("loginAuthentication –\t\tQuery = " + loginAuthQuery)
+    userID := string("")
+    loginAuth, err := db.Query(loginAuthQuery)
+    checkErr(err)
+    for(loginAuth.Next()) {
+        loginAuth.Scan(&userID)
+    }
+    if(userID != "") {
+        //correct login
+        setSession(name, w)
+        http.Redirect(w, r, "/", 308)
+    }
+
+    jsonResponse, err := json.Marshal("Incorrect user credentials. Please try again.")
+    checkErr(err)
+    log.Println("globalView –\t\tReturning JSON string...")
+    w.Write([]byte(jsonResponse))
+    http.Redirect(w, r, "/", 308)
+}
+
+func checkIfLoggedIn(w http.ResponseWriter, r *http.Request) ([]byte){
+    username := string("")
+    username = getUserName(r)
+    if(username!= "") { //user is logged in
+        jsonResponse, err := json.Marshal(true)
+        checkErr(err)
+        log.Println("globalView –\t\tReturning JSON string...")
+        return jsonResponse
+    } else {
+        jsonResponse, err := json.Marshal(false)
+        checkErr(err)
+        log.Println("globalView –\t\tReturning JSON string...")
+        return jsonResponse
+    }
+}
+
+func setSession(userName string, response http.ResponseWriter) {
+    value := map[string]string{
+        "name": userName,
+    }
+    if encoded, err := cookieHandler.Encode("session", value); err == nil {
+        cookie := &http.Cookie{
+            Name:  "session",
+            Value: encoded,
+            Path:  "/",
+        }
+        http.SetCookie(response, cookie)
+    }
+}
+
+func getUserName(request *http.Request) (userName string) {
+    if cookie, err := request.Cookie("session"); err == nil {
+        cookieValue := make(map[string]string)
+        if err = cookieHandler.Decode("session", cookie.Value, &cookieValue); err == nil {
+            userName = cookieValue["name"]
+        }
+    }
+    return userName
+}
+
+func clearSession(response http.ResponseWriter) { //use for logout
+    cookie := &http.Cookie{
+        Name:   "session",
+        Value:  "",
+        Path:   "/",
+        MaxAge: -1,
+     }
+    http.SetCookie(response, cookie)
+}
+
 type GlobalData struct {
     GlobalDataApps []GlobalDataApp `json: "globalDataApps" `
     GlobalDataCountries []GlobalDataCountry `json: "globalDataCountries" `
