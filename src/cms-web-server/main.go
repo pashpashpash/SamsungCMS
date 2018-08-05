@@ -1430,10 +1430,15 @@ func exportPageHandler(w http.ResponseWriter, r *http.Request) {
     // template := template.Must(template.ParseFiles("templates/index.html"))
     // checkErr(err)
     // template.Execute(w, "Hello World!")
-
+    username := string("")
+    username = getUserName(r)
+    if(username!= "") {
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     myHtml := exportPageHTML(vars["Config_ID"])
     io.WriteString(w, myHtml)
+    } else {
+        io.WriteString(w, "Unauthenticated Connection. Please log in.")
+    }
 
 }
 
