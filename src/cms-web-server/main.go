@@ -888,7 +888,7 @@ func getOperatorsByCountryID(Country data) ([]byte) {
 
     var operatorRows = OperatorRows{}
     full_query := string(`
-    SELECT MCCMNC_ID, Operator_Name, Country_ID,  from operators
+    SELECT MCCMNC_ID, Operator_Name, Country_ID  from operators
     WHERE Country_ID='`+Country.Country_ID+`'
     ORDER BY Operator_Name`)
     rows, err := db.Query(full_query)
