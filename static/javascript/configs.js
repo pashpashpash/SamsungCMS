@@ -48,8 +48,9 @@ server_post.post(post_url, postRequestJSON, function(appConfig) {
             rowValue.innerText = value;
 
 
-            row.appendChild(rowDescription);
+
             row.appendChild(rowValue);
+            row.appendChild(rowDescription);
             configData.appendChild(row)
         }
         if(key === "IconUrl") {
