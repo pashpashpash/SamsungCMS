@@ -244,7 +244,7 @@ for _, country := range countries {
             configs = RemoveDuplicatesFromSlice(configs)
 
         }
-        if(len(configs) != 0) {
+        if(len(configs) != 0) {  //if mapped configuration length is not 0, add to export
             for _, config := range configs {
                 configSection += (config + ", ")
             }
@@ -379,7 +379,7 @@ for _, operatorGroup := range operatorGroups {
             }
         }
 
-        if(len(configs) != 0) {
+        if(len(configs) != 0) { //if mapped configuration length is not 0, add to export
             for _, config := range configs {
                 configSection += (config + ", ")
             }
@@ -525,7 +525,6 @@ func RemoveDuplicatesFromSlice(s []string) []string {
       for _, item := range s {
               if _, ok := m[item]; ok {
                       // duplicate item
-                      log.Println(item + " is a duplicate")
               } else {
                       m[item] = true
               }
