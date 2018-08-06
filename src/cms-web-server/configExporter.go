@@ -163,20 +163,21 @@ for _, globalfeaturedLocation := range featuredLocations { //featuredLocation = 
 
 
 configuration += "\n; ========================  Countries  ======================================"
+countriesSection := string("")
 log.Println("Starting to dump countries...")
 for _, country := range countries {
     // log.Println(country)
 
 
-
     for _, featuredLocation := range featuredLocations { //featuredLocation = product i.e. "maxGo" or "folder"
-        configuration += (("\n["+country+"_"+featuredLocation+"]") + ("\n"))
-        configuration += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
-        configuration += "filter = (["
-            configuration += "\"country\": \""+country+"\","
-            configuration += "\"product\": \""+featuredLocation+"\","
-        configuration += ("])\n")
-        configuration += ("configList = [")
+        configSection := string("")
+        configSection += (("\n["+country+"_"+featuredLocation+"]") + ("\n"))
+        configSection += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
+        configSection += "filter = (["
+            configSection += "\"country\": \""+country+"\","
+            configSection += "\"product\": \""+featuredLocation+"\","
+        configSection += ("])\n")
+        configSection += ("configList = [")
         configs := []string{}
         var configsMap = make(map[string]bool)
         if(featuredLocation == "homescreen") {
@@ -243,14 +244,19 @@ for _, country := range countries {
             configs = RemoveDuplicatesFromSlice(configs)
 
         }
-        for _, config := range configs {
-            configuration += (config + ", ")
+        if(len(configs) != 0) {
+            for _, config := range configs {
+                configSection += (config + ", ")
+            }
+            configSection += ("]")
+            configurationOrder++
+            countriesSection += configSection
         }
-        configuration += ("]")
-        configurationOrder++
     }
 
 }
+configuration += countriesSection //add countriesSection to configuration export
+
 configuration += "\n; ========================  Operators  ======================================"
 log.Println("Starting to dump operators (more checks involved here)...")
 
@@ -270,7 +276,7 @@ for(operatorGroupsList.Next()) {
 }
 operatorGroupsList.Close()
 
-
+operatorsSection := string("")
 for _, operatorGroup := range operatorGroups {
 
 
@@ -289,13 +295,14 @@ for _, operatorGroup := range operatorGroups {
     }
     mappedOperatorList.Close()
     for _, featuredLocation := range featuredLocations { //featuredLocation = product i.e. "maxGo" or "folder"
-        configuration += (("\n["+operatorGroup+"_"+featuredLocation+"]") + ("\n"))
-        configuration += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
-        configuration += "filter = (["
-            configuration += "\"operator\": \""+operatorGroup+"\","
-            configuration += "\"product\": \""+featuredLocation+"\","
-        configuration += ("])\n")
-        configuration += ("configList = [")
+        configSection := string("")
+        configSection += (("\n["+operatorGroup+"_"+featuredLocation+"]") + ("\n"))
+        configSection += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
+        configSection += "filter = (["
+            configSection += "\"operator\": \""+operatorGroup+"\","
+            configSection += "\"product\": \""+featuredLocation+"\","
+        configSection += ("])\n")
+        configSection += ("configList = [")
         configs := []string{}
         var configsMap = make(map[string]bool)
         for _, mappedOperator := range mappedOperators {
@@ -371,13 +378,19 @@ for _, operatorGroup := range operatorGroups {
 
             }
         }
-        configurationOrder++
-        for _, config := range configs {
-            configuration += (config + ", ")
+
+        if(len(configs) != 0) {
+            for _, config := range configs {
+                configSection += (config + ", ")
+            }
+            configSection += ("]")
+            configurationOrder++
+            operatorsSection += configSection
         }
-        configuration += ("]")
     }
 }
+configuration += operatorsSection //add countriesSection to configuration export
+
 return configuration
 }
 
