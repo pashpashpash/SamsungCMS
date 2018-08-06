@@ -22,7 +22,7 @@ func uniqueNonEmptyElementsOf(s []string) []string {
 	return us
 }
 
-// DATABASE HELPER FUNCTION
+// DATABASE HELPER FUNCTION //
 func initDB(name string) (*sql.DB) {
     tw := new(tabwriter.Writer)
     tw.Init(os.Stderr, 0, 8, 0, '\t', 0)
