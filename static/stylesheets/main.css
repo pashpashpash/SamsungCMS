@@ -250,6 +250,10 @@ body {
     width: 40%;
     margin-bottom: 14px;
 }
+.configData .rowDescription {
+    margin-left: 14px;
+    margin-bottom : -1px;
+}
 .webApp .row{
     max-height: 46px;
     border-top: 1px solid transparent;
