@@ -862,6 +862,16 @@ func updateConfigurationINI(Data data) ([]byte) {
     checkErr(err)
     log.Println("updateConfigurationINI –\t\t wrote to file")
 
+    // //package together static/configuration.ini, static/ultra_apps_json, and static/ultra_apps into static/configuration.zip
+    // files := []string{"static/configuration.ini", "static/ultra_apps_json/", "static/ultra_apps/"}
+    // zipOutput := "static/configuration.zip"
+    // for _, file := range files {
+    //     err = zipit(zipOutput, file)
+    //     checkErr(err)
+    // }
+    //
+    // log.Println("Zipped File: " + zipOutput)
+
     jsonResponse, err := json.Marshal("success")
     checkErr(err)
     return jsonResponse

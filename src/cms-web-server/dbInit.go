@@ -182,416 +182,422 @@ func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredL
 
 func loadConfigTables(db *sql.DB) {
     log.Println("loadConfigTables –\tInitializing [DEFAULT] appConfigs+configurationMappings tables...")
-    statement, _ := db.Prepare(`INSERT INTO appConfigs (originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?)`)
+    // statement, _ := db.Prepare(`INSERT INTO appConfigs (originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?)`)
     // =============================== (Config_ID* = 1) INSTAGRAM [DEFAULT] ==================================//
-    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "2", "3.1")
-    // =============================== (Config_ID* = 2) vKontakte [DEFAULT] ==================================//
-    log.Println("loadConfigTables –\tInserting vKontakte [DEFAULT] entries...")
-
-    _, err := statement.Exec("vk", "vKontakte", "ultra_apps/vkontakte_ultra.png","https://vk.com", "4" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
-    checkErr(err)
-
-    // =============================== (Config_ID* = 3) Cricbuzz [DEFAULT] ==================================//
-    log.Println("loadConfigTables –\tInserting Cricbuzz [DEFAULT] entries...")
-    _, err = statement.Exec("cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "5" , "3.1")
-    checkErr(err)
-    //folder, homescreen, max
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
-    checkErr(err)
-
-
-    // =============================== (Config_ID* = 4) Wikipedia [DEFAULT] ==================================//
-    newAppConfig(db, "4", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "7", "3.1")
-
-    // =============================== (Config_ID* = 5) Facebook [Global and Preloaded] ==================================//
-    log.Println("loadConfigTables –\tInserting Facebook [Global and Preloaded] entries...")
-    newAppConfig(db, "5", "[Global and Preloaded]", "folder,homescreen,max", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
-    // =============================== (Config_ID = 1) Instagram [Global and Preloaded] ==================================//
-    log.Println("loadConfigTables –\tInserting Instagram [Global and Preloaded] entries...")
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 1, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 1, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 1, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    // =============================== (Config_ID = 2) vKontakte [Global and Preloaded] ==================================//
-    log.Println("loadConfigTables –\tInserting vKontakte [Global and Preloaded] entries...")
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
-    checkErr(err)
-
-
-    // =============================== (Config_ID = 3) Cricbuzz [Global and Preloaded] ==================================//
-    log.Println("loadConfigTables –\tInserting Cricbuzz [Global and Preloaded] entries...")
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    // =============================== (Config_ID = 4) Wikipedia [Global and Preloaded] ==================================//
-    log.Println("loadConfigTables –\tInserting Wikipedia [Global and Preloaded] entries...")
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 4, Country_ID FROM countries`)
-    checkErr(err)
-
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 4, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 4, Country_ID FROM countries`)
-    checkErr(err)
-
-
-    // =============================== (Config_ID = 5) Facebook [global_and_preloaded_with_freebasic] ==================================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-
-    // ========================== (Config_ID = 1) Instagram [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    // ========================== (Config_ID = 2) vKontakte [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 3) Cricbuzz [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 6) Free Basics [global_and_preloaded_with_freebasic] =============================//
-    log.Println("loadConfigTables –\tInserting Free Basics [global_and_preloaded_with_freebasic] entries...")
-    _, err = statement.Exec("freebasics", "Free Basics", "ultra_apps/ic_free_basics.png","https://freebasics.com/?ref=s_max_bookmark", "6" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 4) Wikipedia [global_and_preloaded_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 7) Facebook [android_go] =============================//
-    log.Println("loadConfigTables –\tInserting Facebook [android_go] entry...")
-    _, err = statement.Exec("facebook", "Facebook", "ultra_apps/facebook_ultra_color.png","https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 7, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "7"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 8) Instagram [android_go] =============================//
-    log.Println("loadConfigTables –\tInserting Instagram [android_go] entry...")
-    _, err = statement.Exec("instagram", "Instagram", "ultra_apps/instagram_ultra.png","https://www.instagram.com/?utm_source=samsung_max_sd", "2" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 8, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "8"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 9) Twitter [android_go] =============================//
-    log.Println("loadConfigTables –\tInserting Twitter [android_go] entry...")
-    _, err = statement.Exec("twitter", "Twitter", "ultra_apps/twitter_ultra.png","https://mobile.twitter.com", "3" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 9, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "9"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 10) vKontakte [android_go] =============================//
-    log.Println("loadConfigTables –\tInserting vKontakte [android_go] entry...")
-    _, err = statement.Exec("vk", "vKontakte", "ultra_apps/vkontakte_ultra.png","https://vk.com", "4" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 10, Country_ID FROM countries WHERE Country_ID!="in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "10"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 11) Wikipedia [android_go] =============================//
-    log.Println("loadConfigTables –\tInserting Twitter [android_go] entry...")
-    _, err = statement.Exec("wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png","https://www.wikipedia.org", "7" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 11, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "11"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 12) Worldreader [android_go] =============================//
-    log.Println("loadConfigTables –\tInserting worldreader [android_go] entry...")
-    _, err = statement.Exec("worldreader", "Worldreader", "ultra_apps/ic_worldreader_ultra.png","https://www.worldreader.org", "25" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 12, Country_ID FROM countries`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "12"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    // ========================== (Config_ID = 8) Instagram [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    // ========================== (Config_ID = 9) Twitter [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
-    checkErr(err)
-
-    // ========================== (Config_ID = 10) vKontakte [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 10, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics" )) AND Country_ID != "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 7) Freebasics [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 6) Freebasics [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 11) Wikipedia [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 13) DailyHunt [android_go_india] =============================//
-    log.Println("loadConfigTables –\tInserting DailyHunt [android_go_india] entry...")
-    _, err = statement.Exec("dailyhunt", "Dailyhunt", "ultra_apps/ic_dailyhunt_lite.png","https://samsung.dailyhunt.in/news/india/english?utm_source=Samsung&utm_medium=Android%20Go&utm_campaign=Phase%201&mode=pwa&s=Samsung&ss=AndroidGo", "0" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 13, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "13"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 7) Facebook [android_go_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 7, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 8) Instagram [android_go_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 8, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 9) Twitter [android_go_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 9, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 11) Wikipedia [android_go_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 11, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 14) Nitrostreet [android_go_india] =============================//
-    log.Println("loadConfigTables –\tInserting Nitrostreet [android_go_india] entry...")
-    _, err = statement.Exec("nitrostreet", "Nitro StreetRun 2", "ultra_apps/ic_nitrostreet_ultra.png","http://play.ludigames.com/games/nitroStreetRun2Free/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "20" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 14, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "14"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 15) PuzzlePets [android_go_india] =============================//
-    log.Println("loadConfigTables –\tInserting PuzzlePets [android_go_india] entry...")
-    _, err = statement.Exec("puzzlepets", "Puzzle Pets Pairs", "ultra_apps/ic_puzzlepets_ultra.png","http://play.ludigames.com/games/puzzlePetsPairsFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "21" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 15, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "15"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 16) Paper Flight [android_go_india] =============================//
-    log.Println("loadConfigTables –\tInserting Paper Flight [android_go_india] entry...")
-    _, err = statement.Exec("paperflight", "Paper Flight", "ultra_apps/ic_paperflight_ultra.png","http://play.ludigames.com/games/paperFlightFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "22" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 16, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "16"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 17) Ludibubbles [android_go_india] =============================//
-    log.Println("loadConfigTables –\tInserting Ludibubbles [android_go_india] entry...")
-    _, err = statement.Exec("ludibubbles", "Ludibubbles", "ultra_apps/ic_ludibubbles_ultra.png","http://play.ludigames.com/games/ludibubblesFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "23" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 17, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "17"`)
-    checkErr(err)
-
-    // ========================== (Config_ID* = 18) Moregames [android_go_india] =============================//
-    log.Println("loadConfigTables –\tInserting Moregames [android_go_india] entry...")
-    _, err = statement.Exec("moregames", "More games", "ultra_apps/ic_more_games.png","http://play.ludigames.com/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "24" , "3.1")
-    checkErr(err)
-
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 18, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-    _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "18"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 12) Worldreader [android_go_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 12, Country_ID FROM countries WHERE Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 13) DailyHunt [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 13, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 8) Instagram [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 9) Twitter [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 6) Free Basics [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 11) Wikipedia [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 14) Nitrostreet [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 14, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 15) PuzzlePets [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 15, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 16) PaperFlight [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 16, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 17) Ludibubbles [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 17, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 18) Moregames [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 18, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
-
-    // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic_india] =============================//
-    _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
-    checkErr(err)
+    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "1", "3.1")
+
+    newAppConfig(db, "2", "[DEFAULT]", "ALL", "cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "2" , "3.1")
+
+    newAppConfig(db, "3", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "3", "3.1")
+
+    newAppConfig(db, "4", "[Global and Preloaded]", "ALL", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "4" , "3.1")
+    // // =============================== (Config_ID* = 2) vKontakte [DEFAULT] ==================================//
+    // log.Println("loadConfigTables –\tInserting vKontakte [DEFAULT] entries...")
+    //
+    // _, err := statement.Exec("vk", "vKontakte", "ultra_apps/vkontakte_ultra.png","https://vk.com", "4" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // checkErr(err)
+    //
+    // // =============================== (Config_ID* = 3) Cricbuzz [DEFAULT] ==================================//
+    // log.Println("loadConfigTables –\tInserting Cricbuzz [DEFAULT] entries...")
+    // _, err = statement.Exec("cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "5" , "3.1")
+    // checkErr(err)
+    // //folder, homescreen, max
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
+    // checkErr(err)
+    //
+    //
+    // // =============================== (Config_ID* = 4) Wikipedia [DEFAULT] ==================================//
+    // newAppConfig(db, "4", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "7", "3.1")
+    //
+    // // =============================== (Config_ID* = 5) Facebook [Global and Preloaded] ==================================//
+    // log.Println("loadConfigTables –\tInserting Facebook [Global and Preloaded] entries...")
+    // newAppConfig(db, "5", "[Global and Preloaded]", "folder,homescreen,max", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
+    // // =============================== (Config_ID = 1) Instagram [Global and Preloaded] ==================================//
+    // log.Println("loadConfigTables –\tInserting Instagram [Global and Preloaded] entries...")
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 1, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 1, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 1, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // // =============================== (Config_ID = 2) vKontakte [Global and Preloaded] ==================================//
+    // log.Println("loadConfigTables –\tInserting vKontakte [Global and Preloaded] entries...")
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
+    // checkErr(err)
+    //
+    //
+    // // =============================== (Config_ID = 3) Cricbuzz [Global and Preloaded] ==================================//
+    // log.Println("loadConfigTables –\tInserting Cricbuzz [Global and Preloaded] entries...")
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // // =============================== (Config_ID = 4) Wikipedia [Global and Preloaded] ==================================//
+    // log.Println("loadConfigTables –\tInserting Wikipedia [Global and Preloaded] entries...")
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 4, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 4, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 4, Country_ID FROM countries`)
+    // checkErr(err)
+    //
+    //
+    // // =============================== (Config_ID = 5) Facebook [global_and_preloaded_with_freebasic] ==================================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 5, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    //
+    // // ========================== (Config_ID = 1) Instagram [global_and_preloaded_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 1, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 2) vKontakte [global_and_preloaded_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 2, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID != "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 3) Cricbuzz [global_and_preloaded_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 3, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 6) Free Basics [global_and_preloaded_with_freebasic] =============================//
+    // log.Println("loadConfigTables –\tInserting Free Basics [global_and_preloaded_with_freebasic] entries...")
+    // _, err = statement.Exec("freebasics", "Free Basics", "ultra_apps/ic_free_basics.png","https://freebasics.com/?ref=s_max_bookmark", "6" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 4) Wikipedia [global_and_preloaded_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 4, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 7) Facebook [android_go] =============================//
+    // log.Println("loadConfigTables –\tInserting Facebook [android_go] entry...")
+    // _, err = statement.Exec("facebook", "Facebook", "ultra_apps/facebook_ultra_color.png","https://m.facebook.com/?ref=s_max_bookmark", "1" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 7, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "7"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 8) Instagram [android_go] =============================//
+    // log.Println("loadConfigTables –\tInserting Instagram [android_go] entry...")
+    // _, err = statement.Exec("instagram", "Instagram", "ultra_apps/instagram_ultra.png","https://www.instagram.com/?utm_source=samsung_max_sd", "2" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 8, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "8"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 9) Twitter [android_go] =============================//
+    // log.Println("loadConfigTables –\tInserting Twitter [android_go] entry...")
+    // _, err = statement.Exec("twitter", "Twitter", "ultra_apps/twitter_ultra.png","https://mobile.twitter.com", "3" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 9, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "9"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 10) vKontakte [android_go] =============================//
+    // log.Println("loadConfigTables –\tInserting vKontakte [android_go] entry...")
+    // _, err = statement.Exec("vk", "vKontakte", "ultra_apps/vkontakte_ultra.png","https://vk.com", "4" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 10, Country_ID FROM countries WHERE Country_ID!="in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "10"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 11) Wikipedia [android_go] =============================//
+    // log.Println("loadConfigTables –\tInserting Twitter [android_go] entry...")
+    // _, err = statement.Exec("wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png","https://www.wikipedia.org", "7" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 11, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "11"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 12) Worldreader [android_go] =============================//
+    // log.Println("loadConfigTables –\tInserting worldreader [android_go] entry...")
+    // _, err = statement.Exec("worldreader", "Worldreader", "ultra_apps/ic_worldreader_ultra.png","https://www.worldreader.org", "25" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 12, Country_ID FROM countries`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "12"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 8) Instagram [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 9) Twitter [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 10) vKontakte [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 10, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics" )) AND Country_ID != "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 7) Freebasics [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 6) Freebasics [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 11) Wikipedia [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics"))`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 13) DailyHunt [android_go_india] =============================//
+    // log.Println("loadConfigTables –\tInserting DailyHunt [android_go_india] entry...")
+    // _, err = statement.Exec("dailyhunt", "Dailyhunt", "ultra_apps/ic_dailyhunt_lite.png","https://samsung.dailyhunt.in/news/india/english?utm_source=Samsung&utm_medium=Android%20Go&utm_campaign=Phase%201&mode=pwa&s=Samsung&ss=AndroidGo", "0" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 13, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "13"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 7) Facebook [android_go_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 7, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 8) Instagram [android_go_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 8, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 9) Twitter [android_go_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 9, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 11) Wikipedia [android_go_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 11, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 14) Nitrostreet [android_go_india] =============================//
+    // log.Println("loadConfigTables –\tInserting Nitrostreet [android_go_india] entry...")
+    // _, err = statement.Exec("nitrostreet", "Nitro StreetRun 2", "ultra_apps/ic_nitrostreet_ultra.png","http://play.ludigames.com/games/nitroStreetRun2Free/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "20" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 14, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "14"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 15) PuzzlePets [android_go_india] =============================//
+    // log.Println("loadConfigTables –\tInserting PuzzlePets [android_go_india] entry...")
+    // _, err = statement.Exec("puzzlepets", "Puzzle Pets Pairs", "ultra_apps/ic_puzzlepets_ultra.png","http://play.ludigames.com/games/puzzlePetsPairsFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "21" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 15, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "15"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 16) Paper Flight [android_go_india] =============================//
+    // log.Println("loadConfigTables –\tInserting Paper Flight [android_go_india] entry...")
+    // _, err = statement.Exec("paperflight", "Paper Flight", "ultra_apps/ic_paperflight_ultra.png","http://play.ludigames.com/games/paperFlightFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "22" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 16, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "16"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 17) Ludibubbles [android_go_india] =============================//
+    // log.Println("loadConfigTables –\tInserting Ludibubbles [android_go_india] entry...")
+    // _, err = statement.Exec("ludibubbles", "Ludibubbles", "ultra_apps/ic_ludibubbles_ultra.png","http://play.ludigames.com/games/ludibubblesFree/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "23" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 17, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "17"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID* = 18) Moregames [android_go_india] =============================//
+    // log.Println("loadConfigTables –\tInserting Moregames [android_go_india] entry...")
+    // _, err = statement.Exec("moregames", "More games", "ultra_apps/ic_more_games.png","http://play.ludigames.com/?utm_source=gameloft&utm_medium=bookmark&utm_campaign=PH72", "24" , "3.1")
+    // checkErr(err)
+    //
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 18, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "18"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 12) Worldreader [android_go_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 12, Country_ID FROM countries WHERE Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 13) DailyHunt [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 13, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 7, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 8) Instagram [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 8, MCCMNC_ID FROM operators WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 9) Twitter [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 9, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 6) Free Basics [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 11) Wikipedia [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 11, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 14) Nitrostreet [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 14, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 15) PuzzlePets [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 15, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 16) PaperFlight [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 16, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 17) Ludibubbles [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 17, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 18) Moregames [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 18, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
+    //
+    // // ========================== (Config_ID = 12) Worldreader [android_go_with_freebasic_india] =============================//
+    // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 12, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) AND Country_ID = "in"`)
+    // checkErr(err)
 }
 
 func createTables(db *sql.DB) {
