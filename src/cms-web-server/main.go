@@ -710,7 +710,7 @@ func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () 
 }
 
 func addNewConfig(Config data) ([]byte) {
-    log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName)
+    log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName + " | Rank: " + Config.AppRank)
     log.Println(Config.AppConfigurationMappings.Countries)
     log.Println(Config.AppConfigurationMappings.Operators)
     log.Println(Config.AppConfigurationMappings.OperatorGroups)
@@ -719,6 +719,7 @@ func addNewConfig(Config data) ([]byte) {
     log.Println(Config.FeaturedLocations)
 
     statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, versionNumber) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppVersionNumber + `"` + `)`)
+    log.Println("addNewConfig –\t\tInsert statement: " + statement)
     res, err := db.Exec(statement)
     checkErr(err)
     id, err := res.LastInsertId()
@@ -1052,7 +1053,6 @@ type ConfigurationMappingsResult struct{
 func getConfigurationMappings(Config data) ([]byte) {
     log.Println("getConfigurationMappings –\tRecieved request to get configuration mappings for " + Config.Config_ID)
 
-    var result = ConfigurationMappingsResult{}
     full_query := string(`
     SELECT Country_ID FROM (SELECT DISTINCT Country_ID FROM countries)
     EXCEPT
@@ -1068,23 +1068,25 @@ func getConfigurationMappings(Config data) ([]byte) {
         allCountriesExist = false
     }
     rows.Close()
-
+    var result = ConfigurationMappingsResult{}
+    
     if(!allCountriesExist)  {
-        var result = ConfigurationMappingsResult{}
+
         full_query = string(`
         SELECT Country_ID, countries.name from configurationMappings
         JOIN countries USING (Country_ID)
         WHERE Config_ID="`+Config.Config_ID+`" AND Country_ID IS NOT NULL
         `)
-        rows, err = db.Query(full_query)
+        countryRows, err := db.Query(full_query)
         checkErr(err)
         log.Println("getConfigurationMappings –\t"+full_query)
-        for rows.Next() {
+        for countryRows.Next() {
             countryRow := MappingsCountryRow{}
-            rows.Scan(&countryRow.Text, &countryRow.Value)
+            countryRows.Scan(&countryRow.Text, &countryRow.Value)
+            log.Println("getConfigurationMappings –\t"+countryRow.Text)
             result.CountryRows = append(result.CountryRows, countryRow)
         }
-        rows.Close()
+        countryRows.Close()
     } else {
         countryRow := MappingsCountryRow{}
         countryRow.Text = "*"
@@ -1098,16 +1100,16 @@ func getConfigurationMappings(Config data) ([]byte) {
     JOIN operatorGroups USING (MCCMNC_ID)
     WHERE Config_ID="`+Config.Config_ID+`" AND MCCMNC_ID IS NOT NULL ORDER BY operatorGroups.Operator_Group_Name
     `)
-    rows, err = db.Query(full_query)
+    operatorRows, err := db.Query(full_query)
     checkErr(err)
     log.Println("getConfigurationMappings –\t"+full_query)
-    for rows.Next() {
+    for operatorRows.Next() {
         operatorRow := MappingsOperatorRow{}
-        rows.Scan(&operatorRow.Value, &operatorRow.Text, &operatorRow.Group)
+        operatorRows.Scan(&operatorRow.Value, &operatorRow.Text, &operatorRow.Group)
         result.OperatorRows = append(result.OperatorRows, operatorRow)
     }
-    rows.Close()
-
+    operatorRows.Close()
+    log.Println(result)
     jsonResponse, err := json.Marshal(result)
     checkErr(err)
     return jsonResponse
@@ -1278,7 +1280,7 @@ func appView(Data data) ([]byte) {
 }
 func getAppConfig(Data data) ([]byte) {
 
-    getAppConfigQuery := `SELECT Config_ID, originalName, modifiableName, iconURL, homeURL, versionNumber, rank, category FROM appConfigs WHERE Config_ID = "`+Data.Config_ID+`"`
+    getAppConfigQuery := `SELECT Config_ID, originalName, modifiableName, iconURL, homeURL, rank, category, versionNumber FROM appConfigs WHERE Config_ID = "`+Data.Config_ID+`"`
     rows, err := db.Query(getAppConfigQuery)
     checkErr(err)
 
@@ -1286,7 +1288,7 @@ func getAppConfig(Data data) ([]byte) {
 
     var app = App{}
     for (rows.Next()) {
-        rows.Scan(&app.Config_ID, &app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.VersionNumber, &app.Rank, &app.Category)
+        rows.Scan(&app.Config_ID, &app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl,  &app.Rank, &app.Category, &app.VersionNumber)
     }
     jsonResponse, err := json.Marshal(app)
     jsonString := string(jsonResponse)
