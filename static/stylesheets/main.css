@@ -3,6 +3,7 @@ body {
 
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
+  background-image: url(/images/blur_bg_ultralight.png);
 }
 
 
@@ -502,14 +503,14 @@ hr{
     font-weight: 400;
     margin-left: 6px;
     margin-top: 4px;
-    color: #ebebeb;
+    color: white;
 }
 #settingsViewButton{
     font-size: 16px;
     font-weight: 400;
     margin-left: 6px;
     margin-top: 4px;
-    color: #ebebeb;
+    color: white;
 }
 .globalViewON{
     color:#f953c6 !important;
@@ -660,6 +661,7 @@ hr{
     background: #fff5f4;
     color: #171616;
     outline: none;
+    width: 420px;
 }
 #starandsearch input[type=text]::placeholder {
     color: #171616;
@@ -676,7 +678,7 @@ hr{
     padding-bottom: 4px;
     padding-top: 8px;
     text-align: center;
-    color: #807f7f;
+    color: #171616;
     font-weight: 100;
 }
 #appTray .appTraySection {
@@ -684,7 +686,7 @@ hr{
 
     margin-bottom:24px;
     padding-bottom: 18px;
-    border: 1px solid #ebebeb;
+    border: 2px solid white;
 }
 .iconContainer #iconText{
     width: 104px;
@@ -718,10 +720,11 @@ main{
 #appTray{
     margin: auto;
     width: 700px;
-    height: 500px;
+    height: 559px;
     padding-top: 6px;
-    overflow:scroll;
+    overflow: scroll;
     color: black;
+    border-bottom: 2px solid white;
 }
 #allicons{
     margin: auto;
@@ -738,8 +741,10 @@ main{
 }
 @media screen  and (max-width: 1400px) /* Tablet */ {
     #appTray {
+        height: 547px;
 
         margin:auto;
+        margin-bottom: 60px;
         text-align: center;
         width: 70%;
         /* height: 1300px; */
@@ -762,6 +767,7 @@ main{
     #starandsearch input[type=text] {
             line-height: 44px;
             margin-top: 10px;
+            width:auto;
     }
     #star{
         line-height: 44px;

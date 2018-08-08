@@ -228,7 +228,7 @@ function addAppToTray(app, tray){
 
     webAppsHTML = "<div class='iconContainer' id='" + app.OriginalName + "'>";
         webAppsHTML += ("<img id='icon' src='" + app.IconUrl + "'");
-        webAppsHTML += (" onclick=\"swapOut('"+ app.OriginalName +"')\"");
+        webAppsHTML += (" onclick=\" window.location = '/configs/"+app.Config_ID+"';\"");
         webAppsHTML += (" />");
 
         webAppsHTML += ("<div id='iconText'>");
