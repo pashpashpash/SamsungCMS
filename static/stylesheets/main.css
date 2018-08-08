@@ -659,6 +659,7 @@ hr{
     border-radius: 8px;
     background: #fff5f4;
     color: #171616;
+    outline: none;
 }
 #starandsearch input[type=text]::placeholder {
     color: #171616;
