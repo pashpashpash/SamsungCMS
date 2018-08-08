@@ -54,12 +54,10 @@ window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.ke
 var site_loaded = false;
 var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
 var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
-var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
 var searchfield_text = filterParams[1].value;
 var postRequestJSON = JSON.parse('{"functionToCall" : "loadAppTray", "data" : {'
 + ' "Selected_country" : "'+ selected_country + '",'
-+ ' "Selected_operator" : "'+ selected_operator + '",'
-+ ' "Selected_version" : "'+ selected_version + '"'
++ ' "Selected_operator" : "'+ selected_operator + '"'
 +'}}');
 console.log("MAIN – Sending post request with the following JSON:");
 console.log(postRequestJSON);
@@ -99,19 +97,17 @@ function applyFilters()
     var post_url = "/post/";
     var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
-    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
     var searchfield_text = filterParams[1].value;
     var postRequestJSON = JSON.parse('{"functionToCall" : "loadAppTray", "data" : {'
     + ' "Selected_country" : "'+ selected_country + '",'
-    + ' "Selected_operator" : "'+ selected_operator + '",'
-    + ' "Selected_version" : "'+ selected_version + '"'
+    + ' "Selected_operator" : "'+ selected_operator + '"'
     +'}}');
     console.log("applyFilters – Sending post request with the following JSON:");
     console.log(postRequestJSON);
     server_post.post(post_url, postRequestJSON, function(appsToLoad) {
         console.log("applyFilters – Post request success. Applying filters and updating select filter rows:");
         showWebapps(appTray, appsToLoad);
-        updateFilterValues()
+        updateFilterValues();
     });
 
 }
@@ -121,12 +117,10 @@ function searchApplyFilters(searchValue)
     var post_url = "/post/";
     var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
-    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
     var searchfield_text = filterParams[1].value;
     var postRequestJSON = JSON.parse('{"functionToCall" : "loadAppTray", "data" : {'
     + ' "Selected_country" : "'+ selected_country + '",'
     + ' "Selected_operator" : "'+ selected_operator + '",'
-    + ' "Selected_version" : "'+ selected_version + '",'
     + ' "Searchfield_text" : "'+ searchValue + '"'
     +'}}');
     console.log("applyFilters – Sending post request with the following JSON:");
@@ -144,23 +138,16 @@ function searchApplyFilters(searchValue)
 //input an app container + a json of webapps, and this func will display them in the container with proper nesting
 function showWebapps(appTray, webapps) {
     if (webapps != null) {
+        appTray.innerHTML = "";
         var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
-        for(var o= 0; o < webapps.length; o++){
-            console.log("SHOW_WEBAPPS – Adding "+webapps[o].ModifiableName+" iconContainer to the HTML | MAXGO");
-            webAppsHTML += "<div class='iconContainer' id='" + webapps[o].OriginalName + "'>";
-                // webAppsHTML += ("<div id='deleteIcon' ");
-                // webAppsHTML += (" onclick=\"deleteAppfromTray('"+ webapps[o].OriginalName +"')\"");
-                // webAppsHTML += ("></div>");
-                webAppsHTML += ("<img id='icon' src='" + webapps[o].IconUrl + "'");
-                webAppsHTML += (" onclick=\"swapOut('"+ webapps[o].OriginalName +"')\"");
-                webAppsHTML += (" />");
+        addAppTraySections(appTray); //creates sections inside of app tray for maxGlobal, max, and maxGo
 
-                webAppsHTML += ("<div id='iconText'>");
-                    webAppsHTML += (webapps[o].ModifiableName + " Ultra");
-                webAppsHTML += ("</div>");
-            webAppsHTML += ("</div>");
+
+        for(var o= 0; o < webapps.length; o++){
+            addAppToTray(webapps[o], appTray);
         }
-        webAppsHTML += "<div class='iconContainer'>"; //ADD ULTRA APP ICON
+
+        webAppsHTML = "<div class='iconContainer'>"; //ADD ULTRA APP ICON
         webAppsHTML += ("<img id='icon' src='" + "/images/add_icon.png" +"'");
         webAppsHTML += (" onclick=\"showAddAppPopup()\"");
         webAppsHTML += (" />");
@@ -173,12 +160,109 @@ function showWebapps(appTray, webapps) {
         webAppsHTML += ("</div>");
         webAppsHTML += ("</div>");
 
+        var addIcon1 = document.createElement("div");
+        addIcon1.innerHTML = webAppsHTML;
+        addIcon1 = addIcon1.children[0];
+        var addIcon2 = document.createElement("div");
+        addIcon2.innerHTML = webAppsHTML;
+        addIcon2 = addIcon2.children[0];
+        var addIcon3 = document.createElement("div");
+        addIcon3.innerHTML = webAppsHTML;
+        addIcon3 = addIcon3.children[0];
+
+        maxGlobalContent.appendChild(addIcon1);
+        maxContent.appendChild(addIcon2);
+        maxGoContent.appendChild(addIcon3);
 
 
-        appTray.innerHTML = (webAppsHTML);
     } else {
         appTray.innerHTML = "";
     }
+}
+function addAppTraySections(appTray) {
+    var webAppsHTML = "";  //set webAppsHTML string to null, so we can += to it later
+    var maxGlobal = document.createElement("div");
+    maxGlobal.className = "appTraySection";
+    maxGlobal.id = "maxGlobal";
+    var maxGlobalDescription = document.createElement("div");
+    maxGlobalDescription.className = "appTraySectionDescription";
+    maxGlobalDescription.innerText = "Max Global";
+    var maxGlobalContent = document.createElement("div");
+    maxGlobalContent.className = "appTraySectionContent";
+    maxGlobalContent.id = "maxGlobalContent";
+    var max = document.createElement("div");
+    max.className = "appTraySection";
+    max.id = "max";
+    var maxDescription = document.createElement("div");
+    maxDescription.className = "appTraySectionDescription";
+    maxDescription.innerText = "Max";
+    var maxContent = document.createElement("div");
+    maxContent.className = "appTraySectionContent";
+    maxContent.id = "maxContent";
+    var maxGo = document.createElement("div");
+    maxGo.className = "appTraySection";
+    maxGo.id = "maxGo";
+    var maxGoDescription = document.createElement("div");
+    maxGoDescription.className = "appTraySectionDescription";
+    maxGoDescription.innerText = "Max Go";
+    var maxGoContent = document.createElement("div");
+    maxGoContent.className = "appTraySectionContent";
+    maxGoContent.id = "maxGoContent";
+
+    maxGlobal.appendChild(maxGlobalDescription);
+    max.appendChild(maxDescription);
+    maxGo.appendChild(maxGoDescription);
+
+
+    maxGlobal.appendChild(maxGlobalContent);
+    max.appendChild(maxContent);
+    maxGo.appendChild(maxGoContent);
+
+    appTray.appendChild(maxGlobal);
+    appTray.appendChild(max);
+    appTray.appendChild(maxGo);
+}
+function addAppToTray(app, tray){
+
+    console.log("SHOW_WEBAPPS – Adding "+app.ModifiableName+" iconContainer to the HTML");
+
+    webAppsHTML = "<div class='iconContainer' id='" + app.OriginalName + "'>";
+        webAppsHTML += ("<img id='icon' src='" + app.IconUrl + "'");
+        webAppsHTML += (" onclick=\"swapOut('"+ app.OriginalName +"')\"");
+        webAppsHTML += (" />");
+
+        webAppsHTML += ("<div id='iconText'>");
+            webAppsHTML += (app.ModifiableName + " Ultra");
+        webAppsHTML += ("</div>");
+    webAppsHTML += ("</div>");
+    var iconContainer = document.createElement("div")
+    iconContainer.innerHTML = webAppsHTML;
+    iconContainer = iconContainer.children[0];
+
+    if(app.ProductName === "maxGlobal") {
+        if(!appAlreadyExistsInSection(app, tray.children[0].children[1])) {
+            tray.children[0].children[1].appendChild(iconContainer);
+        }
+    }
+    if(app.ProductName === "max") {
+        if(!appAlreadyExistsInSection(app, tray.children[1].children[1])) {
+            tray.children[1].children[1].appendChild(iconContainer);
+        }
+    }
+    if(app.ProductName === "maxGo") {
+        if(!appAlreadyExistsInSection(app, tray.children[2].children[1])) {
+        tray.children[2].children[1].appendChild(iconContainer);
+        }
+    }
+
+}
+function appAlreadyExistsInSection(app, appTraySection) {
+    for(var i = 0; i<appTraySection.children.length; i++) {
+        if(appTraySection.children[i].id === app.OriginalName) {
+            return true;
+        }
+    }
+    return false;
 }
 function toggleSettingsView(){
     settingsViewButton.classList.toggle('settingsViewON');
@@ -591,21 +675,21 @@ function showAppConfigOnHover(appConfig, configNumber) {
     appConfigHoverContents.innerText = generateAppConfigHoverContents(configNumber);
     console.log("showAppConfigOnHover – hoverContents innerHTML = " + appConfigHoverContents.innerText);
     var configFeaturedLocs = document.createElement('div');
-    configFeaturedLocs.className = 'configFeaturedLocations';
+    configFeaturedLocs.className = 'configproducts';
     configFeaturedLocs.innerHTML = '<div class=\'loading\'></div>';
     configFeaturedLocs = configFeaturedLocs.children[0];
     appConfigHoverContents.appendChild(configFeaturedLocs);
 
-    console.log("showAppConfigOnHover – Getting featuredLocations for config " + configNumber)
-    var postRequestText = '{"functionToCall" : "getFeaturedLocations", "data" : {'
+    console.log("showAppConfigOnHover – Getting products for config " + configNumber)
+    var postRequestText = '{"functionToCall" : "getproducts", "data" : {'
         + ' "Config_ID" : "'+ configNumber + '"'
         +'}}';
     var postRequestJSON = JSON.parse(postRequestText);
     console.log(postRequestJSON);
-    server_post.post(post_url, postRequestJSON, function(featuredLocations) {
+    server_post.post(post_url, postRequestJSON, function(products) {
         var newHTML = 'Featured Locations : ';
-        for(i in featuredLocations) {
-            newHTML += (featuredLocations[i] + ", ");
+        for(i in products) {
+            newHTML += (products[i] + ", ");
         }
         var parent = configFeaturedLocs.parentElement;
         if(appConfig.children[0]!=null){
@@ -826,14 +910,12 @@ function swapOut(appID)
     var url = "/post/";
     var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
-    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
     var searchfield_text = filterParams[1].value;
     var app_name = appID;
 
     var postRequestJSON = JSON.parse('{"functionToCall" : "appView", "data" : {'
     + ' "Selected_country" : "'+ selected_country + '",'
     + ' "Selected_operator" : "'+ selected_operator + '",'
-    + ' "Selected_version" : "'+ selected_version + '",'
     + ' "App_name" : "'+ app_name + '"'
     +'}}');
 
@@ -918,7 +1000,6 @@ function addUltraApp(form)
     for(var i = 0; i < operatorGroupMappings.children.length; i++) {
         operatorGroupList += ("\""+operatorGroupMappings.children[i].children[0].innerText+"\"" + ", ")
     }
-
     countriesList = countriesList.replace(/,\s*$/, "");
     operatorsList = operatorsList.replace(/,\s*$/, "");
     operatorGroupList = operatorGroupList.replace(/,\s*$/, "");
@@ -941,11 +1022,10 @@ function addUltraApp(form)
         +'},'
         + ' "App_NativeURL" : "'+ form.children[0].children[5].value + '",'
         + ' "App_IconURL" : "'+ form.children[0].children[6].value + '",'
-        + ' "FeaturedLocations" : { '
-            + ' "Homescreen" : '+form.children[0].children[7].children[0].children[0].checked+','
-            + ' "Folder" : '+form.children[0].children[7].children[1].children[0].checked+','
-            + ' "Max" : '+form.children[0].children[7].children[2].children[0].checked+','
-            + ' "MaxGo" : '+form.children[0].children[7].children[3].children[0].checked+''
+        + ' "products" : { '
+            + ' "MaxGlobal" : '+form.children[0].children[7].children[0].children[0].checked+','
+            + ' "Max" : '+form.children[0].children[7].children[1].children[0].checked+','
+            + ' "MaxGo" : '+form.children[0].children[7].children[2].children[0].checked+''
         +'},'
         + ' "App_ExistsEverywhere" : '+ existsEverywhere + ','
         + ' "App_ConfigurationMappings" : { '
@@ -1094,7 +1174,7 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
                 webAppHTML += "Featured Location";
             webAppHTML += ("</div>");
             webAppHTML += "<div class='rowValue'>";
-                webAppHTML += app.featuredLocationName;
+                webAppHTML += app.productName;
             webAppHTML += ("</div>");
         webAppHTML += "</div>";
 
@@ -1156,22 +1236,18 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
     addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
 
-    addAppViewHTML += '<div id ="featuredLocations">';
-        addAppViewHTML += 'Featured Locations';
+    addAppViewHTML += '<div id ="products">';
+        addAppViewHTML += 'Products';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="homescreen" checked />';
-            addAppViewHTML += '<label for="homescreen">Homescreen</label>';
+            addAppViewHTML += '<input type="checkbox" name="products" value="maxGlobal" checked />';
+            addAppViewHTML += '<label for="maxGlobal">MaxGlobal</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="folder" checked />';
-            addAppViewHTML += '<label for="folder">Folder</label>';
-        addAppViewHTML += '</div>';
-        addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="max" checked />';
+            addAppViewHTML += '<input type="checkbox" name="products" value="max" checked />';
             addAppViewHTML += '<label for="max">Max</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="featuredLocations" value="maxGo" checked />';
+            addAppViewHTML += '<input type="checkbox" name="products" value="maxGo" checked />';
             addAppViewHTML += '<label for="maxGo">MaxGo</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';

@@ -9,27 +9,24 @@ var last_country;
 function updateFilterValues() {
     var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex].value;
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex].value;
-    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex].value;
     var last_operator = selected_operator;
     var last_country = selected_country;
     var postRequestJSON = JSON.parse('{"functionToCall" : "updateFilterValues", "data" : {'
     + ' "Selected_country" : "'+ selected_country + '",'
-    + ' "Selected_operator" : "'+ selected_operator + '",'
-    + ' "Selected_version" : "'+ selected_version + '"'
+    + ' "Selected_operator" : "'+ selected_operator + '"'
     +'}}');
     console.log("updateFilterValues – Sending post request to call updateFilterValues method");
     server_post.post(post_url, postRequestJSON, function(filterData) {
         console.log("updateFilterValues – Post Request success. Calling loadFilters...");
-        loadFilters(filterData);
+        loadFilters(filterData, last_country, last_operator);
     });
 }
-function loadFilters(filterData){
+function loadFilters(filterData, lastcountry, last_operator){
     var selected_country = filterParams[0][0].options[filterParams[0][0].selectedIndex];
     var selected_operator = filterParams[0][1].options[filterParams[0][1].selectedIndex];
-    var selected_version = filterParams[0][2].options[filterParams[0][2].selectedIndex]
     console.log("loadFilters – Loading in filter data...");
     console.log("loadFilters – New filter values: ");
-    console.log(selected_country, selected_operator, selected_version);
+    console.log(selected_country, selected_operator);
     console.log("loadFilters – Data to be loaded into filters: ");
     console.log(filterData);
     if(filterData.countryFilterRows != null)
@@ -40,34 +37,64 @@ function loadFilters(filterData){
         }
         for (var i = 0; i < filterData.countryFilterRows.length; i++) {
             filterParams[0][0].options.add(new Option(filterData.countryFilterRows[i].Country_ID, filterData.countryFilterRows[i].name, false, false));
+
         }
         if(filterData.countryFilterRows.length === 1){
             filterParams[0][0].options.add(new Option("🔯", "star", false, false));
+
         }
     }
     if(filterData.operatorFilterRows != null)
     {
         if(filterData.countryFilterRows===null){
             filterParams[0][1].options.length = 0;
-            filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+            var previousoperatorExists = false;
+
             for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
-                filterData.operatorFilterRows[i];
-                filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                if(last_operator != filterData.operatorFilterRows[i].MCCMNC_ID) {
+                    filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                } else {
+                        previousoperatorExists = true;
+                        filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, true, true));
+                }
+            }
+            if(!previousoperatorExists) {
+                filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+            } else {
+                filterParams[0][1].options.add(new Option("🔯", "star", false, false));
             }
         } else { //if country also not null, that means operator was pressed first, so just update operator list while keeping same selection
             if(filterData.countryFilterRows.length===1) {
                 filterParams[0][1].options.length = 0;
+                var previousoperatorExists = false;
                 for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
-                    filterData.operatorFilterRows[i];
-                    filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                    if(last_operator != filterData.operatorFilterRows[i].MCCMNC_ID) {
+                        filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                    } else {
+                            previousoperatorExists = true;
+                            filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, true, true));
+                    }
                 }
-                filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                if(!previousoperatorExists) {
+                    filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                } else {
+                    filterParams[0][1].options.add(new Option("🔯", "star", false, false));
+                }
             } else {
+                var previousoperatorExists = false;
                 filterParams[0][1].options.length = 0;
-                filterParams[0][1].options.add(new Option("🔯", "star", true, true));
                 for (var i = 0; i < filterData.operatorFilterRows.length; i++) {
-                    filterData.operatorFilterRows[i];
-                    filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                    if(last_operator != filterData.operatorFilterRows[i].MCCMNC_ID) {
+                        filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, false, false));
+                    } else {
+                            previousoperatorExists = true;
+                            filterParams[0][1].options.add(new Option(filterData.operatorFilterRows[i].Operator_Name, filterData.operatorFilterRows[i].MCCMNC_ID, true, true));
+                    }
+                }
+                if(!previousoperatorExists) {
+                    filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                } else {
+                    filterParams[0][1].options.add(new Option("🔯", "star", false, false));
                 }
             }
         }
@@ -76,18 +103,6 @@ function loadFilters(filterData){
     } else {
         filterParams[0][1].options.length = 0;
         filterParams[0][1].options.add(new Option("🔯", "star", true, true));
-    }
-    if(filterData.versionNumberRows != null)
-    {
-        if(filterData.versionNumberRows.length != (filterParams[0][2].options.length-1))
-        {
-            filterParams[0][2].options.length = 0;
-            filterParams[0][2].options.add(new Option("🔯", "star", true, true));
-            for (var i = 0; i < filterData.versionNumberRows.length; i++) {
-                filterData.versionNumberRows[i];
-                filterParams[0][2].options.add(new Option(filterData.versionNumberRows[i].versionNumber, filterData.versionNumberRows[i].versionNumber, false, false));
-            }
-        }
     }
 }
 

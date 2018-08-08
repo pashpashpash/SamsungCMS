@@ -42,6 +42,17 @@ func initDB(name string) (*sql.DB) {
     _, err = db.Exec(`INSERT or IGNORE  INTO users (username, password) VALUES ("admin", "admin")`)
     checkErr(err)
 
+    log.Println("initDB –\t\tInitializing favoriteCountries table with a few countries...")
+    _, err = db.Exec(`INSERT or IGNORE  INTO favoriteCountries (Country_ID) VALUES ("bl")`)
+    checkErr(err)
+    _, err = db.Exec(`INSERT or IGNORE  INTO favoriteCountries (Country_ID) VALUES ("br")`)
+    checkErr(err)
+    _, err = db.Exec(`INSERT or IGNORE  INTO favoriteCountries (Country_ID) VALUES ("in")`)
+    checkErr(err)
+    _, err = db.Exec(`INSERT or IGNORE  INTO favoriteCountries (Country_ID) VALUES ("vn")`)
+    checkErr(err)
+
+
 
     // should be changed to initialize only OUR list of operators
     log.Println("initDB –\t\tInitializing operators table with temporary MCC table data...")
@@ -96,10 +107,10 @@ func initDB(name string) (*sql.DB) {
     return db
 }
 
-// SELECT DISTINCT Config_ID, featuredLocationName FROM configurationMappings WHERE
+// SELECT DISTINCT Config_ID, productName FROM configurationMappings WHERE
 // MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "in" )  //appTray for country=India without name
 
-// SELECT DISTINCT appConfigs.Config_ID, originalName, configurationMappings.featuredLocationName FROM appConfigs
+// SELECT DISTINCT appConfigs.Config_ID, originalName, configurationMappings.productName FROM appConfigs
 // JOIN     configurationMappings USING (Config_ID)
 // WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
 // MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "in" )) ;  //appTray for country=India
@@ -126,52 +137,49 @@ func similarConfigs(db *sql.DB, originalName string, Config_ID string) []string{
     return returnArrayOfConfig_IDs
 }
 
-func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredLocations string, originalName string, modifiableName string, iconURL string, homeURL string, rank string, versionNumber string) {
+func newAppConfig(db *sql.DB, Config_ID string, config_section string, products string, originalName string, modifiableName string, iconURL string, homeURL string, category string, rank string) {
     log.Println("newAppConfig –\tInserting " + modifiableName + " " +config_section + " entries...")
-    statement, _ := db.Prepare(`INSERT OR IGNORE INTO appConfigs (Config_ID, originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-    _, err := statement.Exec(Config_ID, originalName, modifiableName, iconURL, homeURL, rank, versionNumber)
+    statement, _ := db.Prepare(`INSERT OR IGNORE INTO appConfigs (Config_ID, originalName, modifiableName , iconURL , homeURL , category, rank ) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    _, err := statement.Exec(Config_ID, originalName, modifiableName, iconURL, homeURL, category, rank)
     checkErr(err)
+
     var similarConfigs_IDs []string = similarConfigs(db, originalName, Config_ID)
     if(len(similarConfigs_IDs)>0){
         log.Println("newAppConfig –\tFound similarConfig:")
         log.Println(similarConfigs_IDs)
     }
-    if(featuredLocations == "folder" || featuredLocations == "ALL") {
+    if(products == "maxGlobal" || products == "ALL") {
         execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT " + Config_ID + ", Country_ID FROM countries"
         _, err = db.Exec(execText)
         checkErr(err)
-        execText = `INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
+        execText = `INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGlobal", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
         _, err = db.Exec(execText)
         checkErr(err)
-    } else if(featuredLocations == "homescreen" || featuredLocations == "ALL") {
+    }
+    if(products == "max" || products == "ALL"){
         execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT " + Config_ID + ", Country_ID FROM countries"
         _, err = db.Exec(execText)
         checkErr(err)
-        execText = `INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
+        execText = `INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
         _, err = db.Exec(execText)
         checkErr(err)
-    } else if(featuredLocations == "max" || featuredLocations == "ALL"){
+    }
+    if(products == "maxGo" || products == "ALL"){
         execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT " + Config_ID + ", Country_ID FROM countries"
         _, err = db.Exec(execText)
         checkErr(err)
-        execText = `INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
+        execText = `INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
         _, err = db.Exec(execText)
         checkErr(err)
-    } else if(featuredLocations == "maxGo" || featuredLocations == "ALL"){
-        execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT " + Config_ID + ", Country_ID FROM countries"
-        _, err = db.Exec(execText)
-        checkErr(err)
-        execText = `INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
-        _, err = db.Exec(execText)
-        checkErr(err)
-    } else if(strings.Contains(featuredLocations, ",")) {
-        locations := strings.Split(featuredLocations, ",")
+    }
+    if(strings.Contains(products, ",")) {
+        locations := strings.Split(products, ",")
         for _, location := range locations {
             if location != ""{
                 execText := "INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT " + Config_ID + ", Country_ID FROM countries"
                 _, err = db.Exec(execText)
                 checkErr(err)
-                execText = `INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "`+location+`", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
+                execText = `INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "`+location+`", Config_ID FROM appConfigs WHERE Config_ID = "`+Config_ID+`"`
                 _, err = db.Exec(execText)
                 checkErr(err)
             }
@@ -182,15 +190,15 @@ func newAppConfig(db *sql.DB, Config_ID string, config_section string, featuredL
 
 func loadConfigTables(db *sql.DB) {
     log.Println("loadConfigTables –\tInitializing [DEFAULT] appConfigs+configurationMappings tables...")
-    // statement, _ := db.Prepare(`INSERT INTO appConfigs (originalName, modifiableName , iconURL , homeURL , rank , versionNumber) VALUES (?, ?, ?, ?, ?, ?)`)
+
     // =============================== (Config_ID* = 1) INSTAGRAM [DEFAULT] ==================================//
-    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "1", "3.1")
+    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "Ultra Apps" ,"1")
 
-    newAppConfig(db, "2", "[DEFAULT]", "ALL", "cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "2" , "3.1")
+    newAppConfig(db, "2", "[DEFAULT]", "ALL", "cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "Ultra Apps","2")
 
-    newAppConfig(db, "3", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "3", "3.1")
+    newAppConfig(db, "3", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "Ultra Apps","3")
 
-    newAppConfig(db, "4", "[Global and Preloaded]", "ALL", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "4" , "3.1")
+    newAppConfig(db, "4", "[Global and Preloaded]", "ALL", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "Ultra Apps","4")
     // // =============================== (Config_ID* = 2) vKontakte [DEFAULT] ==================================//
     // log.Println("loadConfigTables –\tInserting vKontakte [DEFAULT] entries...")
     //
@@ -199,22 +207,22 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
     // checkErr(err)
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
     // checkErr(err)
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
     // checkErr(err)
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 2, Country_ID FROM countries WHERE Country_ID != "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "2"`)
     // checkErr(err)
     //
     // // =============================== (Config_ID* = 3) Cricbuzz [DEFAULT] ==================================//
@@ -224,18 +232,18 @@ func loadConfigTables(db *sql.DB) {
     // //folder, homescreen, max
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
     // checkErr(err)
     //
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
     // checkErr(err)
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 3, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "3"`)
     // checkErr(err)
     //
     //
@@ -352,17 +360,17 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "folder", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
     // checkErr(err)
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "homescreen", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
     // checkErr(err)
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT 6, MCCMNC_ID FROM operators  WHERE MCCMNC_ID in ( SELECT MCCMNC_ID from operatorGroups WHERE  (Operator_Group_Name = "freebasics" OR Operator_Group_Name = "viettel" OR Operator_Group_Name = "digicel-pa" OR Operator_Group_Name = "telcel" OR Operator_Group_Name = "tigo-co" OR Operator_Group_Name = "viva-bo" OR Operator_Group_Name = "mobifone" OR Operator_Group_Name = "freebasics")) `)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "max", Config_ID FROM appConfigs WHERE Config_ID = "6"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID = 4) Wikipedia [global_and_preloaded_with_freebasic] =============================//
@@ -382,7 +390,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 7, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "7"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "7"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 8) Instagram [android_go] =============================//
@@ -392,7 +400,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 8, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "8"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "8"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 9) Twitter [android_go] =============================//
@@ -402,7 +410,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 9, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "9"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "9"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 10) vKontakte [android_go] =============================//
@@ -412,7 +420,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 10, Country_ID FROM countries WHERE Country_ID!="in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "10"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "10"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 11) Wikipedia [android_go] =============================//
@@ -422,7 +430,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 11, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "11"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "11"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 12) Worldreader [android_go] =============================//
@@ -432,7 +440,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 12, Country_ID FROM countries`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "12"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "12"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID = 7) Facebook [android_go_with_freebasic] =============================//
@@ -478,7 +486,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 13, Country_ID FROM countries WHERE Country_ID = "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "13"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "13"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID = 7) Facebook [android_go_india] =============================//
@@ -504,7 +512,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 14, Country_ID FROM countries WHERE Country_ID = "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "14"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "14"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 15) PuzzlePets [android_go_india] =============================//
@@ -514,7 +522,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 15, Country_ID FROM countries WHERE Country_ID = "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "15"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "15"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 16) Paper Flight [android_go_india] =============================//
@@ -524,7 +532,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 16, Country_ID FROM countries WHERE Country_ID = "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "16"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "16"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 17) Ludibubbles [android_go_india] =============================//
@@ -534,7 +542,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 17, Country_ID FROM countries WHERE Country_ID = "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "17"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "17"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID* = 18) Moregames [android_go_india] =============================//
@@ -544,7 +552,7 @@ func loadConfigTables(db *sql.DB) {
     //
     // _, err = db.Exec(`INSERT OR IGNORE INTO configurationMappings (Config_ID, Country_ID) SELECT 18, Country_ID FROM countries WHERE Country_ID = "in"`)
     // checkErr(err)
-    // _, err = db.Exec(`INSERT OR IGNORE INTO featuredLocations (featuredLocationName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "18"`)
+    // _, err = db.Exec(`INSERT OR IGNORE INTO products (productName, Config_ID) SELECT "maxGo", Config_ID FROM appConfigs WHERE Config_ID = "18"`)
     // checkErr(err)
     //
     // // ========================== (Config_ID = 12) Worldreader [android_go_india] =============================//
@@ -613,6 +621,11 @@ func createTables(db *sql.DB) {
     _, err = stmt.Exec()
     checkErr(err)
 
+    log.Println( "createTables –\tCreating favoriteCountries table...")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS favoriteCountries ( id INTEGER PRIMARY KEY AUTOINCREMENT, Country_ID TEXT UNIQUE, FOREIGN KEY(Country_ID) REFERENCES countries(Coutnry_ID))")
+    _, err = stmt.Exec()
+    checkErr(err)
+
     log.Println("createTables –\tDropping operators table if exists...")
     _, err = db.Exec("DROP TABLE IF EXISTS operators")
 
@@ -633,7 +646,7 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("DROP TABLE IF EXISTS appConfigs")
 
     log.Println( "createTables –\tCreating appConfigs table...")
-    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, category TEXT, versionNumber FLOAT, FOREIGN KEY(versionNumber) REFERENCES versions(versionNumber))")
+    stmt, _ = db.Prepare("CREATE TABLE IF NOT EXISTS appConfigs ( Config_ID INTEGER PRIMARY KEY AUTOINCREMENT, originalName TEXT, modifiableName TEXT, iconURL TEXT, homeURL TEXT, rank INTEGER, category TEXT)")
     _, err = stmt.Exec()
     checkErr(err)
 
@@ -645,10 +658,12 @@ func createTables(db *sql.DB) {
     _, err = stmt.Exec()
     checkErr(err)
 
-    log.Println("createTables –\tDropping featuredLocations table if exists...")
-    _, err = db.Exec("DROP TABLE IF EXISTS featuredLocations")
-    log.Println( "createTables –\tCreating featuredLocations table...")
-    _, err = db.Exec("CREATE TABLE IF NOT EXISTS featuredLocations (id INTEGER PRIMARY KEY AUTOINCREMENT, featuredLocationName TEXT, Config_ID INTEGER, FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), UNIQUE(featuredLocationName, Config_ID))")
+    log.Println("createTables –\tDropping featuredLocations table if exists... (remove this later)")
+    _, err = db.Exec("DROP TABLE IF EXISTS featuredLocations") //remove this
+    log.Println("createTables –\tDropping products table if exists... (remove this later)")
+    _, err = db.Exec("DROP TABLE IF EXISTS products")
+    log.Println( "createTables –\tCreating products table...")
+    _, err = db.Exec("CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, productName TEXT, Config_ID INTEGER, FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID), UNIQUE(productName, Config_ID))")
     checkErr(err)
 
 
@@ -658,6 +673,12 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("CREATE TABLE IF NOT EXISTS featureMappings (id INTEGER PRIMARY KEY AUTOINCREMENT, featureType TEXT, featureName TEXT, Config_ID INTERGER, FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID))")
     checkErr(err)
 
+    log.Println("createTables –\tDropping packages table if exists...")
+    _, err = db.Exec("DROP TABLE IF EXISTS packages")
+    log.Println( "createTables –\tCreating packages table...")
+    _, err = db.Exec("CREATE TABLE IF NOT EXISTS packages (id INTEGER PRIMARY KEY AUTOINCREMENT, packageName TEXT, Config_ID INTERGER, FOREIGN KEY(Config_ID) REFERENCES appConfigs(Config_ID))")
+    checkErr(err)
+
 
     log.Println("createTables –\tDropping users table if exists...")
     _, err = db.Exec("DROP TABLE IF EXISTS users")
@@ -665,10 +686,8 @@ func createTables(db *sql.DB) {
     _, err = db.Exec("CREATE TABLE IF NOT EXISTS users (userID INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)")
     checkErr(err)
 
-    log.Println("createTables –\tDropping userSessions table if exists...")
+    log.Println("createTables –\tDropping userSessions table if exists... (remove later)")
     _, err = db.Exec("DROP TABLE IF EXISTS userSessions")
-    log.Println( "createTables –\tCreating userSessions table...")
-    _, err = db.Exec("CREATE TABLE IF NOT EXISTS userSessions (sessionKey TEXT PRIMARY KEY, userID INTEGER, FOREIGN KEY(userID) REFERENCES users(userID) )")
     checkErr(err)
 }
 

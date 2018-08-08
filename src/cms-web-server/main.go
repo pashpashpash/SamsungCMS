@@ -76,7 +76,6 @@ type requestData struct {
 type data struct {
     Selected_country string `json:Selected_country, string, omitempty`
     Selected_operator string `json:Selected_operator, string, omitempty`
-    Selected_version string `json:Selected_version, string, omitempty`
     Searchfield_text string `json:Searchfield_text, string, omitempty`
     App_name string `json:App_name, string, omitempty`
     Country_Name string `json:name, string, omitempty`
@@ -92,7 +91,7 @@ type data struct {
     AppHomeURL               string `json:"App_HomeURL"`
     AppNativeURL             string `json:"App_NativeURL"`
     AppIconURL               string `json:"App_IconURL"`
-    AppVersionNumber         string `json:"App_VersionNumber"`
+    AppCategory         string `json:"App_Category"`
     AppExistsEverywhere      bool   `json:"App_ExistsEverywhere"`
     AppConfigurationMappings struct {
         Countries           []string `json:"Countries, omitempty"`
@@ -111,12 +110,11 @@ type data struct {
         Adblock           bool `json:"Adblock, omitempty"`
         NoImages          bool `json:"NoImages, omitempty"`
     } `json:"DefaultHiddenFeatures"`
-    FeaturedLocations struct {
-        Homescreen           bool `json:"Homescreen, omitempty"`
-        Folder           bool `json:"Folder, omitempty"`
+    Products struct {
+        MaxGlobal           bool `json:"MaxGlobal, omitempty"`
         Max           bool `json:"Max, omitempty"`
         MaxGo          bool `json:"MaxGo, omitempty"`
-    } `json:"FeaturedLocations"`
+    } `json:"Products"`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -168,9 +166,9 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
             log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
             jsonResponse := getAllAppConfigs(requestData.Data)
             w.Write([]byte(jsonResponse))
-        } else if (requestData.FunctionToCall=="getFeaturedLocations") {
-            log.Println("postHandler –\t\tgetFeaturedLocations method request detected")
-            jsonResponse := getFeaturedLocations(requestData.Data)
+        } else if (requestData.FunctionToCall=="getproducts") {
+            log.Println("postHandler –\t\tgetproducts method request detected")
+            jsonResponse := getproducts(requestData.Data)
             w.Write([]byte(jsonResponse))
         } else if (requestData.FunctionToCall=="getFeatureMappings") {
             log.Println("postHandler –\t\tgetFeatureMappings method request detected")
@@ -468,10 +466,10 @@ func globalView(Data data) ([]byte) {
 
                 globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
                 INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
                 WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "homescreen" ORDER BY configurationMappings.id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND products.productName = "homescreen" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err := db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -484,10 +482,10 @@ func globalView(Data data) ([]byte) {
                 activeConfigs.Close()
                 globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
                 INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
                 WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "folder" ORDER BY configurationMappings.id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND products.productName = "folder" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err = db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -500,10 +498,10 @@ func globalView(Data data) ([]byte) {
                 activeConfigs.Close()
                 globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
                 INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
                 WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "max" ORDER BY configurationMappings.id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND products.productName = "max" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err = db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -516,10 +514,10 @@ func globalView(Data data) ([]byte) {
                 activeConfigs.Close()
                 globalViewQuery = `SELECT configurationMappings.Config_ID from ConfigurationMappings
                 INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-                INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
+                INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
                 WHERE configurationMappings.Config_ID in
                 (SELECT Config_ID from AppConfigs WHERE originalName = '`+Data.AppOriginalName+`')
-                AND Country_ID = '`+Country_ID+`' AND featuredLocations.featuredLocationName = "maxGo" ORDER BY configurationMappings.id DESC LIMIT 1`
+                AND Country_ID = '`+Country_ID+`' AND products.productName = "maxGo" ORDER BY configurationMappings.id DESC LIMIT 1`
                 activeConfigs, err = db.Query(globalViewQuery)
                 checkErr(err)
                 for activeConfigs.Next() {
@@ -685,24 +683,19 @@ func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () 
             checkErr(err)
         }
 
-        //featuredLocations
-        if(Config.FeaturedLocations.Folder ==true) {
-            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"folder"` + `)`)
+        //products
+        if(Config.Products.MaxGlobal ==true) {
+            statement = string(`INSERT INTO products (Config_ID, productName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"maxGlobal"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
-        if(Config.FeaturedLocations.Homescreen ==true) {
-            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"homescreen"` + `)`)
+        if(Config.Products.Max ==true) {
+            statement = string(`INSERT INTO products (Config_ID, productName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"max"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
-        if(Config.FeaturedLocations.Max ==true) {
-            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"max"` + `)`)
-            _, err := db.Exec(statement)
-            checkErr(err)
-        }
-        if(Config.FeaturedLocations.MaxGo ==true) {
-            statement = string(`INSERT INTO featuredLocations (Config_ID, featuredLocationName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"maxGo"` + `)`)
+        if(Config.Products.MaxGo ==true) {
+            statement = string(`INSERT INTO products (Config_ID, productName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"maxGo"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
@@ -716,9 +709,9 @@ func addNewConfig(Config data) ([]byte) {
     log.Println(Config.AppConfigurationMappings.OperatorGroups)
     log.Println(Config.DefaultEnabledFeatures)
     log.Println(Config.DefaultHiddenFeatures)
-    log.Println(Config.FeaturedLocations)
+    log.Println(Config.Products)
 
-    statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, versionNumber) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppVersionNumber + `"` + `)`)
+    statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, category) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppCategory + `"` + `)`)
     log.Println("addNewConfig –\t\tInsert statement: " + statement)
     res, err := db.Exec(statement)
     checkErr(err)
@@ -728,7 +721,7 @@ func addNewConfig(Config data) ([]byte) {
     var New_App_Config_ID = id
     New_App_Config_ID_string := strconv.Itoa(int(New_App_Config_ID))
 
-    addNewFeaturesAndProducts(Config, New_App_Config_ID_string) //handles featuredLocations Table inserts and featureMappings table inserts
+    addNewFeaturesAndProducts(Config, New_App_Config_ID_string) //handles products Table inserts and featureMappings table inserts
 
     for _, country := range Config.AppConfigurationMappings.Countries {
         mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
@@ -836,7 +829,7 @@ func deleteConfiguration(Data data) ([]byte) {
         log.Println("deleteOperator –\t\t"+deleteConfigurationstatement)
         _, err = db.Exec(deleteConfigurationstatement)
         checkErr(err)
-        deleteConfigurationstatement = string(`DELETE FROM featuredLocations WHERE Config_ID = "`+Data.Config_ID+`"`)
+        deleteConfigurationstatement = string(`DELETE FROM products WHERE Config_ID = "`+Data.Config_ID+`"`)
         log.Println("deleteOperator –\t\t"+deleteConfigurationstatement)
         _, err = db.Exec(deleteConfigurationstatement)
         checkErr(err)
@@ -925,19 +918,19 @@ type AppConfig struct {
     IconURL string `json: "IconURL" db:"iconURL"`
     HomeURL string `json: "HomeURL" db:"homeURL"`
     Rank string `json: "Rank" db:"rank"`
-    VersionNumber string `json: "VersionNumber" db:"versionNumber"`
+    Category string `json: "Category" db:"category"`
 }
 func getAllAppConfigs(notUsed data) ([]byte) {
     log.Println("getAllAppConfigs –\tRecieved request to get all app configs")
     var appConfigs = AppConfigs{}
 
     full_query := string(`
-    SELECT DISTINCT Config_ID, originalName, modifiableName,iconURL, homeURL, rank, versionNumber  from appConfigs`)
+    SELECT DISTINCT Config_ID, originalName, modifiableName,iconURL, homeURL, rank, category  from appConfigs`)
     allAppConfigs, err := db.Query(full_query)
     checkErr(err)
     for allAppConfigs.Next() {
         var AppConfig = AppConfig{}
-        allAppConfigs.Scan(&AppConfig.Config_ID, &AppConfig.OriginalName, &AppConfig.ModifiableName, &AppConfig.IconURL, &AppConfig.HomeURL, &AppConfig.Rank, &AppConfig.VersionNumber)
+        allAppConfigs.Scan(&AppConfig.Config_ID, &AppConfig.OriginalName, &AppConfig.ModifiableName, &AppConfig.IconURL, &AppConfig.HomeURL, &AppConfig.Rank, &AppConfig.Category)
         appConfigs.AppConfigs = append(appConfigs.AppConfigs, AppConfig)
     }
     allAppConfigs.Close()
@@ -989,12 +982,12 @@ func getOperatorGroupByName(Operator data) ([]byte) {
     return jsonResponse
 }
 
-func getFeaturedLocations(Config data) ([]byte) {
-    log.Println("getFeaturedLocations –\tRecieved request to get featured locations for " + Config.Config_ID)
+func getproducts(Config data) ([]byte) {
+    log.Println("getproducts –\tRecieved request to get featured locations for " + Config.Config_ID)
 
-    var featuredLocations = []string{}
+    var products = []string{}
     full_query := string(`
-    SELECT DISTINCT FeaturedLocationName from featuredLocations
+    SELECT DISTINCT productName from products
     WHERE Config_ID="`+Config.Config_ID+`"
     `)
     rows, err := db.Query(full_query)
@@ -1002,11 +995,11 @@ func getFeaturedLocations(Config data) ([]byte) {
     for rows.Next() {
         featuredLocation := ""
         rows.Scan(&featuredLocation)
-        featuredLocations = append(featuredLocations, featuredLocation)
+        products = append(products, featuredLocation)
     }
     rows.Close()
 
-    jsonResponse, err := json.Marshal(featuredLocations)
+    jsonResponse, err := json.Marshal(products)
     checkErr(err)
     return jsonResponse
 }
@@ -1069,7 +1062,7 @@ func getConfigurationMappings(Config data) ([]byte) {
     }
     rows.Close()
     var result = ConfigurationMappingsResult{}
-    
+
     if(!allCountriesExist)  {
 
         full_query = string(`
@@ -1124,13 +1117,10 @@ type OperatorFilterRow struct {
     Value string `json:"MCCMNC_ID" db:"MCCMNC_ID" `
     Text string `json:"Operator_Name" db:"Operator_Name"`
 }
-type VersionNumberRow struct {
-    Value string `json:"versionNumber" db:"versionNumber"`
-}
+
 type FilterRows struct{
     CountryFilterRows []CountryFilterRow `json:"countryFilterRows"`
     OperatorFilterRows []OperatorFilterRow `json:"operatorFilterRows"`
-    VersionNumberRows []VersionNumberRow `json:"versionNumberRows"`
 }
 func updateFilterValues(Filters data) ([]byte) {
     log.Println("updateFilterValues –\tRecieved request to update filter items based off existing filter selection.")
@@ -1189,7 +1179,7 @@ func updateFilterValues(Filters data) ([]byte) {
         rows.Close()
     } else { //stars in both country and operator, load full tables
 
-        full_query := string(`SELECT DISTINCT Country_ID, name from countries`) //country query -- all distinct countries by value and name
+        full_query := string(`SELECT DISTINCT Country_ID, name from countries WHERE Country_ID in (SELECT Country_ID from favoriteCountries)`) //country query -- all distinct countries by value and name
         rows, err := db.Query(full_query)
         checkErr(err)
         for rows.Next() {
@@ -1208,18 +1198,7 @@ func updateFilterValues(Filters data) ([]byte) {
             filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
         }
         rows.Close()
-
-        full_query = string(`SELECT DISTINCT versionNumber from appConfigs`) //version query -- all distinct versions by value
-        rows, err = db.Query(full_query)
-        checkErr(err)
-        for rows.Next() {
-            var versionNumberRow = VersionNumberRow{}
-            rows.Scan(&versionNumberRow.Value)
-            filterRows.VersionNumberRows = append(filterRows.VersionNumberRows, versionNumberRow)
-        }
-        rows.Close()
     }
-
 
     jsonResponse, err := json.Marshal(filterRows)
     checkErr(err)
@@ -1237,9 +1216,8 @@ type App struct {
     IconUrl string
     HomeUrl string
     Category string `db: "category, omitempty"`
-    VersionNumber  float64 `db: "versionNumber"`
     Rank int `db: "rank"`
-    FeaturedLocationName string `json: ", omitempty"`
+    ProductName string `json: ", omitempty"`
 
 }
 
@@ -1255,7 +1233,7 @@ func appView(Data data) ([]byte) {
     }
 
     appViewQuery := `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName,
-    iconURL, homeURL, rank, configurationMappings.featuredLocationName FROM appConfigs
+    iconURL, homeURL, rank, configurationMappings.productName FROM appConfigs
     JOIN     configurationMappings USING (Config_ID)
     WHERE originalName = "` + Data.App_name +`"
     AND Config_ID in (SELECT Config_ID from configurationMappings
@@ -1267,7 +1245,7 @@ func appView(Data data) ([]byte) {
     var app = App{}
     for rows.Next() {
 
-        rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
+        rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.ProductName)
     }
     defer rows.Close()
 
@@ -1280,7 +1258,7 @@ func appView(Data data) ([]byte) {
 }
 func getAppConfig(Data data) ([]byte) {
 
-    getAppConfigQuery := `SELECT Config_ID, originalName, modifiableName, iconURL, homeURL, rank, category, versionNumber FROM appConfigs WHERE Config_ID = "`+Data.Config_ID+`"`
+    getAppConfigQuery := `SELECT Config_ID, originalName, modifiableName, iconURL, homeURL, rank, category FROM appConfigs WHERE Config_ID = "`+Data.Config_ID+`"`
     rows, err := db.Query(getAppConfigQuery)
     checkErr(err)
 
@@ -1288,7 +1266,7 @@ func getAppConfig(Data data) ([]byte) {
 
     var app = App{}
     for (rows.Next()) {
-        rows.Scan(&app.Config_ID, &app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl,  &app.Rank, &app.Category, &app.VersionNumber)
+        rows.Scan(&app.Config_ID, &app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl,  &app.Rank, &app.Category)
     }
     jsonResponse, err := json.Marshal(app)
     jsonString := string(jsonResponse)
@@ -1303,47 +1281,59 @@ func loadAppTray(Filters data) ([]byte) {
     searchfield_query := string("")
     country_code := string("")
     operator_query := string("")
-    version_query := string("")
     country_query := string("")
-
-    if(Filters.Selected_operator != "star") { //more specific than country
-        operator_query = `WHERE MCCMNC_ID like "%` + Filters.Selected_operator +`%"`
-    } else if (Filters.Selected_country != "star") {
-        country_code = Filters.Selected_country
-        country_query = `AND Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%`+country_code+`%") `
-    }
-    if(Filters.Selected_country =="star") {
-        country_query = `OR Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE Country_ID like "%%")`
-    }
+    full_query := string("")
     if(Filters.Searchfield_text != ""){ //search field is NOT empty
         searchfield_query = ` AND originalName like "%` + Filters.Searchfield_text +`%"`
     }
-    if(Filters.Selected_version != "star") {
-        version_query = `AND versionNumber >= ` + Filters.Selected_version +``
+
+    if(Filters.Selected_operator != "star") { //more specific than country
+        operator_query = `Config_ID in (SELECT Config_ID FROM configurationMappings WHERE MCCMNC_ID = "`+Filters.Selected_operator+`") `
+
+        full_query = string(`
+        SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
+        homeUrl, rank, products.productName FROM appConfigs
+        JOIN     configurationMappings USING (Config_ID)
+        JOIN     products USING (Config_ID)
+        WHERE `+operator_query+` `+searchfield_query+`
+        ORDER BY rank ASC, configurationMappings.id DESC;
+        `)
+    } else if (Filters.Selected_country != "star") {
+        country_code = Filters.Selected_country
+        country_query = `Config_ID in (SELECT Config_ID FROM configurationMappings WHERE Country_ID LIKE "%`+country_code+`%") `
+        full_query = string(`
+        SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
+        homeUrl, rank, products.productName FROM appConfigs
+        JOIN     configurationMappings USING (Config_ID)
+        JOIN     products USING (Config_ID)
+        WHERE `+country_query+` `+searchfield_query+`
+        ORDER BY rank ASC, configurationMappings.id DESC;
+        `)
     }
-    full_query := string(`
-    SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
-    homeUrl, rank, featuredLocations.featuredLocationName FROM appConfigs
-    JOIN     configurationMappings USING (Config_ID)
-    JOIN     featuredLocations USING (Config_ID)
-    WHERE ((Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
-    MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators ` + operator_query + `))) `+ country_query + ")" + searchfield_query + " " + version_query + `
-    GROUP BY rank
-    `)
+    if(Filters.Selected_country =="star" && Filters.Selected_operator =="star") {
+        full_query = string(`
+        SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
+        homeUrl, rank, products.productName FROM appConfigs
+        JOIN     configurationMappings USING (Config_ID)
+        JOIN     products USING (Config_ID)
+        ORDER BY rank ASC, configurationMappings.id DESC;
+        `)
+    }
+
     log.Println("loadAppTray –\t\tQuery looks like : " + full_query)
     rows, err := db.Query(full_query)
     checkErr(err)
     //
     //     if(Filters.Selected_country != "star")
     // if(Filters.Selected_country != "star"){
-    //     var queryString = `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+    //     var queryString = `SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.productName FROM appConfigs
     //     JOIN     configurationMappings USING (Config_ID)
     //     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
     //     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID = "`+ Filters.Selected_country +`" )) GROUP BY rank`
     //
     //     rows, err = db.Query(queryString)
     // } else {
-    //     rows, err = db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.featuredLocationName FROM appConfigs
+    //     rows, err = db.Query(`SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL, homeUrl, rank, configurationMappings.productName FROM appConfigs
     //     JOIN     configurationMappings USING (Config_ID)
     //     WHERE Config_ID in (SELECT DISTINCT configurationMappings.Config_ID FROM configurationMappings WHERE
     //     MCCMNC_ID IN (SELECT MCCMNC_ID FROM operators WHERE Country_ID like "%" )) GROUP BY rank`)
@@ -1354,7 +1344,7 @@ func loadAppTray(Filters data) ([]byte) {
 
     for rows.Next() {
         var app = App{}
-        rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.FeaturedLocationName)
+        rows.Scan(&app.Config_ID,&app.OriginalName, &app.ModifiableName, &app.IconUrl, &app.HomeUrl, &app.Rank, &app.ProductName)
         appsContainer.Apps = append(appsContainer.Apps, app)
     }
     defer rows.Close()
