@@ -89,7 +89,6 @@ type data struct {
     AppOriginalName          string `json:"App_OriginalName"`
     AppRank                  string `json:"App_Rank"`
     AppHomeURL               string `json:"App_HomeURL"`
-    AppNativeURL             string `json:"App_NativeURL"`
     AppIconURL               string `json:"App_IconURL"`
     AppCategory         string `json:"App_Category"`
     AppExistsEverywhere      bool   `json:"App_ExistsEverywhere"`
@@ -110,11 +109,19 @@ type data struct {
         Adblock           bool `json:"Adblock, omitempty"`
         NoImages          bool `json:"NoImages, omitempty"`
     } `json:"DefaultHiddenFeatures"`
+    DefaultHiddenUI struct {
+        Splash           bool `json:"Splash, omitempty"`
+        Overlay           bool `json:"Overlay, omitempty"`
+        AB           bool `json:"AB, omitempty"`
+        Badges          bool `json:"Badges, omitempty"`
+        Folder          bool `json:"Folder, omitempty"`
+    } `json:"DefaultHiddenUI"`
     Products struct {
         MaxGlobal           bool `json:"MaxGlobal, omitempty"`
         Max           bool `json:"Max, omitempty"`
         MaxGo          bool `json:"MaxGo, omitempty"`
     } `json:"Products"`
+    Packages      []string   `json:"Packages, omitempty"`
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
     log.Printf("postHandler –\t\tIncoming post request:")
@@ -640,45 +647,71 @@ func globalView(Data data) ([]byte) {
 
 func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () {
         statement := string("")
-        //enabledfeatures
+        //defaultenabledfeatures
         if(Config.DefaultEnabledFeatures.Savings ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "savings"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"defaultEnabledFeatures", "savings"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         if(Config.DefaultEnabledFeatures.Privacy ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "privacy"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"defaultEnabledFeatures", "privacy"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         if(Config.DefaultEnabledFeatures.Adblock ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "adBlock"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"defaultEnabledFeatures", "adBlock"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         if(Config.DefaultEnabledFeatures.NoImages ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultEnabledFeatures", "noImages"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"defaultEnabledFeatures", "noImages"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         //hiddenfeatures
         if(Config.DefaultHiddenFeatures.Savings ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "savings"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenFeatures", "savings"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         if(Config.DefaultHiddenFeatures.Privacy ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "privacy"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenFeatures", "privacy"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         if(Config.DefaultHiddenFeatures.Adblock ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "adBlock"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenFeatures", "adBlock"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
         if(Config.DefaultHiddenFeatures.NoImages ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"DefaultHiddenFeatures", "noImages"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenFeatures", "noImages"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        //hiddenUI
+        if(Config.DefaultHiddenUI.Splash ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "spash"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenUI.Overlay ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "overlay"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenUI.AB ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "ab"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenUI.Badges ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "badges"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(Config.DefaultHiddenUI.Folder ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "folder"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
@@ -700,15 +733,20 @@ func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () 
             checkErr(err)
         }
 
+        //packages
+        for _, packageName := range Config.Packages {
+            statement = string(`INSERT INTO packages (Config_ID, packageName) VALUES (` + `"` + New_App_Config_ID_string + `", "` + packageName + `")`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+
 }
 
 func addNewConfig(Config data) ([]byte) {
     log.Println("addNewConfig –\t\tRecieved request to add " + Config.AppOriginalName + " | Rank: " + Config.AppRank)
-    log.Println(Config.AppConfigurationMappings.Countries)
-    log.Println(Config.AppConfigurationMappings.Operators)
-    log.Println(Config.AppConfigurationMappings.OperatorGroups)
-    log.Println(Config.DefaultEnabledFeatures)
+    log.Println(Config.DefaultHiddenUI)
     log.Println(Config.DefaultHiddenFeatures)
+    log.Println(Config.DefaultEnabledFeatures)
     log.Println(Config.Products)
 
     statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, category) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppCategory + `"` + `)`)

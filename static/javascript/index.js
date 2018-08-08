@@ -1008,24 +1008,32 @@ function addUltraApp(form)
         + ' "App_OriginalName" : "'+ form.children[0].children[0].value.toLowerCase() + '",'
         + ' "App_Rank" : "'+ form.children[0].children[1].value + '",'
         + ' "App_HomeURL" : "'+ form.children[0].children[2].value + '",'
-        + ' "DefaultEnabledFeatures" : { '
-            + ' "Savings" : '+form.children[0].children[3].children[0].children[0].checked+','
-            + ' "Privacy" : '+form.children[0].children[3].children[1].children[0].checked+','
-            + ' "Adblock" : '+form.children[0].children[3].children[2].children[0].checked+','
-            + ' "NoImages" : '+form.children[0].children[3].children[3].children[0].checked+''
+        + ' "App_IconURL" : "'+ form.children[0].children[3].value + '",'
+        + ' "App_Category" : "'+ form.children[0].children[4].value + '",'
+        + ' "Packages" : ["'+ form.children[0].children[5].value + '"],'
+        + ' "DefaultHiddenUI" : { '
+            + ' "Splash" : '+form.children[0].children[6].children[0].children[0].checked+','
+            + ' "Overlay" : '+form.children[0].children[6].children[1].children[0].checked+','
+            + ' "AB" : '+form.children[0].children[6].children[2].children[0].checked+','
+            + ' "Badges" : '+form.children[0].children[6].children[3].children[0].checked+','
+            + ' "Folder" : '+form.children[0].children[6].children[3].children[0].checked+''
         +'},'
         + ' "DefaultHiddenFeatures" : { '
-            + ' "Savings" : '+form.children[0].children[4].children[0].children[0].checked+','
-            + ' "Privacy" : '+form.children[0].children[4].children[1].children[0].checked+','
-            + ' "Adblock" : '+form.children[0].children[4].children[2].children[0].checked+','
-            + ' "NoImages" : '+form.children[0].children[4].children[3].children[0].checked+''
+            + ' "Savings" : '+form.children[0].children[7].children[0].children[0].checked+','
+            + ' "Privacy" : '+form.children[0].children[7].children[1].children[0].checked+','
+            + ' "Adblock" : '+form.children[0].children[7].children[2].children[0].checked+','
+            + ' "NoImages" : '+form.children[0].children[7].children[3].children[0].checked+''
         +'},'
-        + ' "App_NativeURL" : "'+ form.children[0].children[5].value + '",'
-        + ' "App_IconURL" : "'+ form.children[0].children[6].value + '",'
+        + ' "DefaultEnabledFeatures" : { '
+            + ' "Savings" : '+form.children[0].children[8].children[0].children[0].checked+','
+            + ' "Privacy" : '+form.children[0].children[8].children[1].children[0].checked+','
+            + ' "Adblock" : '+form.children[0].children[8].children[2].children[0].checked+','
+            + ' "NoImages" : '+form.children[0].children[8].children[3].children[0].checked+''
+        +'},'
         + ' "products" : { '
-            + ' "MaxGlobal" : '+form.children[0].children[7].children[0].children[0].checked+','
-            + ' "Max" : '+form.children[0].children[7].children[1].children[0].checked+','
-            + ' "MaxGo" : '+form.children[0].children[7].children[2].children[0].checked+''
+            + ' "MaxGlobal" : '+form.children[0].children[9].children[0].children[0].checked+','
+            + ' "Max" : '+form.children[0].children[9].children[1].children[0].checked+','
+            + ' "MaxGo" : '+form.children[0].children[9].children[2].children[0].checked+''
         +'},'
         + ' "App_ExistsEverywhere" : '+ existsEverywhere + ','
         + ' "App_ConfigurationMappings" : { '
@@ -1195,6 +1203,51 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '<input type="text" placeholder="Ultra App Name" name="name">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';
     addAppViewHTML += '<input type="text" placeholder="Webapp Link" name="homeUrl">';
+    addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
+    addAppViewHTML += '<input type="text" placeholder="Category" name="category">';
+    addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
+    addAppViewHTML += '<div id ="addAppHiddenUI">';
+        addAppViewHTML += 'Hidden UI ';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="splash" checked />';
+            addAppViewHTML += '<label for="splash">Splash</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="overlay" checked />';
+            addAppViewHTML += '<label for="overlay">Overlay</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="ab" checked />';
+            addAppViewHTML += '<label for="ab">AB</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="badges" checked />';
+            addAppViewHTML += '<label for="badges">Badges</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="folder" checked />';
+            addAppViewHTML += '<label for="folder">Folder</label>';
+        addAppViewHTML += '</div>';
+    addAppViewHTML += '</div>';
+    addAppViewHTML += '<div id ="addAppHiddenFeatures">';
+        addAppViewHTML += 'Hidden Features ';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="savings" checked />';
+            addAppViewHTML += '<label for="savings">Savings</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="privacy" checked />';
+            addAppViewHTML += '<label for="privacy">Privacy</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="adBlock" checked />';
+            addAppViewHTML += '<label for="adBlock">Adblock</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="noImages" checked />';
+            addAppViewHTML += '<label for="noImages">No Images</label>';
+        addAppViewHTML += '</div>';
+    addAppViewHTML += '</div>';
     addAppViewHTML += '<div id ="addAppEnabledFeatures">';
         addAppViewHTML += 'Default Enabled Features ';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
@@ -1214,28 +1267,6 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
             addAppViewHTML += '<label for="noImages">No Images</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
-    addAppViewHTML += '<div id ="addAppHiddenFeatures">';
-        addAppViewHTML += 'Default Hidden Features ';
-        addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="savings" checked />';
-            addAppViewHTML += '<label for="savings">Savings</label>';
-        addAppViewHTML += '</div>';
-        addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="privacy" checked />';
-            addAppViewHTML += '<label for="privacy">Privacy</label>';
-        addAppViewHTML += '</div>';
-        addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="adBlock" checked />';
-            addAppViewHTML += '<label for="adBlock">Adblock</label>';
-        addAppViewHTML += '</div>';
-        addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="noImages" checked />';
-            addAppViewHTML += '<label for="noImages">No Images</label>';
-        addAppViewHTML += '</div>';
-    addAppViewHTML += '</div>';
-    addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
-    addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
-
     addAppViewHTML += '<div id ="products">';
         addAppViewHTML += 'Products';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
@@ -1251,7 +1282,6 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
             addAppViewHTML += '<label for="maxGo">MaxGo</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
-
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id="configurationMapping">';
         addAppViewHTML += '<div id="countryMapping">';

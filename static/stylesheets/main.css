@@ -830,6 +830,18 @@ img#icon {
     margin: auto;
     margin-top: 14px;
     margin-bottom: 8px;
+    display:inline-block;
+}
+.addAppPopup .contents label {
+    display:inline-block;
+    margin-left: 4px;
+}
+#configurationMapping{
+    border-top: 1px solid #811c55;
+    padding-top: 14px;
+}
+#appConfig {
+    margin-bottom: 14px;
 }
 .addAppPopup form{
     text-align: left;
@@ -856,15 +868,16 @@ img#icon {
 .addAppPopup .closeButton:hover {
     background-color: #F1F1F1;
 }
-#addAppEnabledFeatures, #addAppHiddenFeatures, #products{
+#addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI{
     margin-left: 18px;
     margin-right: 18px;
 }
 .addAppPopup .contents #addAppCheckboxContainer
 {
-    display: inline-grid;
     margin-left: 24px;
+    display: inline;
 }
+
 
 /* Add animation (fade in the popup) */
 @-webkit-keyframes fadeIn {
