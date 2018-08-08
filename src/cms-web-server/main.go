@@ -1349,13 +1349,24 @@ func loadAppTray(Filters data) ([]byte) {
         `)
     }
     if(Filters.Selected_country =="star" && Filters.Selected_operator =="star") {
-        full_query = string(`
-        SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
-        homeUrl, rank, products.productName FROM appConfigs
-        JOIN     configurationMappings USING (Config_ID)
-        JOIN     products USING (Config_ID)
-        ORDER BY rank ASC, configurationMappings.id DESC;
-        `)
+        if(searchfield_query != "") {
+            full_query = string(`
+            SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
+            homeUrl, rank, products.productName FROM appConfigs
+            JOIN     configurationMappings USING (Config_ID)
+            JOIN     products USING (Config_ID)
+            WHERE  originalName like "%` + Filters.Searchfield_text +`%"
+            ORDER BY rank ASC, configurationMappings.id DESC;
+            `)
+        } else {
+            full_query = string(`
+            SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
+            homeUrl, rank, products.productName FROM appConfigs
+            JOIN     configurationMappings USING (Config_ID)
+            JOIN     products USING (Config_ID)
+            ORDER BY rank ASC, configurationMappings.id DESC;
+            `)
+        }
     }
 
     log.Println("loadAppTray –\t\tQuery looks like : " + full_query)

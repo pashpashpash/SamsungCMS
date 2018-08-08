@@ -33,14 +33,14 @@ function loadFilters(filterData, lastcountry, last_operator){
     {
         filterParams[0][0].options.length = 0;
         if(filterData.countryFilterRows.length != 1) {
-            filterParams[0][0].options.add(new Option("🔯", "star", true, true));
+            filterParams[0][0].options.add(new Option("Countries  ▾", "star", true, true));
         }
         for (var i = 0; i < filterData.countryFilterRows.length; i++) {
             filterParams[0][0].options.add(new Option(filterData.countryFilterRows[i].Country_ID, filterData.countryFilterRows[i].name, false, false));
 
         }
         if(filterData.countryFilterRows.length === 1){
-            filterParams[0][0].options.add(new Option("🔯", "star", false, false));
+            filterParams[0][0].options.add(new Option("Countries  ▾", "star", false, false));
 
         }
     }
@@ -59,9 +59,9 @@ function loadFilters(filterData, lastcountry, last_operator){
                 }
             }
             if(!previousoperatorExists) {
-                filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                filterParams[0][1].options.add(new Option("Operators  ▾", "star", true, true));
             } else {
-                filterParams[0][1].options.add(new Option("🔯", "star", false, false));
+                filterParams[0][1].options.add(new Option("Operators  ▾", "star", false, false));
             }
         } else { //if country also not null, that means operator was pressed first, so just update operator list while keeping same selection
             if(filterData.countryFilterRows.length===1) {
@@ -76,9 +76,9 @@ function loadFilters(filterData, lastcountry, last_operator){
                     }
                 }
                 if(!previousoperatorExists) {
-                    filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                    filterParams[0][1].options.add(new Option("Operators  ▾", "star", true, true));
                 } else {
-                    filterParams[0][1].options.add(new Option("🔯", "star", false, false));
+                    filterParams[0][1].options.add(new Option("Operators  ▾", "star", false, false));
                 }
             } else {
                 var previousoperatorExists = false;
@@ -92,9 +92,9 @@ function loadFilters(filterData, lastcountry, last_operator){
                     }
                 }
                 if(!previousoperatorExists) {
-                    filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+                    filterParams[0][1].options.add(new Option("Operators  ▾", "star", true, true));
                 } else {
-                    filterParams[0][1].options.add(new Option("🔯", "star", false, false));
+                    filterParams[0][1].options.add(new Option("Operators  ▾", "star", false, false));
                 }
             }
         }
@@ -102,7 +102,7 @@ function loadFilters(filterData, lastcountry, last_operator){
 
     } else {
         filterParams[0][1].options.length = 0;
-        filterParams[0][1].options.add(new Option("🔯", "star", true, true));
+        filterParams[0][1].options.add(new Option("▾ Operators ▾", "star", true, true));
     }
 }
 

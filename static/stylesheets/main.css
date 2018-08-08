@@ -580,14 +580,22 @@ hr{
 }
 
 #filters select, #filters form{
-    padding: 9px 30px 8px 8px;
+    padding: 13px;
     font-size: 16px;
-    border: 1px solid black;
-    height: 44px;
+    border: 0px solid black;
+    /* height: 44px; */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-color: #ebebeb;
+    background-image: url(/images/blur_bg.png);
+    background-size: 202%;
+    color: #171616;
+    background-blend-mode:color;
+    cursor:pointer;
+    outline: none; // this one
+}
+#filters select:hover, #filters form:hover {
+    background-blend-mode:screen;
 }
 #filters{
     width: 68%;
@@ -600,9 +608,8 @@ hr{
     display: inline-flex;
 }
 #filterContainer select{
-    margin-left:18px;
     margin-right:32px;
-    width: 128px;
+    max-width: 120px;
 }
 #filterContainer #filterText{
     font-size:14px;
@@ -644,12 +651,17 @@ hr{
 }
 #starandsearch input[type=text] {
     display: inline-flex;
-    padding-left: 7px;
+    padding-left: 14px;
     padding-right: 7px;
+    padding-top: 2px;
     font-size:16px;
-    border:1px solid black;
+    border:0px solid black;
     border-radius: 8px;
-
+    background: #fff5f4;
+    color: #171616;
+}
+#starandsearch input[type=text]::placeholder {
+    color: #171616;
 }
 
 
