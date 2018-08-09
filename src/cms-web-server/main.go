@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
     // "html/template"
+    // "bytes"
 	"path"
 	"time"
     "fmt"
@@ -61,6 +62,7 @@ func NewServer() *negroni.Negroni {
     mx.HandleFunc("/configs/{Config_ID}", configPageHandler)   //for config page
     mx.HandleFunc("/export", exportPageHandler)
     mx.HandleFunc("/post/login", loginAuthentication)   //handles all post requests
+    mx.HandleFunc("/upload", UploadFile)   //handles all post requests
     mx.HandleFunc("/post/", postHandler)   //handles all post requests
 	mx.PathPrefix("/").Handler(FileServer(http.Dir(root + "/static/")))     //for all other urls, serve from /static/
 
@@ -1551,6 +1553,23 @@ func checkErr(err error) {
      }
  }
 
+ // upload logic
+ func UploadFile(w http.ResponseWriter, r *http.Request) {
+     file, handler, err := r.FormFile("uploadfile")
+     defer file.Close()
+      checkErr(err)
+      log.Println("UploadFile –\t\tDetected uploaded file: " + handler.Filename)
+
+      byteContainer, err := ioutil.ReadAll(file)
+      checkErr(err)
+    err = ioutil.WriteFile("static/ultra_apps/" +handler.Filename, byteContainer, 0644)
+    checkErr(err)
+
+    var returnResult = ResultMessage{"SUCCESS"}
+    jsonResponse, err := json.Marshal(returnResult)
+    checkErr(err)
+    w.Write([]byte(jsonResponse))
+ }
 
 type Webapp struct {
     ID string   `json:"id"`

@@ -1196,10 +1196,16 @@ function generateAppDetailsHTML(app) //Responsible for generating app details HT
     webAppHTML += ("</div>");
     return webAppHTML;
 }
-
-
+function imageUploaded(newAppForm){
+    document.getElementById("imageUploaded").classList.remove("hidden");
+    console.log(newAppForm);
+    console.log(newAppForm.children[3]);
+    var filePath = newAppForm.children[1].children[0].files[0].name;
+    newAppForm.children[3].children[0].children[3].value = ("ultra_apps/"+ filePath);
+}
 function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
-    var addAppViewHTML = '<form id="addAppForm" onsubmit="submitNewApp(this); return false"><div id="appConfig">';
+    var addAppViewHTML = '<form onsubmit="imageUploaded(this.parentElement);" id = "addAppIconForm" enctype="multipart/form-data" target="invisible" action="/upload" method="post"><input id="fileUpload" type="file" name="uploadfile" /><input type="submit" value="upload" /><div id="imageUploaded" class="hidden"></div></form><iframe name="invisible" style="display:none;"></iframe>';
+    addAppViewHTML += '<form id="addAppForm" onsubmit="submitNewApp(this); return false"><div id="appConfig">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Name" name="name">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';
     addAppViewHTML += '<input type="text" placeholder="Webapp Link" name="homeUrl">';
@@ -1295,6 +1301,22 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '</div>';
     addAppViewHTML += '<input type="submit" value="Submit"></form>';
     return addAppViewHTML;
+}
+
+function imgUpload(file){
+    var uploadRequest = new XMLHttpRequest();
+    uploadRequest.open('post', 'demo-url');
+    uploadRequest.file = file;
+    uploadRequest.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("demo").innerHTML =
+      this.responseText;
+      //or
+      document.getElementById("demo").innerHTML =
+      "Response code is 200 i.e successful image upload";
+    }
+  };
+    uploadRequest.send();
 }
 function displayCountrySearchResults(countrySearchFieldText){
     console.log("displayCountrySearchResults – User input: " + countrySearchFieldText);

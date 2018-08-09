@@ -522,7 +522,7 @@ hr{
 }
 
 .hidden{
-    display:none;
+    display:none !important;
 }
 .appConfigHoverContent{
     width: 312px;
@@ -838,6 +838,21 @@ img#icon {
     border-radius: 8px;
     border: 1px solid #ebebeb;
     width: 80%;
+}
+.addAppPopup .contents #addAppIconForm input {
+    display:inline-block;
+}
+#addAppIconForm iframe{
+    display:inline-block;
+}
+#imageUploaded{
+    background-image: url("/images/double-tick.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 14px;
+    height:14px;
+    display:inline-block;
 }
 .addAppPopup .contents input[type=submit]{
     padding-left: 14px;
