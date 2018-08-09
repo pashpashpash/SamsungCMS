@@ -1204,7 +1204,7 @@ function imageUploaded(newAppForm){
     newAppForm.children[3].children[0].children[3].value = ("ultra_apps/"+ filePath);
 }
 function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
-    var addAppViewHTML = '<form onsubmit="imageUploaded(this.parentElement);" id = "addAppIconForm" enctype="multipart/form-data" target="invisible" action="/upload" method="post"><input id="fileUpload" type="file" name="uploadfile" /><input type="submit" value="upload" /><div id="imageUploaded" class="hidden"></div></form><iframe name="invisible" style="display:none;"></iframe>';
+    var addAppViewHTML = '<form onsubmit="imageUploaded(this.parentElement);" id = "addAppIconForm" enctype="multipart/form-data" target="invisible" action="/upload" method="post"><input id="fileUpload" type="file" name="uploadfile" /><input type="submit" value="Upload Image" /><div id="imageUploaded" class="hidden"></div></form><iframe name="invisible" style="display:none;"></iframe>';
     addAppViewHTML += '<form id="addAppForm" onsubmit="submitNewApp(this); return false"><div id="appConfig">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Name" name="name">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';

@@ -524,6 +524,15 @@ hr{
 .hidden{
     display:none !important;
 }
+.hoverFeatureName{
+    border:solid 1px #171616;
+    font-weight: 700;
+    padding:14px;
+}
+.hoverFeatureName div{
+    margin-top:8px;
+    font-weight: 400;
+}
 .appConfigHoverContent{
     width: 312px;
     background-color: white;
