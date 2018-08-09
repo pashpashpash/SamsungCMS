@@ -26,13 +26,12 @@ known filters = ({
 countries := []string{}
 operatorGroups := []string{}
 configurationNumbers := []string{}
-featuredLocations := []string{}
+products := []string{}
 configurationOrder := 0
 
 
 //For [ALL COUNTRIES] section in export
-homescreenConfigsInAllCountries := []string{}
-folderConfigsInAllCountries := []string{}
+maxGlobalConfigsInAllCountries := []string{}
 maxConfigsInAllCountries := []string{}
 maxGoConfigsInAllCountries := []string{}
 
@@ -70,25 +69,25 @@ for(configList.Next()){
     configurationNumbers = append(configurationNumbers, config)
 }
 
-generateConfigQuery = `SELECT DISTINCT featuredLocationName from featuredLocations`
+generateConfigQuery = `SELECT DISTINCT productName from products`
 log.Println("generateConfigurationINI –\t\tQuery = " + generateConfigQuery)
-featuredLocationList, err := db.Query(generateConfigQuery)
+productList, err := db.Query(generateConfigQuery)
 checkErr(err)
-for(featuredLocationList.Next()){
-    featuredLocationName := string("")
-    featuredLocationList.Scan(&featuredLocationName)
-    featuredLocations = append(featuredLocations, featuredLocationName)
+for(productList.Next()){
+    productName := string("")
+    productList.Scan(&productName)
+    products = append(products, productName)
 }
 
 for _, config := range configurationNumbers {
-    for _, featuredLocation := range featuredLocations {
+    for _, product := range products {
         generateConfigQuery = `
         SELECT * FROM (SELECT DISTINCT Country_ID from countries)
         EXCEPT
         SELECT * FROM (SELECT DISTINCT Country_ID from configurationMappings
         INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-        INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
-        WHERE featuredLocations.featuredLocationName = "`+featuredLocation+`"
+        INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
+        WHERE products.productName = "`+product+`"
         AND configurationMappings.Config_ID = "`+config+`")
         `
         countriesList, err := db.Query(generateConfigQuery)
@@ -98,13 +97,11 @@ for _, config := range configurationNumbers {
             existsEverywhere = false;
         }
         if(existsEverywhere) {
-            if(featuredLocation == "homescreen") {
-                homescreenConfigsInAllCountries = append(homescreenConfigsInAllCountries, config)
-            } else if (featuredLocation == "folder") {
-                folderConfigsInAllCountries = append(folderConfigsInAllCountries, config)
-            } else if (featuredLocation == "max") {
+            if(product == "maxGlobal") {
+                maxGlobalConfigsInAllCountries = append(maxGlobalConfigsInAllCountries, config)
+            } else if (product == "max") {
                 maxConfigsInAllCountries = append(maxConfigsInAllCountries, config)
-            } else if (featuredLocation == "maxGo") {
+            } else if (product == "maxGo") {
                 maxGoConfigsInAllCountries = append(maxGoConfigsInAllCountries, config)
             }
         }
@@ -112,8 +109,7 @@ for _, config := range configurationNumbers {
 }
 
 
-homescreenConfigs := difference(configurationNumbers, homescreenConfigsInAllCountries) //used in the countries section
-folderConfigs := difference(configurationNumbers, folderConfigsInAllCountries)
+maxGlobalConfigs := difference(configurationNumbers, maxGlobalConfigsInAllCountries) //used in the countries section
 maxConfigs := difference(configurationNumbers, maxConfigsInAllCountries)
 maxGoConfigs := difference(configurationNumbers, maxGoConfigsInAllCountries)
 
@@ -125,39 +121,33 @@ log.Println(operatorGroups)
 log.Println("Configuration Numbers:")
 log.Println(configurationNumbers)
 log.Println("Featured Locations:")
-log.Println(featuredLocations)
-log.Println("Configs In all Countries (homescreen,folder,max,maxGo):")
-log.Println(homescreenConfigsInAllCountries)
-log.Println(folderConfigsInAllCountries)
+log.Println(products)
+log.Println("Configs In all Countries (maxGlobal,max,maxGo):")
+log.Println(maxGlobalConfigsInAllCountries)
 log.Println(maxConfigsInAllCountries)
 log.Println(maxGoConfigsInAllCountries)
-log.Println("Configs to be iterated over in [countries] and [operatorGroups] sections in config (homescreen,folder,max,maxGo):")
-log.Println(homescreenConfigs)
-log.Println(folderConfigs)
+log.Println("Configs to be iterated over in [countries] and [operatorGroups] sections in config (maxGlobal,max,maxGo):")
+log.Println(maxGlobalConfigs)
 log.Println(maxConfigs)
 log.Println(maxGoConfigs)
 
 configuration += "\n; ========================  Defaults  ======================================"
-for _, globalfeaturedLocation := range featuredLocations { //featuredLocation = product i.e. "maxGo" or "folder"
-    configuration += (("\n["+"ALLCOUNTRIES"+"_"+globalfeaturedLocation+"]") + ("\n"))
+for _, globalproduct := range products { //product = product i.e. "maxGo" or "maxGlobal"
+    configuration += (("\n["+"ALLCOUNTRIES"+"_"+globalproduct+"]") + ("\n"))
     configuration += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
     configuration += "filter = (["
-        configuration += "\"product\": \""+globalfeaturedLocation+"\","
+        configuration += "\"product\": \""+globalproduct+"\","
     configuration += ("])\n")
     configuration += ("configList = [")
-    if(globalfeaturedLocation == "homescreen") {
-        for _, globalAppConfig := range  homescreenConfigsInAllCountries{
+    if(globalproduct == "maxGlobal") {
+        for _, globalAppConfig := range  maxGlobalConfigsInAllCountries{
             configuration += (globalAppConfig + ", ")
         }
-    } else if(globalfeaturedLocation == "folder") {
-        for _, globalAppConfig := range  folderConfigsInAllCountries{
-            configuration += (globalAppConfig + ", ")
-        }
-    } else if(globalfeaturedLocation == "max") {
+    } else if(globalproduct == "max") {
         for _, globalAppConfig := range  maxConfigsInAllCountries{
             configuration += (globalAppConfig + ", ")
         }
-    }  else if(globalfeaturedLocation == "maxGo") {
+    }  else if(globalproduct == "maxGo") {
         for _, globalAppConfig := range maxGoConfigsInAllCountries {
             configuration += (globalAppConfig + ", ")
         }
@@ -174,24 +164,24 @@ for _, country := range countries {
     // log.Println(country)
 
 
-    for _, featuredLocation := range featuredLocations { //featuredLocation = product i.e. "maxGo" or "folder"
+    for _, product := range products { //product = product i.e. "maxGo" or "maxGlobal"
         configSection := string("")
-        configSection += (("\n["+country+"_"+featuredLocation+"]") + ("\n"))
+        configSection += (("\n["+country+"_"+product+"]") + ("\n"))
         configSection += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
         configSection += "filter = (["
             configSection += "\"country\": \""+country+"\","
-            configSection += "\"product\": \""+featuredLocation+"\","
+            configSection += "\"product\": \""+product+"\","
         configSection += ("])\n")
         configSection += ("configList = [")
         configs := []string{}
         var configsMap = make(map[string]bool)
-        if(featuredLocation == "homescreen") {
-            for _, appConfig := range homescreenConfigs {
-                //check if app configuration exists based on config number, featuredLocation, and country_id
+        if(product == "maxGlobal") {
+            for _, appConfig := range maxGlobalConfigs {
+                //check if app configuration exists based on config number, product, and country_id
                 orderOfConfig := string("")
-                orderOfConfig = configExistsInCountryAndProduct(country, featuredLocation, appConfig)
+                orderOfConfig = configExistsInCountryAndProduct(country, product, appConfig)
                 if(orderOfConfig != "") {
-                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, featuredLocation, appConfig))) {
+                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, product, appConfig))) {
                         //only add config if this is the highest order instance of the config in this section with this originalName
                             addUnique(&configs, configsMap, appConfig)
 
@@ -200,31 +190,14 @@ for _, country := range countries {
             }
             configs = RemoveDuplicatesFromSlice(configs)
 
-        } else if (featuredLocation == "folder") {
-            for _, appConfig := range folderConfigs {
-                //check if app configuration exists based on config number, featuredLocation, and country_id
-                //change this to get countryOrder as well
-                orderOfConfig := string("")
-                orderOfConfig = configExistsInCountryAndProduct(country, featuredLocation, appConfig)
-                if(orderOfConfig != "") {
-
-                    //add app config to country
-                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, featuredLocation, appConfig))) {
-                        //only add config if this is the highest order instance of the config in this section with this originalName
-                        addUnique(&configs, configsMap, appConfig)
-                    }
-                }
-            }
-            configs = RemoveDuplicatesFromSlice(configs)
-
-        } else if (featuredLocation == "max") {
+        } else if (product == "max") {
             for _, appConfig := range maxConfigs {
-                //check if app configuration exists based on config number, featuredLocation, and country_id
+                //check if app configuration exists based on config number, product, and country_id
                 orderOfConfig := string("")
-                orderOfConfig = configExistsInCountryAndProduct(country, featuredLocation, appConfig)
+                orderOfConfig = configExistsInCountryAndProduct(country, product, appConfig)
                 if(orderOfConfig!= "") {
 
-                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, featuredLocation, appConfig))) {
+                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, product, appConfig))) {
                         //only add config if this is the highest order instance of the config in this section with this originalName
                         addUnique(&configs, configsMap, appConfig)
                     }
@@ -232,15 +205,15 @@ for _, country := range countries {
             }
             configs = RemoveDuplicatesFromSlice(configs)
 
-        } else if (featuredLocation == "maxGo") {
+        } else if (product == "maxGo") {
             for _, appConfig := range maxGoConfigs {
-                //check if app configuration exists based on config number, featuredLocation, and country_id
+                //check if app configuration exists based on config number, product, and country_id
                 orderOfConfig := string("")
-                orderOfConfig = configExistsInCountryAndProduct(country, featuredLocation, appConfig)
+                orderOfConfig = configExistsInCountryAndProduct(country, product, appConfig)
 
                 if(orderOfConfig != "") {
 
-                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, featuredLocation, appConfig))) {
+                    if(!(thereAreSimilarCountryConfigsWithHigherOrder(orderOfConfig, country, product, appConfig))) {
                         //only add config if this is the highest order instance of the config in this section with this originalName
                         addUnique(&configs, configsMap, appConfig)
                     }
@@ -299,82 +272,65 @@ for _, operatorGroup := range operatorGroups {
         mappedOperators = append(mappedOperators, mappedOperator)
     }
     mappedOperatorList.Close()
-    for _, featuredLocation := range featuredLocations { //featuredLocation = product i.e. "maxGo" or "folder"
+    for _, product := range products { //product = product i.e. "maxGo" or "maxGlobal"
         configSection := string("")
-        configSection += (("\n["+operatorGroup+"_"+featuredLocation+"]") + ("\n"))
+        configSection += (("\n["+operatorGroup+"_"+product+"]") + ("\n"))
         configSection += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
         configSection += "filter = (["
             configSection += "\"operator\": \""+operatorGroup+"\","
-            configSection += "\"product\": \""+featuredLocation+"\","
+            configSection += "\"product\": \""+product+"\","
         configSection += ("])\n")
         configSection += ("configList = [")
         configs := []string{}
         var configsMap = make(map[string]bool)
         for _, mappedOperator := range mappedOperators {
             // log.Println(mappedOperator)
-            if(featuredLocation == "homescreen") {
-                for _, appConfig := range homescreenConfigs {
-                    results := configExistsInOperatorAndProduct(mappedOperator, featuredLocation, appConfig)
+            if(product == "maxGlobal") {
+                for _, appConfig := range maxGlobalConfigs {
+                    results := configExistsInOperatorAndProduct(mappedOperator, product, appConfig)
                     operatorOrder := results[0]
                     country_id := results[1]
 
-                    countryOrder := getCountryMappingOrder(country_id, featuredLocation, appConfig)
+                    countryOrder := getCountryMappingOrder(country_id, product, appConfig)
                     countryOrderInt, _ := strconv.Atoi(countryOrder)
                     operatorOrderInt, _ := strconv.Atoi(operatorOrder)
                     if(countryOrderInt < operatorOrderInt) {
 
-                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, featuredLocation, appConfig))) {
+                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, product, appConfig))) {
                             addUnique(&configs, configsMap, appConfig)
                         }
                     }
                 }
                 configs = RemoveDuplicatesFromSlice(configs)
-            } else if(featuredLocation == "folder") {
-                for _, appConfig := range folderConfigs {
-                    results := configExistsInOperatorAndProduct(mappedOperator, featuredLocation, appConfig)
-                    operatorOrder := results[0]
-                    country_id := results[1]
-
-                    countryOrder := getCountryMappingOrder(country_id, featuredLocation, appConfig)
-                    countryOrderInt, _ := strconv.Atoi(countryOrder)
-                    operatorOrderInt, _ := strconv.Atoi(operatorOrder)
-                    if(countryOrderInt < operatorOrderInt) {
-
-                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, featuredLocation, appConfig))) {
-                            addUnique(&configs, configsMap, appConfig)
-                        }
-                    }
-                }
-                configs = RemoveDuplicatesFromSlice(configs)
-            }  else if(featuredLocation == "max") {
+            } else if(product == "max") {
                 for _, appConfig := range maxConfigs {
-                    results := configExistsInOperatorAndProduct(mappedOperator, featuredLocation, appConfig)
+                    results := configExistsInOperatorAndProduct(mappedOperator, product, appConfig)
                     operatorOrder := results[0]
                     country_id := results[1]
 
-                    countryOrder := getCountryMappingOrder(country_id, featuredLocation, appConfig)
+                    countryOrder := getCountryMappingOrder(country_id, product, appConfig)
                     countryOrderInt, _ := strconv.Atoi(countryOrder)
                     operatorOrderInt, _ := strconv.Atoi(operatorOrder)
                     if(countryOrderInt < operatorOrderInt) {
 
-                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, featuredLocation, appConfig))) {
+                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, product, appConfig))) {
                             addUnique(&configs, configsMap, appConfig)
                         }
                     }
                 }
                 configs = RemoveDuplicatesFromSlice(configs)
-            }  else if(featuredLocation == "maxGo") {
+            }  else if(product == "maxGo") {
                 for _, appConfig := range maxGoConfigs {
-                    results := configExistsInOperatorAndProduct(mappedOperator, featuredLocation, appConfig)
+                    results := configExistsInOperatorAndProduct(mappedOperator, product, appConfig)
                     operatorOrder := results[0]
                     country_id := results[1]
 
-                    countryOrder := getCountryMappingOrder(country_id, featuredLocation, appConfig)
+                    countryOrder := getCountryMappingOrder(country_id, product, appConfig)
                     countryOrderInt, _ := strconv.Atoi(countryOrder)
                     operatorOrderInt, _ := strconv.Atoi(operatorOrder)
                     if(countryOrderInt < operatorOrderInt) {
 
-                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, featuredLocation, appConfig))) {
+                        if(!(thereAreSimilarOperatorConfigsWithHigherOrder(operatorOrder, mappedOperator, product, appConfig))) {
                             addUnique(&configs, configsMap, appConfig)
                         }
                     }
@@ -414,12 +370,12 @@ func difference(a, b []string) []string {
     return ab
 }
 
-func configExistsInCountryAndProduct(country, featuredLocation, appConfig  string) (string) {
+func configExistsInCountryAndProduct(country, product, appConfig  string) (string) {
     generateConfigQuery := `
     SELECT DISTINCT configurationMappings.id from configurationMappings
     INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-    INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
-    WHERE configurationMappings.Country_ID = '`+country+`' AND featuredLocations.featuredLocationName = "`+featuredLocation+`"
+    INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
+    WHERE configurationMappings.Country_ID = '`+country+`' AND products.productName = "`+product+`"
     AND configurationMappings.Config_ID = "`+appConfig+`" ORDER BY configurationMappings.id DESC LIMIT 1
     `
     config, err := db.Query(generateConfigQuery)
@@ -431,13 +387,13 @@ func configExistsInCountryAndProduct(country, featuredLocation, appConfig  strin
     return string1
 }
 
-func configExistsInOperatorAndProduct(operator, featuredLocation, appConfig  string) ([]string) {
+func configExistsInOperatorAndProduct(operator, product, appConfig  string) ([]string) {
     generateConfigQuery := `
     SELECT DISTINCT operators.Country_ID, configurationMappings.id from configurationMappings
     JOIN operators USING (MCCMNC_ID)
     INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-    INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
-    WHERE MCCMNC_ID = '`+operator+`' AND configurationMappings.Config_ID = "`+appConfig+`" AND featuredLocations.featuredLocationName ="`+featuredLocation+`" ORDER BY configurationMappings.id DESC LIMIT 1
+    INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
+    WHERE MCCMNC_ID = '`+operator+`' AND configurationMappings.Config_ID = "`+appConfig+`" AND products.productName ="`+product+`" ORDER BY configurationMappings.id DESC LIMIT 1
     `
     configList, err := db.Query(generateConfigQuery)
     checkErr(err)
@@ -450,12 +406,12 @@ func configExistsInOperatorAndProduct(operator, featuredLocation, appConfig  str
     arrayOfStringsArrays := []string{order, Country_ID}
     return arrayOfStringsArrays
 }
-func thereAreSimilarCountryConfigsWithHigherOrder(order, country, featuredLocation, appConfig  string) (bool) {
+func thereAreSimilarCountryConfigsWithHigherOrder(order, country, product, appConfig  string) (bool) {
     generateConfigQuery := `
     SELECT DISTINCT configurationMappings.id from configurationMappings
     INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-    INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
-    WHERE configurationMappings.Country_ID = '`+country+`' AND featuredLocations.featuredLocationName = "`+featuredLocation+`"
+    INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
+    WHERE configurationMappings.Country_ID = '`+country+`' AND products.productName = "`+product+`"
     AND configurationMappings.Config_ID in (SELECT Config_ID FROM appConfigs WHERE originalName in (SELECT originalName from appConfigs WHERE Config_ID ='`+appConfig+`')) ORDER BY configurationMappings.id DESC LIMIT 1
     `
     configList, err := db.Query(generateConfigQuery)
@@ -476,12 +432,12 @@ func thereAreSimilarCountryConfigsWithHigherOrder(order, country, featuredLocati
 
     return higherorder
 }
-func thereAreSimilarOperatorConfigsWithHigherOrder(order, operator, featuredLocation, appConfig  string) (bool) {
+func thereAreSimilarOperatorConfigsWithHigherOrder(order, operator, product, appConfig  string) (bool) {
     generateConfigQuery := `
     SELECT DISTINCT configurationMappings.id from configurationMappings
     INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-    INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
-    WHERE configurationMappings.MCCMNC_ID = '`+operator+`' AND featuredLocations.featuredLocationName = "`+featuredLocation+`"
+    INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
+    WHERE configurationMappings.MCCMNC_ID = '`+operator+`' AND products.productName = "`+product+`"
     AND configurationMappings.Config_ID in (SELECT Config_ID FROM appConfigs WHERE originalName in (SELECT originalName from appConfigs WHERE Config_ID ='`+appConfig+`')) ORDER BY configurationMappings.id DESC LIMIT 1
     `
     configList, err := db.Query(generateConfigQuery)
@@ -500,12 +456,12 @@ func thereAreSimilarOperatorConfigsWithHigherOrder(order, operator, featuredLoca
     return higherorder
 }
 
-func getCountryMappingOrder(country, featuredLocation, appConfig  string) (string) {
+func getCountryMappingOrder(country, product, appConfig  string) (string) {
     generateConfigQuery := `
     SELECT DISTINCT configurationMappings.id, configurationMappings.Config_ID from configurationMappings
     INNER JOIN appConfigs ON configurationMappings.Config_ID = appConfigs.Config_ID
-    INNER JOIN featuredLocations ON appConfigs.Config_ID = featuredLocations.Config_ID
-    WHERE configurationMappings.Country_ID = '`+country+`' AND featuredLocations.featuredLocationName = "`+featuredLocation+`"
+    INNER JOIN products ON appConfigs.Config_ID = products.Config_ID
+    WHERE configurationMappings.Country_ID = '`+country+`' AND products.productName = "`+product+`"
     AND configurationMappings.Config_ID in  (SELECT Config_ID from appConfigs WHERE originalName in (SELECT originalName from appConfigs WHERE Config_ID = '`+appConfig+`')) ORDER BY configurationMappings.id DESC LIMIT 1
     `
     config, err := db.Query(generateConfigQuery)
