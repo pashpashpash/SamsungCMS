@@ -717,7 +717,7 @@ function showAppConfigOnHover(appConfig, configNumber) {
         var postRequestJSON = JSON.parse(postRequestText);
         console.log(postRequestJSON);
         server_post.post(post_url, postRequestJSON, function(products) {
-            var newHTML = 'Featured Locations : ';
+            var newHTML = 'Products : ';
             for(i in products) {
                 newHTML += (products[i] + ", ");
             }
