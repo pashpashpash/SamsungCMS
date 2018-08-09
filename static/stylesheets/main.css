@@ -310,7 +310,7 @@ body {
     margin-right:14px;
 }
 .mappingsRow:hover {
-    background:lightgrey;
+    background:white;
 }
 .configData .row .rowValue {
     margin-left: 14px;
