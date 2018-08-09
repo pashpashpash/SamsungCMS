@@ -102,7 +102,7 @@ function loadFilters(filterData, lastcountry, last_operator){
 
     } else {
         filterParams[0][1].options.length = 0;
-        filterParams[0][1].options.add(new Option("▾ Operators ▾", "star", true, true));
+        filterParams[0][1].options.add(new Option("Operators ▾", "star", true, true));
     }
 }
 

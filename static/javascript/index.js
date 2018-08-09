@@ -669,94 +669,125 @@ function setConfigHover(appConfig, configNumber){
     appConfig.onmouseout = function() {hideAppConfigOnHover(this, configNumber)};
 }
 function showAppConfigOnHover(appConfig, configNumber) {
-    console.log(appConfig);
-    var appConfigHoverContents = document.createElement('div');
-    appConfigHoverContents.className = 'appConfigHoverContent';
-    appConfigHoverContents.innerText = generateAppConfigHoverContents(configNumber);
-    console.log("showAppConfigOnHover – hoverContents innerHTML = " + appConfigHoverContents.innerText);
-    var configFeaturedLocs = document.createElement('div');
-    configFeaturedLocs.className = 'configproducts';
-    configFeaturedLocs.innerHTML = '<div class=\'loading\'></div>';
-    configFeaturedLocs = configFeaturedLocs.children[0];
-    appConfigHoverContents.appendChild(configFeaturedLocs);
-
-    console.log("showAppConfigOnHover – Getting products for config " + configNumber)
-    var postRequestText = '{"functionToCall" : "getproducts", "data" : {'
-        + ' "Config_ID" : "'+ configNumber + '"'
-        +'}}';
-    var postRequestJSON = JSON.parse(postRequestText);
+    console.log("updateGlobalConfigArray – Getting all apps from server")
+    var postRequestJSON = JSON.parse('{"functionToCall" : "getAllAppConfigs", "data" : {}}');
     console.log(postRequestJSON);
-    server_post.post(post_url, postRequestJSON, function(products) {
-        var newHTML = 'Featured Locations : ';
-        for(i in products) {
-            newHTML += (products[i] + ", ");
+    server_post.post(post_url, postRequestJSON, function(allAppConfigs) {
+        console.log("updateGlobalConfigArray – Server Response:");
+        console.log(allAppConfigs);
+        globalConfigArray = [];
+        var dummyConfig = {"dummy" : "dummy"};
+        globalConfigArray.push(dummyConfig);
+        for(var i = 0; i < allAppConfigs.appConfigs.length; i++){
+            var appConfig2 = allAppConfigs.appConfigs[i];
+            globalConfigArray.push(appConfig2);
         }
-        var parent = configFeaturedLocs.parentElement;
-        if(appConfig.children[0]!=null){
-            appConfig.children[0].lastChild.remove();
-        }
-        parent.innerHTML+= newHTML;
-    });
-    console.log("showAppConfigOnHover – Getting featureMappings for config " + configNumber)
-    var postRequestText = '{"functionToCall" : "getFeatureMappings", "data" : {'
-        + ' "Config_ID" : "'+ configNumber + '"'
-        +'}}';
-    var postRequestJSON = JSON.parse(postRequestText);
-    console.log(postRequestJSON);
-    server_post.post(post_url, postRequestJSON, function(featureMappings) {
-        console.log("showAppConfigOnHover – server responded with:");
-        console.log(featureMappings);
-        var newHTML = 'Feature Mappings : \n';
-        var oldFeatureType = "";
-        var feature = document.createElement('div');
-        feature.className = "hoverFeature";
-        for(var i = 0; i < featureMappings.length; i++) {
-            console.log(featureMappings[i]);
-            newFeatureType = featureMappings[i].FeatureName;
-            if(oldFeatureType === "") { //beginning of list
-                oldFeatureType = newFeatureType;
-                feature.id = newFeatureType;
+        console.log("showAppConfigOnHover – updated globalConfigArray:");
+        console.log(globalConfigArray);
 
-                var featureName = document.createElement('div');
-                feature.className = "hoverFeatureName"
-                feature.innerText
-                featureName.innerText = featureMappings[i].FeatureType;
-                feature.appendChild(featureName);
-            } else if(oldFeatureType === newFeatureType) { //same feature as before, just add to feature element
-                var featureName = document.createElement('div');
-                feature.className = "hoverFeatureName"
-                featureName.innerText = featureMappings[i].FeatureType;
-                feature.appendChild(featureName);
-            } else { //new Feature
-                appConfig.children[0].appendChild(feature);
-                oldFeatureType = newFeatureType;
-                feature = document.createElement('div');
-                feature.id = newFeatureType;
-                var featureName = document.createElement('div');
-                feature.className = "hoverFeatureName"
-                featureName.innerText = featureMappings[i].FeatureType;
-                feature.appendChild(featureName);
+        console.log(appConfig);
+        var appConfiguration;
+        for(var j = 0; j < globalConfigArray.length; j++) {
+            if(configNumber === globalConfigArray[j].Config_ID) {
+                appConfiguration = globalConfigArray[j];
             }
-
         }
-        appConfig.children[0].appendChild(feature);
+        var returnString = "";
+        for (var element in appConfiguration) {
+            var val = appConfiguration[element];
+            returnString+=(element + " : " + val + "\n");
+        }
+        console.log("generateAppConfigHoverContents – Setting appconfig contents for config #" + configNumber);
+        var appConfigHoverContents = document.createElement('div');
+        appConfigHoverContents.className = 'appConfigHoverContent';
+        appConfigHoverContents.innerText = returnString;
 
-        // var parent = configFeaturedLocs.parentElement;
-        // if(appConfig.children[0]!=null){
-        //     console.log("showAppConfigOnHover – last child to remove?:");
-        // }
-        // appConfig.children[0].appendChild(feature);
 
+        console.log("showAppConfigOnHover – hoverContents innerHTML = " + appConfigHoverContents.innerText);
+        var configFeaturedLocs = document.createElement('div');
+        configFeaturedLocs.className = 'configproducts';
+        configFeaturedLocs.innerHTML = '<div class=\'loading\'></div>';
+        configFeaturedLocs = configFeaturedLocs.children[0];
+        appConfigHoverContents.appendChild(configFeaturedLocs);
+
+        console.log("showAppConfigOnHover – Getting products for config " + configNumber)
+        var postRequestText = '{"functionToCall" : "getproducts", "data" : {'
+            + ' "Config_ID" : "'+ configNumber + '"'
+            +'}}';
+        var postRequestJSON = JSON.parse(postRequestText);
+        console.log(postRequestJSON);
+        server_post.post(post_url, postRequestJSON, function(products) {
+            var newHTML = 'Featured Locations : ';
+            for(i in products) {
+                newHTML += (products[i] + ", ");
+            }
+            var parent = configFeaturedLocs.parentElement;
+            if(appConfig.children[0]!=null){
+                appConfig.children[0].lastChild.remove();
+            }
+            parent.innerHTML+= newHTML;
+        });
+        console.log("showAppConfigOnHover – Getting featureMappings for config " + configNumber)
+        var postRequestText = '{"functionToCall" : "getFeatureMappings", "data" : {'
+            + ' "Config_ID" : "'+ configNumber + '"'
+            +'}}';
+        var postRequestJSON = JSON.parse(postRequestText);
+        console.log(postRequestJSON);
+        server_post.post(post_url, postRequestJSON, function(featureMappings) {
+            console.log("showAppConfigOnHover – server responded with:");
+            console.log(featureMappings);
+            var newHTML = 'Feature Mappings : \n';
+            var oldFeatureType = "";
+            var feature = document.createElement('div');
+            feature.className = "hoverFeature";
+            for(var i = 0; i < featureMappings.length; i++) {
+                console.log(featureMappings[i]);
+                newFeatureType = featureMappings[i].FeatureName;
+                if(oldFeatureType === "") { //beginning of list
+                    oldFeatureType = newFeatureType;
+                    feature.id = newFeatureType;
+
+                    var featureName = document.createElement('div');
+                    feature.className = "hoverFeatureName"
+                    feature.innerText
+                    featureName.innerText = featureMappings[i].FeatureType;
+                    feature.appendChild(featureName);
+                } else if(oldFeatureType === newFeatureType) { //same feature as before, just add to feature element
+                    var featureName = document.createElement('div');
+                    feature.className = "hoverFeatureName"
+                    featureName.innerText = featureMappings[i].FeatureType;
+                    feature.appendChild(featureName);
+                } else { //new Feature
+                    appConfig.children[0].appendChild(feature);
+                    oldFeatureType = newFeatureType;
+                    feature = document.createElement('div');
+                    feature.id = newFeatureType;
+                    var featureName = document.createElement('div');
+                    feature.className = "hoverFeatureName"
+                    featureName.innerText = featureMappings[i].FeatureType;
+                    feature.appendChild(featureName);
+                }
+
+            }
+            appConfig.children[0].appendChild(feature);
+
+            // var parent = configFeaturedLocs.parentElement;
+            // if(appConfig.children[0]!=null){
+            //     console.log("showAppConfigOnHover – last child to remove?:");
+            // }
+            // appConfig.children[0].appendChild(feature);
+
+        });
+
+
+        appConfigHoverContents.classList.remove('hidden');
+        if(appConfig.children[0] != null){
+            appConfig.children[0].remove();
+        }
+
+        appConfig.prepend(appConfigHoverContents);
+        appConfig.children[0].classList.remove('hidden');
     });
-
-
-    appConfigHoverContents.classList.remove('hidden');
-    if(appConfig.children[0] != null){
-        appConfig.children[0].remove();
-    }
-
-    appConfig.prepend(appConfigHoverContents);
-    appConfig.children[0].classList.remove('hidden');
 }
 
 
