@@ -784,6 +784,13 @@ main{
     select{
         margin-top: 10px;
     }
+    #filters select, #filters form {
+        background: white;
+    }
+    .addAppPopup{
+        background: lightgrey;
+        background-image:none !important;
+    }
 }
 
 
