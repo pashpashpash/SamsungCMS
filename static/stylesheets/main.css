@@ -38,7 +38,7 @@ body {
     color: white;
     position: absolute;
     top: 11%;
-    left: 30%;
+    left: 20%;
 }
 
 .overflow-hidden{
@@ -790,7 +790,31 @@ main{
     .addAppPopup{
         background: lightgrey;
         background-image:none !important;
+
     }
+    .addAppPopup .contents {
+        width: 80% !important;
+        left:10% !important;
+        top: 10% !important;
+        height: 80% !important;
+        font-size: 24px !important;
+    }
+    .addAppPopup input {
+        padding: 28px;
+        font-size: 24px !important;
+    }
+     #addAppHiddenUI {
+         margin-top: 28px;
+     }
+     #products {
+         margin-bottom: 28px;
+     }
+    #addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI {
+        border: 1px solid lightgrey;
+        font-size: 20px;
+        padding: 28px;
+    }
+
 }
 
 
@@ -835,10 +859,10 @@ img#icon {
 .addAppPopup .contents {
     opacity: 1;
     position:relative;
-    width: 40%;
+    width: 60%;
     height:70%;
     top: 15%;
-    left:30%;
+    left:20%;
     background:white;
     border-radius: 8px;
     overflow: scroll;
@@ -850,7 +874,7 @@ img#icon {
     margin-right: 14px;
     margin-top: 14px;
     line-height: 24px;
-    padding-left: 14px;
+    padding: 14px;
     border-radius: 8px;
     border: 1px solid #ebebeb;
     width: 80%;
@@ -921,11 +945,18 @@ img#icon {
 #addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI{
     margin-left: 18px;
     margin-right: 18px;
+    padding: 14px;
+
+}
+#addAppHiddenUI{
+    margin-top: 14px;
 }
 .addAppPopup .contents #addAppCheckboxContainer
 {
     margin-left: 24px;
-    display: inline;
+    display: inline-block;
+    padding-left: 14px;
+    padding-right: 14px;
 }
 
 
