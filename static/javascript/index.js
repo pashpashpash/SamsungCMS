@@ -706,7 +706,7 @@ function showAppConfigOnHover(appConfig, configNumber) {
         console.log("showAppConfigOnHover – hoverContents innerHTML = " + appConfigHoverContents.innerText);
         var configFeaturedLocs = document.createElement('div');
         configFeaturedLocs.className = 'configproducts';
-        configFeaturedLocs.innerHTML = '<div class=\'loading\'></div>';
+        configFeaturedLocs.innerHTML = '<div class=\'hidden\'></div>';
         configFeaturedLocs = configFeaturedLocs.children[0];
         appConfigHoverContents.appendChild(configFeaturedLocs);
 
@@ -770,12 +770,6 @@ function showAppConfigOnHover(appConfig, configNumber) {
 
             }
             appConfig.children[0].appendChild(feature);
-
-            // var parent = configFeaturedLocs.parentElement;
-            // if(appConfig.children[0]!=null){
-            //     console.log("showAppConfigOnHover – last child to remove?:");
-            // }
-            // appConfig.children[0].appendChild(feature);
 
         });
 
