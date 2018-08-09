@@ -750,7 +750,7 @@ main{
 }
 @media screen  and (max-width: 1400px) /* Tablet */ {
     #appTray {
-        height: 547px;
+        height: auto;
 
         margin:auto;
         margin-bottom: 60px;
