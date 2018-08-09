@@ -813,16 +813,12 @@ function toggleGlobalApp(appElement) {
     if(appElement.classList.contains('collapsed')){ //collapse app
         appElement.children[3].innerHTML="";
     } else { //expand app
-        var loading = document.createElement('div');
-        loading.className = 'loading';
-        appElement.children[3].prepend(loading);
         var postRequestJSON = JSON.parse('{"functionToCall" : "globalView", "data" : {'
         + ' "App_OriginalName" : "'+ appOriginalName + '"'
         +'}}');
         server_post.post(post_url, postRequestJSON, function(appData) {
             console.log("toggleGlobalView – Success! Server returned:");
             console.log(appData);
-            appElement.children[3].children[0].remove(); //removes loading;
             for(var i = 0; i < appData.GlobalDataCountries.length; i++) {
                 var country = document.createElement('div');
                 country.className = 'globalViewCountry';
