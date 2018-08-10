@@ -828,7 +828,7 @@ func addNewConfig(Config data) ([]byte) {
             checkErr(err)
         }
     }
-    
+
     var returnResult = ResultMessage{}
     if(!anyerrors) {
         returnResult = ResultMessage{"SUCCESS"}

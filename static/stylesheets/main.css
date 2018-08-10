@@ -7,7 +7,9 @@ body {
 }
 
 
-
+::-webkit-scrollbar {
+    display: none;
+}
 /* login screen */
 #name {
     padding: 14px;
@@ -688,7 +690,8 @@ hr{
     padding-top: 8px;
     text-align: center;
     color: #171616;
-    font-weight: 100;
+    font-weight: 300;
+    font-size: 18px;
 }
 #appTray .appTraySection {
     padding: 14px;
@@ -728,8 +731,8 @@ main{
 }
 #appTray{
     margin: auto;
-    width: 760px;
-    height: 559px;
+    width: 68%;
+    height: 584px;
     padding-top: 6px;
     overflow: scroll;
     color: black;
@@ -920,7 +923,7 @@ img#icon {
 .errorDiv{
     background: red;
     margin-bottom: -14px;
-    margin-top: 7px;
+    margin-top: 14px;
     color:white;
     padding: 14px;
 }
