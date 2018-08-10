@@ -5,7 +5,8 @@ import (
 	"net/http"
     // "html/template"
     // "bytes"
-    "github.com/mholt/archiver"
+    "strings"
+    "archive/zip"
     "path/filepath"
 	"path"
 	"time"
@@ -13,6 +14,7 @@ import (
     "io"
     "os"
     "github.com/gorilla/securecookie"
+    "github.com/cf-guardian/guardian/kernel/fileutils"
     "text/tabwriter"
         // "database/sql"
     // "strings"     // fmt.Fprint(w, strings.Join(appNames, ", \n"))
@@ -893,17 +895,24 @@ func updateConfigurationINI(Data data) ([]byte) {
     checkErr(err)
     log.Println("updateConfigurationINI –\t\tupdating configuration.ini...")
 
-    //clear static/ultra_apps_json folder first
+    //clear static/ultra_apps_json and static/configuration_export folders first
     RemoveContents("static/ultra_apps_json")
+    os.RemoveAll("static/configuration_export")
+
     output := generateConfigurationINI()
     err = ioutil.WriteFile("static/ultra_apps_configuration/configuration.ini", []byte(output), 0644)
     checkErr(err)
     log.Println("updateConfigurationINI –\t\t wrote to file")
+    f := fileutils.New()
+    err = f.Copy("static/configuration_export","static/ultra_apps_configuration")
+    err = f.Copy("static/configuration_export", "static/ultra_apps_json")
+    err = f.Copy("static/configuration_export", "static/ultra_apps")
 
     //package together static/configuration.ini, static/ultra_apps_json, and static/ultra_apps into static/configuration.zip
-    files := []string{"static/ultra_apps_configuration/configuration.ini", "static/ultra_apps_json", "static/ultra_apps"}
-    zipOutput := "static/configuration.zip"
-    err = archiver.Zip.Make(zipOutput, files)
+    exportfolder := string("static/configuration_export")
+    zipOutput := string("static/configuration.zip")
+    err = Zipit(zipOutput, exportfolder)
+    checkErr(err)
 
     log.Println("Zipped File: " + zipOutput)
 
@@ -911,6 +920,65 @@ func updateConfigurationINI(Data data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
+func Zipit(target string, source string) error {
+    zipfile, err := os.Create(target)
+    if err != nil {
+        return err
+    }
+    defer zipfile.Close()
+
+    archive := zip.NewWriter(zipfile)
+    defer archive.Close()
+
+    info, err := os.Stat(source)
+    if err != nil {
+        return nil
+    }
+
+    var baseDir string
+    if info.IsDir() {
+        baseDir = filepath.Base(source)
+    }
+
+    filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+        if err != nil {
+            return err
+        }
+
+        header, err := zip.FileInfoHeader(info)
+        if err != nil {
+            return err
+        }
+        if baseDir != "" {
+            header.Name = strings.TrimPrefix(path, source)
+        }
+        if info.IsDir() {
+            header.Name += "/"
+        } else {
+            header.Method = zip.Deflate
+        }
+
+        writer, err := archive.CreateHeader(header)
+        if err != nil {
+            return err
+        }
+
+        if info.IsDir() {
+            return nil
+        }
+
+        file, err := os.Open(path)
+        if err != nil {
+            return err
+        }
+        defer file.Close()
+        _, err = io.Copy(writer, file)
+        return err
+    })
+
+    return err
+}
+
 func RemoveContents(dir string) error {
     d, err := os.Open(dir)
     if err != nil {
