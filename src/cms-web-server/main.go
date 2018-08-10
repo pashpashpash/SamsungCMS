@@ -5,6 +5,8 @@ import (
 	"net/http"
     // "html/template"
     // "bytes"
+    "github.com/mholt/archiver"
+    "path/filepath"
 	"path"
 	"time"
     "fmt"
@@ -887,29 +889,47 @@ func deleteConfiguration(Data data) ([]byte) {
     return jsonResponse
 }
 func updateConfigurationINI(Data data) ([]byte) {
-    _, err := ioutil.ReadFile("static/configuration.ini")
+    _, err := ioutil.ReadFile("static/ultra_apps_configuration/configuration.ini")
     checkErr(err)
     log.Println("updateConfigurationINI –\t\tupdating configuration.ini...")
 
+    //clear static/ultra_apps_json folder first
+    RemoveContents("static/ultra_apps_json")
     output := generateConfigurationINI()
-    err = ioutil.WriteFile("static/configuration.ini", []byte(output), 0644)
+    err = ioutil.WriteFile("static/ultra_apps_configuration/configuration.ini", []byte(output), 0644)
     checkErr(err)
     log.Println("updateConfigurationINI –\t\t wrote to file")
 
-    // //package together static/configuration.ini, static/ultra_apps_json, and static/ultra_apps into static/configuration.zip
-    // files := []string{"static/configuration.ini", "static/ultra_apps_json/", "static/ultra_apps/"}
-    // zipOutput := "static/configuration.zip"
-    // for _, file := range files {
-    //     err = zipit(zipOutput, file)
-    //     checkErr(err)
-    // }
-    //
-    // log.Println("Zipped File: " + zipOutput)
+    //package together static/configuration.ini, static/ultra_apps_json, and static/ultra_apps into static/configuration.zip
+    files := []string{"static/ultra_apps_configuration/configuration.ini", "static/ultra_apps_json", "static/ultra_apps"}
+    zipOutput := "static/configuration.zip"
+    err = archiver.Zip.Make(zipOutput, files)
+
+    log.Println("Zipped File: " + zipOutput)
 
     jsonResponse, err := json.Marshal("success")
     checkErr(err)
     return jsonResponse
 }
+func RemoveContents(dir string) error {
+    d, err := os.Open(dir)
+    if err != nil {
+        return err
+    }
+    defer d.Close()
+    names, err := d.Readdirnames(-1)
+    if err != nil {
+        return err
+    }
+    for _, name := range names {
+        err = os.RemoveAll(filepath.Join(dir, name))
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+
 func submitNewCountry(Country data) ([]byte) {
     var returnString string = ""
     if(Country.Country_ID != "") {
@@ -1486,9 +1506,9 @@ func exportPageHandler(w http.ResponseWriter, r *http.Request) {
     username := string("")
     username = getUserName(r)
     if(username!= "") {
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    myHtml := exportPageHTML(vars["Config_ID"])
-    io.WriteString(w, myHtml)
+        w.Header().Set("Content-Type", "text/html; charset=utf-8")
+        myHtml := exportPageHTML(vars["Config_ID"])
+        io.WriteString(w, myHtml)
     } else {
         io.WriteString(w, "Unauthenticated Connection. Please log in.")
     }
@@ -1576,9 +1596,12 @@ type Webapp struct {
     Rank         int      `json:"rank"`
     Name         string   `json:"name"`
     HomeURL      string   `json:"homeUrl"`
-    DefaultEnabledFeatures []string `json:"defaultEnabledFeatures"`
+    DefaultEnabledFeatures []string `json:"defaultEnabledFeatures,omitempty"`
     HiddenUI     []string `json:"hiddenUI,omitempty"`
-    HiddenFeatures         []string `json:"hiddenFeatures"`
+    HiddenFeatures         []string `json:"hiddenFeatures,omitempty"`
     NativeApps   []string `json:"nativeApps,omitempty"`
     IconURL      string   `json:"iconUrl"`
+}
+type Webapps struct {
+    WebappArray []Webapp `json:"webapps"`
 }

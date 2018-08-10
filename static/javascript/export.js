@@ -13,7 +13,7 @@ function downloadConfigurations() {
         document.getElementsByClassName("exportLoading")[0].classList.toggle("hidden");
         if(result === "success"){
             var links = [
-              '/configuration.ini'
+              '/configuration.zip'
             ];
             downloadAll(links);
         }

@@ -2,11 +2,8 @@ package main
 import (
     "log"
     "strconv"
-    "archive/zip"
-    "path/filepath"
-    "strings"
-    "os"
-    "io"
+    "encoding/json"
+    "io/ioutil"
 )
 func generateConfigurationINI() (string) {
 
@@ -138,21 +135,27 @@ for _, globalproduct := range products { //product = product i.e. "maxGo" or "ma
     configuration += "filter = (["
         configuration += "\"product\": \""+globalproduct+"\","
     configuration += ("])\n")
-    configuration += ("configList = [")
+    configuration += ("json file = \"")
+    configArray := []string{}
     if(globalproduct == "maxGlobal") {
         for _, globalAppConfig := range  maxGlobalConfigsInAllCountries{
-            configuration += (globalAppConfig + ", ")
+            configArray = append(configArray, globalAppConfig)
         }
     } else if(globalproduct == "max") {
         for _, globalAppConfig := range  maxConfigsInAllCountries{
-            configuration += (globalAppConfig + ", ")
+            configArray = append(configArray, globalAppConfig)
         }
     }  else if(globalproduct == "maxGo") {
         for _, globalAppConfig := range maxGoConfigsInAllCountries {
-            configuration += (globalAppConfig + ", ")
+            configArray = append(configArray, globalAppConfig)
         }
     }
-    configuration += ("]")
+    configArray = RemoveDuplicatesFromSlice(configArray)
+    //add json based on config_id here!
+    createJson("ALLCOUNTRIES"+"_"+globalproduct, configArray)
+
+    configuration += ("ultra_apps_json/"+"ALLCOUNTRIES"+"_"+globalproduct+".json")
+    configuration += ("\"")
     configurationOrder++
 }
 
@@ -172,7 +175,7 @@ for _, country := range countries {
             configSection += "\"country\": \""+country+"\","
             configSection += "\"product\": \""+product+"\","
         configSection += ("])\n")
-        configSection += ("configList = [")
+        configSection += ("json file = \"")
         configs := []string{}
         var configsMap = make(map[string]bool)
         if(product == "maxGlobal") {
@@ -223,10 +226,18 @@ for _, country := range countries {
 
         }
         if(len(configs) != 0) {  //if mapped configuration length is not 0, add to export
-            for _, config := range configs {
-                configSection += (config + ", ")
+            if(product=="maxGlobal") {
+                configs = append(configs, maxGlobalConfigsInAllCountries...)
+            } else if(product =="max") {
+                configs = append(configs, maxConfigsInAllCountries...)
+            } else if(product =="maxGo") {
+                configs = append(configs, maxGoConfigsInAllCountries...)
             }
-            configSection += ("]")
+            configs = RemoveDuplicatesFromSlice(configs)
+            //add json based on config_id here!
+            createJson(country+"_"+product, configs)
+            configSection += ("ultra_apps_json/"+country+"_"+product+".json")
+            configSection += ("\"")
             configurationOrder++
             countriesSection += configSection
         }
@@ -280,7 +291,7 @@ for _, operatorGroup := range operatorGroups {
             configSection += "\"operator\": \""+operatorGroup+"\","
             configSection += "\"product\": \""+product+"\","
         configSection += ("])\n")
-        configSection += ("configList = [")
+        configSection += ("json file = \"")
         configs := []string{}
         var configsMap = make(map[string]bool)
         for _, mappedOperator := range mappedOperators {
@@ -341,10 +352,18 @@ for _, operatorGroup := range operatorGroups {
         }
 
         if(len(configs) != 0) { //if mapped configuration length is not 0, add to export
-            for _, config := range configs {
-                configSection += (config + ", ")
+            if(product=="maxGlobal") {
+                configs = append(configs, maxGlobalConfigsInAllCountries...)
+            } else if(product =="max") {
+                configs = append(configs, maxConfigsInAllCountries...)
+            } else if(product =="maxGo") {
+                configs = append(configs, maxGoConfigsInAllCountries...)
             }
-            configSection += ("]")
+            configs = RemoveDuplicatesFromSlice(configs)
+            //add json based on config_id here!
+            createJson(operatorGroup+"_"+product, configs)
+            configSection += ("ultra_apps_json/"+operatorGroup+"_"+product+".json")
+            configSection += ("\"")
             configurationOrder++
             operatorsSection += configSection
         }
@@ -354,6 +373,67 @@ configuration += operatorsSection //add countriesSection to configuration export
 
 return configuration
 }
+
+func createJson(jsonName string, configs []string) {
+    log.Println("createJSON\t\tCreating json with name: " + "static/ultra_apps_json"+jsonName+".json")
+    webapps := Webapps{}
+    for _, config := range configs {
+        generateConfigQuery := `
+        SELECT DISTINCT originalName, rank, modifiableName, homeURL, iconURL from appConfigs
+        WHERE Config_ID = "`+config+`"
+        `
+        appConfig, err := db.Query(generateConfigQuery)
+        checkErr(err)
+        webapp := Webapp{}
+        for(appConfig.Next()) {
+            appConfig.Scan(&webapp.ID, &webapp.Rank, &webapp.Name, &webapp.HomeURL, &webapp.IconURL)
+        }
+
+        generateConfigQuery = `
+        SELECT DISTINCT featureType, featureName from featureMappings
+        WHERE Config_ID = "`+config+`"
+        `
+        featureMapping, err := db.Query(generateConfigQuery)
+        checkErr(err)
+        for(featureMapping.Next()) {
+            featureType := string("")
+            featureName := string("")
+            featureMapping.Scan(&featureType, &featureName)
+            if(featureType=="hiddenUI") {
+                webapp.HiddenUI = append(webapp.HiddenUI, featureName)
+            } else if (featureType=="hiddenFeatures"){
+                webapp.HiddenFeatures = append(webapp.HiddenUI, featureName)
+            } else if (featureType=="defaultEnabledFeatures"){
+                webapp.DefaultEnabledFeatures = append(webapp.HiddenUI, featureName)
+            }
+        }
+        webapps.WebappArray = append(webapps.WebappArray, webapp)
+    }
+    webappJson, _ := json.Marshal(webapps)
+    err := ioutil.WriteFile("static/ultra_apps_json/"+jsonName+".json", webappJson, 0644)
+    checkErr(err)
+}
+
+// {
+//     "id": "facebook",
+//     "rank": 1,
+//     "name": "Facebook",
+//     "homeUrl": "https://m.facebook.com/?ref=s_max_bookmark",
+//     "defaultEnabledFeatures": [
+//         "savings",
+//         "privacy"
+//     ],
+//     "hiddenUI" : [
+//         "folder"
+//     ],
+//     "hiddenFeatures": [
+//         "adBlock",
+//     ],
+//     "nativeApps": [
+//         "com.facebook.katana"
+//     ],
+//     "iconUrl": "ultra_apps/facebook_ultra_color.png",
+// }
 
 // difference returns the elements in a that aren't in b
 func difference(a, b []string) []string {
@@ -496,65 +576,4 @@ func RemoveDuplicatesFromSlice(s []string) []string {
               result = append(result, item)
       }
       return result
-}
-
-func zipit(source, target string) error {
-	zipfile, err := os.Create(target)
-	if err != nil {
-		return err
-	}
-	defer zipfile.Close()
-
-	archive := zip.NewWriter(zipfile)
-	defer archive.Close()
-
-	info, err := os.Stat(source)
-	if err != nil {
-		return nil
-	}
-
-	var baseDir string
-	if info.IsDir() {
-		baseDir = filepath.Base(source)
-	}
-
-	filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		if baseDir != "" {
-			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
-		}
-
-		if info.IsDir() {
-			header.Name += "/"
-		} else {
-			header.Method = zip.Deflate
-		}
-
-		writer, err := archive.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		file, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		_, err = io.Copy(writer, file)
-		return err
-	})
-
-	return err
 }
