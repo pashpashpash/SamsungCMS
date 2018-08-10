@@ -195,7 +195,7 @@ function addAppTraySections(appTray) {
     max.id = "max";
     var maxDescription = document.createElement("div");
     maxDescription.className = "appTraySectionDescription";
-    maxDescription.innerText = "Max";
+    maxDescription.innerText = "Max Preloaded";
     var maxContent = document.createElement("div");
     maxContent.className = "appTraySectionContent";
     maxContent.id = "maxContent";

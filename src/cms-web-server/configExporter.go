@@ -130,10 +130,18 @@ log.Println(maxGoConfigs)
 
 configuration += "\n; ========================  Defaults  ======================================"
 for _, globalproduct := range products { //product = product i.e. "maxGo" or "maxGlobal"
+    globalProductName := string("")
+    if(globalproduct == "maxGlobal") {
+        globalProductName = "com.opera.max.global"
+    } else if (globalproduct == "max") {
+        globalProductName ="com.opera.max.oem"
+    } else if (globalproduct == "maxGo") {
+        globalProductName = "com.samsung.max.go"
+    }
     configuration += (("\n["+"ALLCOUNTRIES"+"_"+globalproduct+"]") + ("\n"))
     configuration += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
     configuration += "filter = (["
-        configuration += "\"product\": \""+globalproduct+"\","
+        configuration += "\"product\": \""+globalProductName+"\","
     configuration += ("])\n")
     configuration += ("json file = \"")
     configArray := []string{}
@@ -168,12 +176,20 @@ for _, country := range countries {
 
 
     for _, product := range products { //product = product i.e. "maxGo" or "maxGlobal"
+        productName := string("")
+        if(product == "maxGlobal") {
+            productName = "com.opera.max.global"
+        } else if (product == "max") {
+            productName ="com.opera.max.oem"
+        } else if (product == "maxGo") {
+            productName = "com.samsung.max.go"
+        }
         configSection := string("")
         configSection += (("\n["+country+"_"+product+"]") + ("\n"))
         configSection += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
         configSection += "filter = (["
             configSection += "\"country\": \""+country+"\","
-            configSection += "\"product\": \""+product+"\","
+            configSection += "\"product\": \""+productName+"\","
         configSection += ("])\n")
         configSection += ("json file = \"")
         configs := []string{}
@@ -284,12 +300,20 @@ for _, operatorGroup := range operatorGroups {
     }
     mappedOperatorList.Close()
     for _, product := range products { //product = product i.e. "maxGo" or "maxGlobal"
+        productName := string("")
+        if(product == "maxGlobal") {
+            productName = "com.opera.max.global"
+        } else if (product == "max") {
+            productName ="com.opera.max.oem"
+        } else if (product == "maxGo") {
+            productName = "com.samsung.max.go"
+        }
         configSection := string("")
         configSection += (("\n["+operatorGroup+"_"+product+"]") + ("\n"))
         configSection += (("order = " +  strconv.Itoa(configurationOrder)) + ("\n"))
         configSection += "filter = (["
             configSection += "\"operator\": \""+operatorGroup+"\","
-            configSection += "\"product\": \""+product+"\","
+            configSection += "\"product\": \""+productName+"\","
         configSection += ("])\n")
         configSection += ("json file = \"")
         configs := []string{}
