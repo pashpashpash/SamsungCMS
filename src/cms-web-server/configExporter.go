@@ -444,7 +444,7 @@ func createJson(jsonName string, configs []string) {
         }
         webapps.WebappArray = append(webapps.WebappArray, webapp)
     }
-    webappJson, _ := json.Marshal(webapps)
+    webappJson, _ := json.MarshalIndent(webapps,  "", "  ")
     err := ioutil.WriteFile("static/ultra_apps_json/"+jsonName+".json", webappJson, 0644)
     checkErr(err)
 }
