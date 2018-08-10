@@ -36,14 +36,18 @@ window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.ke
     e.preventDefault();
     if(e.srcElement===document.getElementById('countrySearch'))
     {
-        console.log("searchForCountry");
-        displayCountrySearchResults(document.getElementById('countrySearch').value)
+        if(!e.srcElement.parentElement.children[1]) {
+            console.log("searchForCountry");
+            displayCountrySearchResults(document.getElementById('countrySearch').value)
+        }
     } else if(e.srcElement===document.getElementsByClassName('search')[0]) {
         console.log("searchForApp");
         applyFilters();
     } else if (e.srcElement===document.getElementById('operatorSearch')) {
-        console.log("searchForOperator");
-        displayOperatorSearchResults(document.getElementById('operatorSearch').value);
+        if(!e.srcElement.parentElement.children[1]) {
+            console.log("searchForOperator");
+            displayOperatorSearchResults(document.getElementById('operatorSearch').value);
+        }
     }
     return false;
 }}},true);
@@ -1088,7 +1092,11 @@ function showAddAppPopup(){ //shows Add App popup window
     popupHTML += generateAddAppPopupInputFields();
     var addAppPopupContents = addAppPopup.children[0];
     addAppPopupContents.innerHTML = popupHTML;
-
+    //find countries search field and set it to autofill
+    var countrySearch = document.getElementById('countrySearch');
+    var operatorSearch = document.getElementById('operatorSearch');
+    autocomplete(countrySearch, all_countries);
+    autocomplete(operatorSearch, all_operators);
     var title = document.createElement("div");
     title.innerHTML = "<div class = 'popupTitle'>Create new Ultra App Configuration</div>";
     addAppPopupContents.parentElement.appendChild(title);
@@ -1236,61 +1244,61 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '<div id ="addAppHiddenUI">';
         addAppViewHTML += 'Hidden UI ';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="splash" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="splash" />';
             addAppViewHTML += '<label for="splash">Splash</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="overlay" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="overlay" />';
             addAppViewHTML += '<label for="overlay">Overlay</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="ab" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="ab" />';
             addAppViewHTML += '<label for="fab">FAB</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="badges" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="badges" />';
             addAppViewHTML += '<label for="badges">Badges</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="folder" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="folder" />';
             addAppViewHTML += '<label for="folder">Folder</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id ="addAppHiddenFeatures">';
         addAppViewHTML += 'Hidden Features ';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="savings" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="savings" />';
             addAppViewHTML += '<label for="savings">Savings</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="privacy" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="privacy" />';
             addAppViewHTML += '<label for="privacy">Privacy</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="adBlock" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="adBlock" />';
             addAppViewHTML += '<label for="adBlock">Adblock</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="noImages" checked />';
+            addAppViewHTML += '<input type="checkbox" name="hiddenFeatures" value="noImages" />';
             addAppViewHTML += '<label for="noImages">No Images</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id ="addAppEnabledFeatures">';
         addAppViewHTML += 'Default Enabled Features ';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="savings" checked />';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="savings" />';
             addAppViewHTML += '<label for="savings">Savings</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="privacy" checked />';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="privacy" />';
             addAppViewHTML += '<label for="privacy">Privacy</label>';
         addAppViewHTML += '</div>'
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="adBlock" checked />';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="adBlock" />';
             addAppViewHTML += '<label for="adBlock">Adblock</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
-            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="noImages" checked />';
+            addAppViewHTML += '<input type="checkbox" name="defaultEnabledFeatures" value="noImages" />';
             addAppViewHTML += '<label for="noImages">No Images</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
@@ -1312,11 +1320,15 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '</div>';
     addAppViewHTML += '<div id="configurationMapping">';
         addAppViewHTML += '<div id="countryMapping">';
-            addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search for Country...">'
+            addAppViewHTML += '<div class="autocomplete" style="width:448px; margin-left:14px;">'
+                addAppViewHTML += '<input class="search" id="countrySearch" type="text" placeholder="Search for Country..." autocomplete="nope">'
+            addAppViewHTML += '</div>'
             addAppViewHTML += '<div class="countrySearchResults"><div class="rowValue">ALL COUNTRIES</div></div>'
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="operatorMapping">';
-            addAppViewHTML += '<input class="search" id="operatorSearch" type="text" placeholder="Search for Operator Group..">'
+            addAppViewHTML += '<div class="autocomplete" style="width:448px; margin-left:14px;">'
+                addAppViewHTML += '<input class="search" id="operatorSearch" type="text" placeholder="Search for Operator Group.." autocomplete="nope">'
+            addAppViewHTML += '</div>'
             addAppViewHTML += '<div class="operatorSearchResults"></div>'
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
