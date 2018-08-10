@@ -755,7 +755,38 @@ func addNewConfig(Config data) ([]byte) {
     log.Println(Config.DefaultHiddenFeatures)
     log.Println(Config.DefaultEnabledFeatures)
     log.Println(Config.Products)
+    anyerrors := false
+    errorString := string("")
 
+    // validation for rank, name, home url, icon and at least one product.
+    if(Config.AppRank != "") {
+        globalViewQuery := `SELECT DISTINCT Config_ID from appConfigs WHERE rank = "`+Config.AppRank+`"`
+        thereShouldBeNoConfigsHere, err := db.Query(globalViewQuery)
+        for(thereShouldBeNoConfigsHere.Next()){
+            anyerrors = true
+            errorString += "An app with this rank already exists. "
+        }
+        checkErr(err)
+    } else {
+        anyerrors = true
+        errorString += "No rank specified. "
+    }
+    if(Config.AppModifiableName == ""){
+        anyerrors = true
+        errorString += "No app name specified. "
+    }
+    if(Config.AppHomeURL == ""){
+        anyerrors = true
+        errorString += "No app home url specified. "
+    }
+    if(Config.AppIconURL == ""){
+        anyerrors = true
+        errorString += "No app icon url specified. "
+    }
+    if(Config.Products.MaxGlobal == false && Config.Products.Max == false && Config.Products.MaxGo == false){
+        anyerrors = true
+        errorString += "No product specified. "
+    }
     statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, category) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppCategory + `"` + `)`)
     log.Println("addNewConfig –\t\tInsert statement: " + statement)
     res, err := db.Exec(statement)
@@ -795,9 +826,12 @@ func addNewConfig(Config data) ([]byte) {
         res, err = db.Exec(mappingstatement)
         checkErr(err)
     }
-
-
-    var returnResult = ResultMessage{"SUCCESS"}
+    var returnResult = ResultMessage{}
+    if(!anyerrors) {
+        returnResult = ResultMessage{"SUCCESS"}
+    } else {
+        returnResult = ResultMessage{errorString}
+    }
     jsonResponse, err := json.Marshal(returnResult)
     checkErr(err)
     return jsonResponse

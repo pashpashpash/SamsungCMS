@@ -917,7 +917,13 @@ img#icon {
 .addAppPopup .closeButton:hover {
     background-color: #F1F1F1;
 }
-
+.errorDiv{
+    background: red;
+    margin-bottom: -14px;
+    margin-top: 7px;
+    color:white;
+    padding: 14px;
+}
 #addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI, #addAppCategories{
     margin-left: 18px;
     margin-right: 18px;

@@ -1,13 +1,6 @@
 {
   "webapps": [
     {
-      "id": "wikipedia",
-      "rank": 3,
-      "name": "Wikipedia",
-      "homeUrl": "https://www.wikipedia.org",
-      "iconUrl": "ultra_apps/ic_wikipedia_ultra.png"
-    },
-    {
       "id": "facebook",
       "rank": 4,
       "name": "Facebook",
@@ -27,6 +20,13 @@
       "name": "Cricbuzz",
       "homeUrl": "http://m.cricbuzz.com",
       "iconUrl": "ultra_apps/cricbuzz_ultra.png"
+    },
+    {
+      "id": "wikipedia",
+      "rank": 3,
+      "name": "Wikipedia",
+      "homeUrl": "https://www.wikipedia.org",
+      "iconUrl": "ultra_apps/ic_wikipedia_ultra.png"
     }
   ]
 }

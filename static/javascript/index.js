@@ -972,8 +972,6 @@ function submitNewApp(form){
     console.log(form);
     console.log("SUBMIT_NEW_APP – Taking the popup form + filter status and adding app for current filter configuration... ")
     addUltraApp(form); //writes to DB ->> new Add App View should use user-specified filterParams within the Add App view, not the appTray filters.
-    console.log("SUBMIT_NEW_APP – Closing popup window...")
-    closeAddAppPopup();
     //add App to app tray//showWebapps_Old() again?
 }
 function addUltraApp(form)
@@ -1081,9 +1079,21 @@ function addUltraApp(form)
     console.log("addUltraApp – Sending post request with the following JSON:");
     console.log(json);
     server_post.post(post_url, json, function(message) {
-        console.log("addUltraApp – POST REQUEST SUCCESS!!! RESPONSE:");
-        console.log(message);
-        applyFilters();
+        console.log("addUltraApp – POST REQUEST SUCCESS!!!");
+        if(message.result === "SUCCESS") {
+            applyFilters();
+            console.log("SUBMIT_NEW_APP – Closing popup window...")
+            closeAddAppPopup();
+        } else {
+            console.log(message.result);
+            var errorDiv = document.createElement("div");
+            errorDiv.className = "errorDiv";
+            errorDiv.textContent = message.result;
+            form.appendChild(errorDiv);
+            var element = document.getElementsByClassName("contents")[0];
+            element.scrollTop = element.scrollHeight - element.clientHeight;
+        }
+
     });
 }
 
