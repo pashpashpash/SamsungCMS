@@ -320,7 +320,6 @@ html {
     margin-left: 14px;
     margin-bottom: -9px;
     max-width: 300px;
-    overflow:scroll;
     word-break: break-all;
     border: 1px solid black;
     padding-left: 14px;
@@ -329,9 +328,15 @@ html {
     padding-bottom: 3px;
         max-height: 16px;
     -ms-overflow-style: none;  // IE 10+
+     overflow-x: hidden;
 }
-.configData .row .rowValue::-webkit-scrollbar {
+.configData .row .rowValue::-webkit-scrollbar, .configData .row .rowValue::-webkit-scrollbar-thumb {
+    width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
     display: none;  // Safari and Chrome
+}
+
+{
 }
 .configMappingsCountries, .configMappingsOperators {
     border: 1px solid black;
