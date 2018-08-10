@@ -1035,7 +1035,7 @@ function addUltraApp(form)
         + ' "DefaultHiddenUI" : { '
             + ' "Splash" : '+form.children[0].children[6].children[0].children[0].checked+','
             + ' "Overlay" : '+form.children[0].children[6].children[1].children[0].checked+','
-            + ' "AB" : '+form.children[0].children[6].children[2].children[0].checked+','
+            + ' "FAB" : '+form.children[0].children[6].children[2].children[0].checked+','
             + ' "Badges" : '+form.children[0].children[6].children[3].children[0].checked+','
             + ' "Folder" : '+form.children[0].children[6].children[3].children[0].checked+''
         +'},'
@@ -1245,7 +1245,7 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
             addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="ab" checked />';
-            addAppViewHTML += '<label for="ab">AB</label>';
+            addAppViewHTML += '<label for="fab">FAB</label>';
         addAppViewHTML += '</div>';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
             addAppViewHTML += '<input type="checkbox" name="hiddenUI" value="badges" checked />';

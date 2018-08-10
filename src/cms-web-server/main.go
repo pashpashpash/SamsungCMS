@@ -118,7 +118,7 @@ type data struct {
     DefaultHiddenUI struct {
         Splash           bool `json:"Splash, omitempty"`
         Overlay           bool `json:"Overlay, omitempty"`
-        AB           bool `json:"AB, omitempty"`
+        FAB           bool `json:"FAB, omitempty"`
         Badges          bool `json:"Badges, omitempty"`
         Folder          bool `json:"Folder, omitempty"`
     } `json:"DefaultHiddenUI"`
@@ -697,7 +697,7 @@ func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () 
         }
         //hiddenUI
         if(Config.DefaultHiddenUI.Splash ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "spash"` + `)`)
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "splash"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
@@ -706,8 +706,8 @@ func addNewFeaturesAndProducts(Config data, New_App_Config_ID_string string) () 
             _, err := db.Exec(statement)
             checkErr(err)
         }
-        if(Config.DefaultHiddenUI.AB ==true) {
-            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "ab"` + `)`)
+        if(Config.DefaultHiddenUI.FAB ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + New_App_Config_ID_string + `", ` + `"hiddenUI", "fab"` + `)`)
             _, err := db.Exec(statement)
             checkErr(err)
         }
