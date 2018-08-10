@@ -13,6 +13,7 @@ import (
     "fmt"
     "io"
     "os"
+    "sort"
     "github.com/gorilla/securecookie"
     "github.com/cf-guardian/guardian/kernel/fileutils"
     "text/tabwriter"
@@ -904,6 +905,8 @@ func updateConfigurationINI(Data data) ([]byte) {
     checkErr(err)
     log.Println("updateConfigurationINI –\t\t wrote to file")
     f := fileutils.New()
+
+    removeUnusedIcons("static/ultra_apps")
     err = f.Copy("static/configuration_export","static/ultra_apps_configuration")
     err = f.Copy("static/configuration_export", "static/ultra_apps_json")
     err = f.Copy("static/configuration_export", "static/ultra_apps")
@@ -920,6 +923,51 @@ func updateConfigurationINI(Data data) ([]byte) {
     checkErr(err)
     return jsonResponse
 }
+type ByModTime []os.FileInfo
+
+func (fis ByModTime) Len() int {
+    return len(fis)
+}
+
+func (fis ByModTime) Swap(i, j int) {
+    fis[i], fis[j] = fis[j], fis[i]
+}
+
+func (fis ByModTime) Less(i, j int) bool {
+    return fis[i].ModTime().Before(fis[j].ModTime())
+}
+func removeUnusedIcons(filepath string){
+    removeUnusedIconsQuery := `SELECT DISTINCT iconURL from appConfigs`
+    log.Println("removeUnusedIcons –\t\tRemoving unused icons")
+    usedIconURLList, err := db.Query(removeUnusedIconsQuery)
+    checkErr(err)
+    urlList := []string{}
+    for(usedIconURLList.Next()){
+        url := string("")
+        usedIconURLList.Scan(&url)
+        url = strings.Replace(url, "ultra_apps/", "", 1)
+        urlList = append(urlList, url)
+    }
+
+    f, _ := os.Open(filepath)
+    fis, _ := f.Readdir(-1)
+    f.Close()
+    sort.Sort(ByModTime(fis))
+
+    for _, fi := range fis {
+        iconExists := false
+        for _, urlIcon := range urlList {
+            if(urlIcon == fi.Name()) {
+                iconExists = true
+            }
+        }
+        if(!iconExists) {
+            os.RemoveAll(filepath+"/"+fi.Name())
+        }
+    }
+
+}
+
 func Zipit(target string, source string) error {
     zipfile, err := os.Create(target)
     if err != nil {
