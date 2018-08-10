@@ -431,6 +431,17 @@ func createJson(jsonName string, configs []string) {
                 webapp.DefaultEnabledFeatures = append(webapp.HiddenUI, featureName)
             }
         }
+        generateConfigQuery = `
+        SELECT DISTINCT packageName from packages
+        WHERE Config_ID = "`+config+`"
+        `
+        packageMapping, err := db.Query(generateConfigQuery)
+        checkErr(err)
+        for(packageMapping.Next()) {
+            packageName := string("")
+            packageMapping.Scan(&packageName)
+            webapp.NativeApps = append(webapp.NativeApps, packageName)
+        }
         webapps.WebappArray = append(webapps.WebappArray, webapp)
     }
     webappJson, _ := json.Marshal(webapps)
