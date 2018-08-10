@@ -84,6 +84,10 @@ func initDB(name string) (*sql.DB) {
     log.Println("initDB –\t\tInitializing countries table with temporary MCC table data...")
     _, err = db.Exec(`INSERT or IGNORE  INTO countries (Country_ID, name, MCC_ID) SELECT Country_ID, country, mcc FROM mytable`)
     checkErr(err)
+    log.Println("initDB –\t\tUpdating Viet Nam to Vietnam (lol)...")
+    _, err = db.Exec(`UPDATE countries SET name="Vietnam" WHERE Country_ID="vn"`)
+    checkErr(err)
+
 
     log.Println("initDB –\t\tLodaing config tables...")
     loadConfigTables(db)

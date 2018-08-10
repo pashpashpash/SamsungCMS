@@ -111,7 +111,6 @@ function applyFilters()
     server_post.post(post_url, postRequestJSON, function(appsToLoad) {
         console.log("applyFilters – Post request success. Applying filters and updating select filter rows:");
         showWebapps(appTray, appsToLoad);
-        updateFilterValues();
     });
 
 }
@@ -132,7 +131,6 @@ function searchApplyFilters(searchValue)
     server_post.post(post_url, postRequestJSON, function(appsToLoad) {
         console.log("applyFilters – Post request success. Applying filters and updating select filter rows:");
         showWebapps(appTray, appsToLoad);
-        updateFilterValues()
     });
 
 }
@@ -1028,13 +1026,20 @@ function addUltraApp(form)
     countriesList = countriesList.replace(/,\s*$/, "");
     operatorsList = operatorsList.replace(/,\s*$/, "");
     operatorGroupList = operatorGroupList.replace(/,\s*$/, "");
+    var categoryName = "";
+    console.log("PENIS");
+    if(form.children[0].children[4].children[0].children[0].checked){
+        categoryName = "default";
+    } else if(form.children[0].children[4].children[1].children[0].checked){
+        categoryName = "games"
+    }
     var json = ('{"functionToCall" : "addNewConfig", "data" : {'
         + ' "App_ModifiableName" : "'+ form.children[0].children[0].value+ '",'
         + ' "App_OriginalName" : "'+ form.children[0].children[0].value.toLowerCase() + '",'
         + ' "App_Rank" : "'+ form.children[0].children[1].value + '",'
         + ' "App_HomeURL" : "'+ form.children[0].children[2].value + '",'
         + ' "App_IconURL" : "'+ form.children[0].children[3].value + '",'
-        + ' "App_Category" : "'+ form.children[0].children[4].value + '",'
+        + ' "App_Category" : "'+ categoryName + '",'
         + ' "Packages" : ["'+ form.children[0].children[5].value + '"],'
         + ' "DefaultHiddenUI" : { '
             + ' "Splash" : '+form.children[0].children[6].children[0].children[0].checked+','
@@ -1239,7 +1244,17 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';
     addAppViewHTML += '<input type="text" placeholder="Webapp Link" name="homeUrl">';
     addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
-    addAppViewHTML += '<input type="text" placeholder="Category" name="category">';
+    addAppViewHTML += '<div id ="addAppCategories">';
+        addAppViewHTML += 'Category ';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="radio" name="category" value="default" checked />';
+            addAppViewHTML += '<label for="default">Default</label>';
+        addAppViewHTML += '</div>';
+        addAppViewHTML += '<div id="addAppCheckboxContainer">';
+            addAppViewHTML += '<input type="radio" name="category" value="games" />';
+            addAppViewHTML += '<label for="games">Games</label>';
+        addAppViewHTML += '</div>';
+    addAppViewHTML += '</div>';
     addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
     addAppViewHTML += '<div id ="addAppHiddenUI">';
         addAppViewHTML += 'Hidden UI ';

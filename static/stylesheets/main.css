@@ -918,7 +918,7 @@ img#icon {
     background-color: #F1F1F1;
 }
 
-#addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI{
+#addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI, #addAppCategories{
     margin-left: 18px;
     margin-right: 18px;
     padding: 14px;

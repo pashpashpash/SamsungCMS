@@ -1244,6 +1244,7 @@ type CountryFilterRow struct {
 type OperatorFilterRow struct {
     Value string `json:"MCCMNC_ID" db:"MCCMNC_ID" `
     Text string `json:"Operator_Name" db:"Operator_Name"`
+    Group string `json:"Operator_Group_Name" db:"Operator_Group_Name"`
 }
 
 type FilterRows struct{
@@ -1255,78 +1256,29 @@ func updateFilterValues(Filters data) ([]byte) {
 
     var filterRows = FilterRows{}
 
-    if(Filters.Selected_operator != "star") { //if operator is not star, I don't need to update country dropdown
+    full_query := string(`
+        SELECT DISTINCT Operator_Group_Name from operatorGroups
+    `)
+    rows, err := db.Query(full_query)
+    checkErr(err)
 
-        full_query := string(`
-        SELECT countries.Country_ID, countries.name from operators
-        JOIN     countries USING (Country_ID)
-        WHERE MCCMNC_ID="`+Filters.Selected_operator+`" LIMIT 1
-        `)
-        rows, err := db.Query(full_query)
-        checkErr(err)
-        country_ID := string("")
-        for rows.Next() {
-            var countryFilterRow = CountryFilterRow{}
-            rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
-            country_ID = countryFilterRow.Value
-            if(Filters.Selected_country == "star") {
-                filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
-            }
-        }
-        rows.Close()
-
-        full_query = string(`
-            SELECT MCCMNC_ID, Operator_Name from operators
-            WHERE Country_ID = "`+country_ID+`"
-        `)
-        rows, err = db.Query(full_query)
-        checkErr(err)
-
-        //operator query here, returns rows
-        for rows.Next() {
-            var operatorFilterRow = OperatorFilterRow{}
-            rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
-            filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
-        }
-        rows.Close()
-
-    } else if (Filters.Selected_country != "star") { //operator IS star, country is NOT star. Thus we need to update operator dropdown
-        full_query := string(`
-            SELECT MCCMNC_ID, Operator_Name from operators
-            WHERE Country_ID = "`+Filters.Selected_country+`"
-        `)
-        rows, err := db.Query(full_query)
-        checkErr(err)
-
-        //operator query here, returns rows
-        for rows.Next() {
-            var operatorFilterRow = OperatorFilterRow{}
-            rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
-            filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
-        }
-        rows.Close()
-    } else { //stars in both country and operator, load full tables
-
-        full_query := string(`SELECT DISTINCT Country_ID, name from countries WHERE Country_ID in (SELECT Country_ID from favoriteCountries)`) //country query -- all distinct countries by value and name
-        rows, err := db.Query(full_query)
-        checkErr(err)
-        for rows.Next() {
-            var countryFilterRow = CountryFilterRow{}
-            rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
-            filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
-        }
-        rows.Close()
-
-        full_query = string(`SELECT DISTINCT MCCMNC_ID, Operator_Name from operators`) //operator query -- all distinct operators
-        rows, err = db.Query(full_query)
-        checkErr(err)
-        for rows.Next() {
-            var operatorFilterRow = OperatorFilterRow{}
-            rows.Scan(&operatorFilterRow.Value, &operatorFilterRow.Text)
-            filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
-        }
-        rows.Close()
+    //operator query here, returns rows
+    for rows.Next() {
+        var operatorFilterRow = OperatorFilterRow{}
+        rows.Scan(&operatorFilterRow.Group)
+        filterRows.OperatorFilterRows = append(filterRows.OperatorFilterRows, operatorFilterRow)
     }
+    rows.Close()
+
+    full_query = string(`SELECT DISTINCT Country_ID, name from countries WHERE Country_ID in (SELECT Country_ID from favoriteCountries)`) //country query -- all distinct countries by value and name
+    rows, err = db.Query(full_query)
+    checkErr(err)
+    for rows.Next() {
+        var countryFilterRow = CountryFilterRow{}
+        rows.Scan(&countryFilterRow.Value, &countryFilterRow.Text)
+        filterRows.CountryFilterRows = append(filterRows.CountryFilterRows, countryFilterRow)
+    }
+    rows.Close()
 
     jsonResponse, err := json.Marshal(filterRows)
     checkErr(err)
@@ -1416,7 +1368,7 @@ func loadAppTray(Filters data) ([]byte) {
     }
 
     if(Filters.Selected_operator != "star") { //more specific than country
-        operator_query = `Config_ID in (SELECT Config_ID FROM configurationMappings WHERE MCCMNC_ID = "`+Filters.Selected_operator+`") `
+        operator_query = `Config_ID in (SELECT Config_ID FROM configurationMappings WHERE MCCMNC_ID in (SELECT MCCMNC_ID FROM operatorGroups WHERE Operator_Group_Name = "`+Filters.Selected_operator+`")) `
 
         full_query = string(`
         SELECT DISTINCT appConfigs.Config_ID, originalName, modifiableName, iconURL,
