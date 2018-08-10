@@ -328,6 +328,10 @@ html {
     padding-top: 4px;
     padding-bottom: 3px;
         max-height: 16px;
+    -ms-overflow-style: none;  // IE 10+
+}
+.configData .row .rowValue::-webkit-scrollbar {
+    display: none;  // Safari and Chrome
 }
 .configMappingsCountries, .configMappingsOperators {
     border: 1px solid black;
