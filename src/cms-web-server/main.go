@@ -787,45 +787,48 @@ func addNewConfig(Config data) ([]byte) {
         anyerrors = true
         errorString += "No product specified. "
     }
-    statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, category) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppCategory + `"` + `)`)
-    log.Println("addNewConfig –\t\tInsert statement: " + statement)
-    res, err := db.Exec(statement)
-    checkErr(err)
-    id, err := res.LastInsertId()
-    checkErr(err)
-    log.Println("addNewConfig –\t\tLast insert id: ", id)
-    var New_App_Config_ID = id
-    New_App_Config_ID_string := strconv.Itoa(int(New_App_Config_ID))
+    if(!anyerrors) {
+        statement := string(`INSERT INTO appConfigs (originalName, modifiableName, iconURL, homeURL, rank, category) VALUES (` + `"` + Config.AppOriginalName + `", "` + Config.AppModifiableName + `", "` + Config.AppIconURL + `", "` + Config.AppHomeURL + `", "` + Config.AppRank + `", "` + Config.AppCategory + `"` + `)`)
+        log.Println("addNewConfig –\t\tInsert statement: " + statement)
+        res, err := db.Exec(statement)
+        checkErr(err)
+        id, err := res.LastInsertId()
+        checkErr(err)
+        log.Println("addNewConfig –\t\tLast insert id: ", id)
+        var New_App_Config_ID = id
+        New_App_Config_ID_string := strconv.Itoa(int(New_App_Config_ID))
 
-    addNewFeaturesAndProducts(Config, New_App_Config_ID_string) //handles products Table inserts and featureMappings table inserts
+        addNewFeaturesAndProducts(Config, New_App_Config_ID_string) //handles products Table inserts and featureMappings table inserts
 
-    for _, country := range Config.AppConfigurationMappings.Countries {
-        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
-        VALUES (`+New_App_Config_ID_string+`, '`+country+`')`)
-        log.Println("addNewConfig –\t"+mappingstatement)
-        res, err = db.Exec(mappingstatement)
-        checkErr(err)
-    }
-    for _, operator := range Config.AppConfigurationMappings.Operators {
+        for _, country := range Config.AppConfigurationMappings.Countries {
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
+            VALUES (`+New_App_Config_ID_string+`, '`+country+`')`)
+            log.Println("addNewConfig –\t"+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
+        for _, operator := range Config.AppConfigurationMappings.Operators {
 
-        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID) VALUES (`+New_App_Config_ID_string+`, "`+operator+`")`)
-        log.Println("addNewConfig –\t\t"+mappingstatement)
-        res, err = db.Exec(mappingstatement)
-        checkErr(err)
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID) VALUES (`+New_App_Config_ID_string+`, "`+operator+`")`)
+            log.Println("addNewConfig –\t\t"+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
+        if(Config.AppExistsEverywhere) {
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
+            SELECT `+New_App_Config_ID_string+`, Country_ID  FROM countries`)
+            log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
+        for _, operatorGroup := range Config.AppConfigurationMappings.OperatorGroups {
+            mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT `+New_App_Config_ID_string+`, MCCMNC_ID FROM operatorGroups WHERE Operator_Group_Name = "`+operatorGroup+`"`)
+            log.Println("addNewConfig –\t\t"+mappingstatement)
+            res, err = db.Exec(mappingstatement)
+            checkErr(err)
+        }
     }
-    if(Config.AppExistsEverywhere) {
-        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, Country_ID)
-        SELECT `+New_App_Config_ID_string+`, Country_ID  FROM countries`)
-        log.Println("addNewConfig –\t\tApp EXISTS EVERYWHERE "+mappingstatement)
-        res, err = db.Exec(mappingstatement)
-        checkErr(err)
-    }
-    for _, operatorGroup := range Config.AppConfigurationMappings.OperatorGroups {
-        mappingstatement := string(`INSERT INTO configurationMappings (Config_ID, MCCMNC_ID) SELECT `+New_App_Config_ID_string+`, MCCMNC_ID FROM operatorGroups WHERE Operator_Group_Name = "`+operatorGroup+`"`)
-        log.Println("addNewConfig –\t\t"+mappingstatement)
-        res, err = db.Exec(mappingstatement)
-        checkErr(err)
-    }
+    
     var returnResult = ResultMessage{}
     if(!anyerrors) {
         returnResult = ResultMessage{"SUCCESS"}
