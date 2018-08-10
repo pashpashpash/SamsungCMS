@@ -1342,7 +1342,7 @@ func updateFilterValues(Filters data) ([]byte) {
     var filterRows = FilterRows{}
 
     full_query := string(`
-        SELECT DISTINCT Operator_Group_Name from operatorGroups
+        SELECT DISTINCT Operator_Group_Name from operatorGroups ORDER BY Operator_Group_Name ASC
     `)
     rows, err := db.Query(full_query)
     checkErr(err)
@@ -1355,7 +1355,7 @@ func updateFilterValues(Filters data) ([]byte) {
     }
     rows.Close()
 
-    full_query = string(`SELECT DISTINCT Country_ID, name from countries WHERE Country_ID in (SELECT Country_ID from favoriteCountries)`) //country query -- all distinct countries by value and name
+    full_query = string(`SELECT DISTINCT Country_ID, name from countries WHERE Country_ID in (SELECT Country_ID from favoriteCountries) ORDER BY name ASC`) //country query -- all distinct countries by value and name
     rows, err = db.Query(full_query)
     checkErr(err)
     for rows.Next() {

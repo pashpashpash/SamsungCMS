@@ -4,12 +4,14 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
   background-image: url(/images/blur_bg_ultralight.png);
+
+}
+html {
+     -ms-overflow-style: none;  // IE 10+
+      overflow: -moz-scrollbars-none;  // Firefox
 }
 
 
-::-webkit-scrollbar {
-    display: none;
-}
 /* login screen */
 #name {
     padding: 14px;
