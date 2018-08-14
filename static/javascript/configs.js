@@ -296,7 +296,7 @@ function editValue(rowValueElement) {
         } else if(id = "category") {
             var categoryInputHTML = '<div id ="addAppCategories">';
                 categoryInputHTML += 'Category ';
-                if(rowValueElement.innerText === "Default") {
+                if(rowValueElement.innerText.toLowerCase() === "default") {
                     categoryInputHTML += '<div id="addAppCheckboxContainer">';
                         categoryInputHTML += '<input type="radio" name="category" value="default" checked />';
                         categoryInputHTML += '<label for="default">Default</label>';
@@ -305,7 +305,7 @@ function editValue(rowValueElement) {
                         categoryInputHTML += '<input type="radio" name="category" value="games" />';
                         categoryInputHTML += '<label for="games">Games</label>';
                     categoryInputHTML += '</div>';
-                } else if (rowValueElement.innerText === "Games"){
+                } else if (rowValueElement.innerText.toLowerCase() === "games"){
                     categoryInputHTML += '<div id="addAppCheckboxContainer">';
                         categoryInputHTML += '<input type="radio" name="category" value="default" />';
                         categoryInputHTML += '<label for="default">Default</label>';

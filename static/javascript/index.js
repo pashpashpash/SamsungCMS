@@ -1016,9 +1016,9 @@ function addUltraApp(form)
     // debugger;
     var categoryName = "";
     console.log("PENIS");
-    if(form.children[0].children[5].children[0].children[0].checked){
+    if(form.children[0].children[6].children[0].children[0].checked){
         categoryName = "default";
-    } else if(form.children[0].children[5].children[1].children[0].checked){
+    } else if(form.children[0].children[6].children[1].children[0].checked){
         categoryName = "games"
     }
     var json = ('{"functionToCall" : "addNewConfig", "data" : {'
@@ -1027,8 +1027,8 @@ function addUltraApp(form)
         + ' "App_Rank" : "'+ form.children[0].children[2].value + '",'
         + ' "App_HomeURL" : "'+ form.children[0].children[3].value + '",'
         + ' "App_IconURL" : "'+ form.children[0].children[4].value + '",'
+        + ' "Packages" : ["'+ form.children[0].children[5].value + '"],'
         + ' "App_Category" : "'+ categoryName + '",'
-        + ' "Packages" : ["'+ form.children[0].children[6].value + '"],'
         + ' "DefaultHiddenUI" : { '
             + ' "Splash" : '+form.children[0].children[7].children[0].children[0].checked+','
             + ' "Overlay" : '+form.children[0].children[7].children[1].children[0].checked+','
@@ -1245,6 +1245,7 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';
     addAppViewHTML += '<input type="text" placeholder="Webapp Link" name="homeUrl">';
     addAppViewHTML += '<input type="text" placeholder="Icon URL Link" name="iconUrl">';
+    addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
     addAppViewHTML += '<div id ="addAppCategories">';
         addAppViewHTML += 'Category ';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
@@ -1256,7 +1257,6 @@ function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
             addAppViewHTML += '<label for="games">Games</label>';
         addAppViewHTML += '</div>';
     addAppViewHTML += '</div>';
-    addAppViewHTML += '<input type="text" placeholder="Native App Link(s)" name="nativeApps">';
     addAppViewHTML += '<div id ="addAppHiddenUI">';
         addAppViewHTML += 'Hidden UI ';
         addAppViewHTML += '<div id="addAppCheckboxContainer">';
