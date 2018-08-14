@@ -771,6 +771,10 @@ func addNewConfig(Config data) ([]byte) {
         anyerrors = true
         errorString += "No rank specified. "
     }
+    if(Config.AppOriginalName == "") {
+        anyerrors = true
+        errorString += "No app id (original name) specified. "
+    }
     if(Config.AppModifiableName == ""){
         anyerrors = true
         errorString += "No app name specified. "

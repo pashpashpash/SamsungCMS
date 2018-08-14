@@ -1024,44 +1024,45 @@ function addUltraApp(form)
     countriesList = countriesList.replace(/,\s*$/, "");
     operatorsList = operatorsList.replace(/,\s*$/, "");
     operatorGroupList = operatorGroupList.replace(/,\s*$/, "");
+    // debugger;
     var categoryName = "";
     console.log("PENIS");
-    if(form.children[0].children[4].children[0].children[0].checked){
+    if(form.children[0].children[5].children[0].children[0].checked){
         categoryName = "default";
-    } else if(form.children[0].children[4].children[1].children[0].checked){
+    } else if(form.children[0].children[5].children[1].children[0].checked){
         categoryName = "games"
     }
     var json = ('{"functionToCall" : "addNewConfig", "data" : {'
-        + ' "App_ModifiableName" : "'+ form.children[0].children[0].value+ '",'
-        + ' "App_OriginalName" : "'+ form.children[0].children[0].value.toLowerCase() + '",'
-        + ' "App_Rank" : "'+ form.children[0].children[1].value + '",'
-        + ' "App_HomeURL" : "'+ form.children[0].children[2].value + '",'
-        + ' "App_IconURL" : "'+ form.children[0].children[3].value + '",'
+        + ' "App_ModifiableName" : "'+ form.children[0].children[1].value+ '",'
+        + ' "App_OriginalName" : "'+ form.children[0].children[0].value + '",'
+        + ' "App_Rank" : "'+ form.children[0].children[2].value + '",'
+        + ' "App_HomeURL" : "'+ form.children[0].children[3].value + '",'
+        + ' "App_IconURL" : "'+ form.children[0].children[4].value + '",'
         + ' "App_Category" : "'+ categoryName + '",'
-        + ' "Packages" : ["'+ form.children[0].children[5].value + '"],'
+        + ' "Packages" : ["'+ form.children[0].children[6].value + '"],'
         + ' "DefaultHiddenUI" : { '
-            + ' "Splash" : '+form.children[0].children[6].children[0].children[0].checked+','
-            + ' "Overlay" : '+form.children[0].children[6].children[1].children[0].checked+','
-            + ' "FAB" : '+form.children[0].children[6].children[2].children[0].checked+','
-            + ' "Badges" : '+form.children[0].children[6].children[3].children[0].checked+','
-            + ' "Folder" : '+form.children[0].children[6].children[3].children[0].checked+''
+            + ' "Splash" : '+form.children[0].children[7].children[0].children[0].checked+','
+            + ' "Overlay" : '+form.children[0].children[7].children[1].children[0].checked+','
+            + ' "FAB" : '+form.children[0].children[7].children[2].children[0].checked+','
+            + ' "Badges" : '+form.children[0].children[7].children[3].children[0].checked+','
+            + ' "Folder" : '+form.children[0].children[7].children[3].children[0].checked+''
         +'},'
         + ' "DefaultHiddenFeatures" : { '
-            + ' "Savings" : '+form.children[0].children[7].children[0].children[0].checked+','
-            + ' "Privacy" : '+form.children[0].children[7].children[1].children[0].checked+','
-            + ' "Adblock" : '+form.children[0].children[7].children[2].children[0].checked+','
-            + ' "NoImages" : '+form.children[0].children[7].children[3].children[0].checked+''
-        +'},'
-        + ' "DefaultEnabledFeatures" : { '
             + ' "Savings" : '+form.children[0].children[8].children[0].children[0].checked+','
             + ' "Privacy" : '+form.children[0].children[8].children[1].children[0].checked+','
             + ' "Adblock" : '+form.children[0].children[8].children[2].children[0].checked+','
             + ' "NoImages" : '+form.children[0].children[8].children[3].children[0].checked+''
         +'},'
+        + ' "DefaultEnabledFeatures" : { '
+            + ' "Savings" : '+form.children[0].children[9].children[0].children[0].checked+','
+            + ' "Privacy" : '+form.children[0].children[9].children[1].children[0].checked+','
+            + ' "Adblock" : '+form.children[0].children[9].children[2].children[0].checked+','
+            + ' "NoImages" : '+form.children[0].children[9].children[3].children[0].checked+''
+        +'},'
         + ' "products" : { '
-            + ' "MaxGlobal" : '+form.children[0].children[9].children[0].children[0].checked+','
-            + ' "Max" : '+form.children[0].children[9].children[1].children[0].checked+','
-            + ' "MaxGo" : '+form.children[0].children[9].children[2].children[0].checked+''
+            + ' "MaxGlobal" : '+form.children[0].children[10].children[0].children[0].checked+','
+            + ' "Max" : '+form.children[0].children[10].children[1].children[0].checked+','
+            + ' "MaxGo" : '+form.children[0].children[10].children[2].children[0].checked+''
         +'},'
         + ' "App_ExistsEverywhere" : '+ existsEverywhere + ','
         + ' "App_ConfigurationMappings" : { '
@@ -1245,11 +1246,12 @@ function imageUploaded(newAppForm){
     console.log(newAppForm);
     console.log(newAppForm.children[3]);
     var filePath = newAppForm.children[1].children[0].files[0].name;
-    newAppForm.children[3].children[0].children[3].value = ("ultra_apps/"+ filePath);
+    newAppForm.children[3].children[0].children[4].value = ("ultra_apps/"+ filePath);
 }
 function generateAddAppPopupInputFields(){ //AddApp Popup window helper function
     var addAppViewHTML = '<form onsubmit="imageUploaded(this.parentElement);" id = "addAppIconForm" enctype="multipart/form-data" target="invisible" action="/upload" method="post"><input id="fileUpload" type="file" name="uploadfile" /><input type="submit" value="Upload Image" /><div id="imageUploaded" class="hidden"></div></form><iframe name="invisible" style="display:none;"></iframe>';
     addAppViewHTML += '<form id="addAppForm" onsubmit="submitNewApp(this); return false"><div id="appConfig">';
+    addAppViewHTML += '<input type="text" placeholder="Ultra App ID (Original Name)" name="originalName">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Name" name="name">';
     addAppViewHTML += '<input type="text" placeholder="Ultra App Rank" name="rank">';
     addAppViewHTML += '<input type="text" placeholder="Webapp Link" name="homeUrl">';
