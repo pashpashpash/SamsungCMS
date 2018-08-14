@@ -196,13 +196,13 @@ func loadConfigTables(db *sql.DB) {
     log.Println("loadConfigTables –\tInitializing [DEFAULT] appConfigs+configurationMappings tables...")
 
     // =============================== (Config_ID* = 1) INSTAGRAM [DEFAULT] ==================================//
-    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "Ultra Apps" ,"1")
+    newAppConfig(db, "1", "[DEFAULT]", "ALL", "instagram", "Instagram", "ultra_apps/instagram_ultra.png", "https://www.instagram.com/?utm_source=samsung_max_sd", "Default" ,"1")
 
-    newAppConfig(db, "2", "[DEFAULT]", "ALL", "cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "Ultra Apps","2")
+    newAppConfig(db, "2", "[DEFAULT]", "ALL", "cricbuzz", "Cricbuzz", "ultra_apps/cricbuzz_ultra.png","http://m.cricbuzz.com", "Default","2")
 
-    newAppConfig(db, "3", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "Ultra Apps","3")
+    newAppConfig(db, "3", "[DEFAULT]", "ALL", "wikipedia", "Wikipedia", "ultra_apps/ic_wikipedia_ultra.png", "https://www.wikipedia.org", "Default","3")
 
-    newAppConfig(db, "4", "[Global and Preloaded]", "ALL", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "Ultra Apps","4")
+    newAppConfig(db, "4", "[Global and Preloaded]", "ALL", "facebook", "Facebook", "ultra_apps/facebook_ultra_color.png", "https://m.facebook.com/?ref=s_max_bookmark", "Default","4")
     // // =============================== (Config_ID* = 2) vKontakte [DEFAULT] ==================================//
     // log.Println("loadConfigTables –\tInserting vKontakte [DEFAULT] entries...")
     //

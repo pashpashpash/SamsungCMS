@@ -92,6 +92,8 @@ type data struct {
     Country_ID string `json:Country_ID, string, omitempty`
     Country_MCC string `json:Country_MCC, string, omitempty`
     Config_ID string `json:"Config_ID"`
+    FieldName string `json:"FieldName"`
+    NewValue string `json:"NewValue"`
     AppModifiableName        string `json:"App_ModifiableName"`
     AppOriginalName          string `json:"App_OriginalName"`
     AppRank                  string `json:"App_Rank"`
@@ -180,9 +182,9 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
             log.Println("postHandler –\t\tgetAllAppConfigs method request detected")
             jsonResponse := getAllAppConfigs(requestData.Data)
             w.Write([]byte(jsonResponse))
-        } else if (requestData.FunctionToCall=="getproducts") {
-            log.Println("postHandler –\t\tgetproducts method request detected")
-            jsonResponse := getproducts(requestData.Data)
+        } else if (requestData.FunctionToCall=="getProducts") {
+            log.Println("postHandler –\t\tgetProducts method request detected")
+            jsonResponse := getProducts(requestData.Data)
             w.Write([]byte(jsonResponse))
         } else if (requestData.FunctionToCall=="getFeatureMappings") {
             log.Println("postHandler –\t\tgetFeatureMappings method request detected")
@@ -224,11 +226,185 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
             log.Println("postHandler –\t\tcheckIfLoggedIn method request detected")
             jsonResponse := checkIfLoggedIn(w,r)
             w.Write([]byte(jsonResponse))
+        }  else if (requestData.FunctionToCall=="editAppConfigField") {
+            log.Println("postHandler –\t\teditAppConfigField method request detected")
+            jsonResponse := editAppConfigField(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        }  else if (requestData.FunctionToCall=="editProducts") {
+            log.Println("postHandler –\t\teditProducts method request detected")
+            jsonResponse := editProducts(requestData.Data)
+            w.Write([]byte(jsonResponse))
+        }  else if (requestData.FunctionToCall=="editFeature") {
+            log.Println("postHandler –\t\teditFeature method request detected")
+            jsonResponse := editFeature(requestData.Data)
+            w.Write([]byte(jsonResponse))
         }
     }
 
 
 }
+func editFeature(EditRequest data) ([]byte) {
+    log.Println("editFeature –\t\tFeature Mapping Edit requested...");
+    clearStatement := `
+    DELETE
+    FROM
+    featureMappings
+    WHERE
+    Config_ID = "`+EditRequest.Config_ID+`"
+    AND featureType = "`+EditRequest.FieldName+`"
+    `
+    _, err := db.Exec(clearStatement)
+    checkErr(err)
+    statement := string("")
+    if(EditRequest.FieldName == "defaultEnabledFeatures") {
+        //defaultenabledfeatures
+        if(EditRequest.DefaultEnabledFeatures.Savings ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"defaultEnabledFeatures", "savings"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultEnabledFeatures.Privacy ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"defaultEnabledFeatures", "privacy"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultEnabledFeatures.Adblock ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"defaultEnabledFeatures", "adBlock"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultEnabledFeatures.NoImages ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"defaultEnabledFeatures", "noImages"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+    } else if (EditRequest.FieldName == "hiddenFeatures") {
+        //hiddenfeatures
+        if(EditRequest.DefaultHiddenFeatures.Savings ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenFeatures", "savings"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenFeatures.Privacy ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenFeatures", "privacy"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenFeatures.Adblock ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenFeatures", "adBlock"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenFeatures.NoImages ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenFeatures", "noImages"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+    } else if (EditRequest.FieldName == "hiddenUI") {
+        //hiddenUI
+        if(EditRequest.DefaultHiddenUI.Splash ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenUI", "splash"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenUI.Overlay ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenUI", "overlay"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenUI.FAB ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenUI", "fab"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenUI.Badges ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenUI", "badges"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.DefaultHiddenUI.Folder ==true) {
+            statement = string(`INSERT INTO featureMappings (Config_ID, featureType, featureName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"hiddenUI", "folder"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+
+    }
+    jsonResponse, err := json.Marshal("success")
+    checkErr(err)
+    return jsonResponse
+}
+
+func editProducts(EditRequest data) ([]byte) {
+    errorsExist := false
+    errorString := string("")
+    if(!EditRequest.Products.MaxGlobal && !EditRequest.Products.Max && !EditRequest.Products.MaxGo) {
+        errorsExist = true
+        errorString += "Need at least one product. "
+    }
+
+    if(!errorsExist) {
+        clearStatement := `DELETE
+        FROM
+        products
+        WHERE
+        Config_ID = "`+EditRequest.Config_ID+`"`
+        _, err := db.Exec(clearStatement)
+        checkErr(err)
+        if(EditRequest.Products.MaxGlobal ==true) {
+            statement := string(`INSERT INTO products (Config_ID, productName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"maxGlobal"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.Products.Max ==true) {
+            statement := string(`INSERT INTO products (Config_ID, productName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"max"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+        if(EditRequest.Products.MaxGo ==true) {
+            statement := string(`INSERT INTO products (Config_ID, productName) VALUES (` + `"` + EditRequest.Config_ID + `", ` + `"maxGo"` + `)`)
+            _, err := db.Exec(statement)
+            checkErr(err)
+        }
+    }
+    jsonResponse, err := json.Marshal("success")
+    if(errorsExist) {
+        jsonResponse, err = json.Marshal(errorString)
+    }
+    checkErr(err)
+    return jsonResponse
+}
+func editAppConfigField(EditRequest data) ([]byte) {
+    log.Println("editAppConfigField –\t\tRecieved request to update " + EditRequest.FieldName)
+    anyerrors := false
+    errorString := ""
+    if(EditRequest.FieldName == "rank") {
+            editAppConfigField := `SELECT DISTINCT Config_ID from appConfigs WHERE rank = "`+EditRequest.NewValue+`"`
+            thereShouldBeNoConfigsHere, err := db.Query(editAppConfigField)
+            for(thereShouldBeNoConfigsHere.Next()){
+                anyerrors = true
+                errorString += "An app with this rank already exists. "
+            }
+            checkErr(err)
+    }
+    if(!anyerrors) {
+        statement := string(`
+        UPDATE appConfigs
+        SET `+EditRequest.FieldName+` = "`+EditRequest.NewValue+`"
+        WHERE Config_ID = "`+EditRequest.Config_ID+`";
+        `)
+        log.Println("editAppConfigField –\t\t" + statement)
+        _, err := db.Exec(statement)
+        checkErr(err)
+    }
+
+    jsonResponse, err := json.Marshal("success")
+    if(anyerrors) {
+        jsonResponse, err = json.Marshal(errorString)
+    }
+    checkErr(err)
+    return jsonResponse
+}
+
 func loginAuthentication(w http.ResponseWriter, r *http.Request) {
 
     name := r.FormValue("name")
@@ -1089,8 +1265,10 @@ func RemoveContents(dir string) error {
 
 func submitNewCountry(Country data) ([]byte) {
     var returnString string = ""
-    if(Country.Country_ID != "") {
-        addCountrystatement := string(`INSERT INTO countries (Country_ID, name, MCC_ID) VALUES ("`+Country.MCCMNC_ID+`", "`+Country.Country_Name+`", "`+Country.Country_MCC+`")`)
+    log.Println("submitNewCountry –\tRecieved request to get add country to favorites: " + Country.Country_Name)
+
+    if(Country.Country_Name != "") {
+        addCountrystatement := string(`INSERT INTO favoriteCountries (Country_ID) SELECT Country_ID from countries WHERE name = "`+Country.Country_Name+`"`)
         log.Println("submitNewCountry –\t\t"+addCountrystatement)
         _, err := db.Exec(addCountrystatement)
         checkErr(err)
@@ -1199,8 +1377,8 @@ func getOperatorGroupByName(Operator data) ([]byte) {
     return jsonResponse
 }
 
-func getproducts(Config data) ([]byte) {
-    log.Println("getproducts –\tRecieved request to get featured locations for " + Config.Config_ID)
+func getProducts(Config data) ([]byte) {
+    log.Println("getProducts –\tRecieved request to get featured locations for " + Config.Config_ID)
 
     var products = []string{}
     full_query := string(`

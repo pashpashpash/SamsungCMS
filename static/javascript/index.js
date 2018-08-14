@@ -278,6 +278,7 @@ function toggleSettingsView(){
             console.log("toggleSettingsView – Success! Server returned:");
             console.log(settingsData);
             generateSettingsViewHTML(settingsData);
+
         });
     } else {
         swapOutContainer.innerHTML = '<main><div id ="appTray"></div></main>';
@@ -446,7 +447,7 @@ function generateSettingsViewHTML(settingsData){
     addCountry.className = "settingsViewAddCountry";
     var addCountryText = document.createElement('div');
     addCountryText.className = "description";
-    addCountryText.innerText = "Add Country";
+    addCountryText.innerText = "Add Favorite Country";
     downArrow = document.createElement('div');
     downArrow.innerHTML = '<div onclick="toggleAddCountry(this.parentElement)">+</div>'
     downArrow = downArrow.children[0];
@@ -461,21 +462,14 @@ function generateSettingsViewHTML(settingsData){
     input.className = "addCountryName"; // set the CSS class
     input.placeholder = "Country Name";
     addCountryContents.appendChild(input);
-    input = document.createElement("input");
-    input.type = "text";
-    input.className = "addCountryID"; // set the CSS class
-    input.placeholder = "Country ID";
-    addCountryContents.appendChild(input);
-    input = document.createElement("input");
-    input.type = "text";
-    input.className = "addCountryMCC"; // set the CSS class
-    input.placeholder = "Country MCC";
-    addCountryContents.appendChild(input);
     input = document.createElement("div");
     input.innerHTML = '<input type="submit" onclick="submitNewCountry(this.parentElement);" />';
     input = input.children[0];
     input.className = "addCountrySubmit"; // set the CSS class
+    input.id = "addCountryToFavoritesInput";
     addCountryContents.appendChild(input);
+
+
 
     addCountry.appendChild(addCountryText);
     addCountry.appendChild(downArrow);
@@ -510,20 +504,15 @@ function toggleOperatorGroup(operatorGroup){
 function submitNewCountry(form){
     console.log("submitNewcountry – submitting new Country:");
     var countryName = form.children[0].value;
-    var countryID = form.children[1].value;
-    var countryMCC = form.children[2].value;
-    console.log("submitNewcountry – " + countryName + " | " + countryID + " | " + countryMCC);
+    console.log("submitNewcountry – " + countryName);
     var postRequestJSON = JSON.parse('{"functionToCall" : "submitNewCountry", "data" : {'
-    + ' "Country_ID" : "'+ countryID + '",'
-    + ' "Country_Name" : "'+ countryName + '",'
-    + ' "Country_MCC" : "'+ countryMCC + '"'
+    + ' "Country_Name" : "'+ countryName + '"'
     +'}}');
     console.log(postRequestJSON);
     server_post.post(post_url, postRequestJSON, function(misc) {
         console.log("submitNewCountry – " + misc);
         if(misc === "success") {
-            toggleSettingsView();
-            toggleSettingsView();
+            location.reload();
         }
     });
 }
@@ -713,7 +702,7 @@ function showAppConfigOnHover(appConfig, configNumber) {
         appConfigHoverContents.appendChild(configFeaturedLocs);
 
         console.log("showAppConfigOnHover – Getting products for config " + configNumber)
-        var postRequestText = '{"functionToCall" : "getproducts", "data" : {'
+        var postRequestText = '{"functionToCall" : "getProducts", "data" : {'
             + ' "Config_ID" : "'+ configNumber + '"'
             +'}}';
         var postRequestJSON = JSON.parse(postRequestText);

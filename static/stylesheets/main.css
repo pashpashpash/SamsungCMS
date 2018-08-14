@@ -316,19 +316,23 @@ html {
 .mappingsRow:hover {
     background:white;
 }
+.singleProduct {
+    display: inline-block;
+    margin-left: 14px;
+}
 .configData .row .rowValue {
     margin-left: 14px;
     margin-bottom: -9px;
-    max-width: 300px;
+    max-width: 185px;
     word-break: break-all;
     border: 1px solid black;
     padding-left: 14px;
+    margin-top: -14px;
     padding-right: 14px;
     padding-top: 4px;
     padding-bottom: 3px;
-        max-height: 16px;
-    -ms-overflow-style: none;  // IE 10+
-     overflow-x: hidden;
+    /* max-height: 16px; */
+    -ms-overflow-style: none;
 }
 .configData .row .rowValue::-webkit-scrollbar, .configData .row .rowValue::-webkit-scrollbar-thumb {
     width: 0px;  /* remove scrollbar space */
@@ -937,12 +941,44 @@ img#icon {
     color:white;
     padding: 14px;
 }
+.configData .errorDiv {
+
+          background: red;
+        margin-bottom: 0px;
+        margin-top: 0px;
+        color: white;
+        padding: 0px;
+}
+.configData #addAppCategories {
+    margin-left: 18px;
+    margin-right: 18px;
+    padding: 0;
+}
+#editFormSubmit{
+    margin-left: 18px;
+    margin-right: 18px;
+    border: 1px solid black;
+}
+.products #editFormSubmit{
+    width: 48px;
+    text-align:center;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+#submitFeatureButton{
+    padding-left: 18px;
+    padding-right: 18px;
+    border: 1px solid black;
+    width: 48px;
+    text-align:center;
+}
 #addAppEnabledFeatures, #addAppHiddenFeatures, #products, #addAppHiddenUI, #addAppCategories{
     margin-left: 18px;
     margin-right: 18px;
     padding: 14px;
 
 }
+
 #products {
     padding-top: 28px;
     border-top: 1px solid #811c55;
