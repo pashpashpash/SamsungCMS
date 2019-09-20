@@ -11,13 +11,13 @@ The purpose of the CMS project is to create a tool that allows anyone on the tea
 4. Create timeline of edits to the config files (with time stamps) and store them (with ability to backup at any point).
 
 ## To do
-- [ ] Add login functionality + server validation
-- [ ] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
-- [ ] Write a translator in go that translates ultra app configs to config.ini sections
-     -  [ ] Blocked atm: Once Michal gets back he will make a simplified version of the config (2 weeks?).
-     -  [ ] While building translator, change db schema to include countrymappings, build new dbinitialization on top of that, addNewApp, queries. BIG refactoring project...
-- [ ] Make export button for the translator on site to be able to export config.ini files.
-- [ ] Write logic that pushes go-generated config.ini's to production (dev cluster)
+- [x] Add login functionality + server validation
+- [x] Delpoy site to a hosted domain provided by Sergey. Alternatively, hook up a GCP server myself.
+- [x] Write a translator in go that translates ultra app configs to config.ini sections
+     -  [x] Blocked atm: Once Michal gets back he will make a simplified version of the config (2 weeks?).
+     -  [x] While building translator, change db schema to include countrymappings, build new dbinitialization on top of that, addNewApp, queries. BIG refactoring project...
+- [x] Make export button for the translator on site to be able to export config.ini files.
+- [x] Write logic that pushes go-generated config.ini's to production (dev cluster)
 ##
 
 - [x] Built out golang restAPI that provides various data at /rest/{category} and /rest/ultra/{appID} in response to GET requests
